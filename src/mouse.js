@@ -33,6 +33,10 @@
 
     MM.MouseWheelHandler.prototype = {
         precise: false,
+        // MM.Point to zoom about
+        centerPoint: null,
+        // MM.Location to zoom about
+        centerLocation: null,
 
         init: function(map) {
             this.map = map;
@@ -66,17 +70,26 @@
             var timeSince = new Date().getTime() - this.prevTime;
 
             if (Math.abs(delta) > 0 && (timeSince > 200) && !this.precise) {
-                var point = MM.getMousePoint(e, this.map);
+                var point = this.getZoomPoint(e);
                 this.map.zoomByAbout(delta > 0 ? 1 : -1, point);
 
                 this.prevTime = new Date().getTime();
             } else if (this.precise) {
-                var point = MM.getMousePoint(e, this.map);
+                var point = this.getZoomPoint(e);
                 this.map.zoomByAbout(delta * 0.001, point);
             }
 
             // Cancel the event so that the page doesn't scroll
             return MM.cancelEvent(e);
+        },
+
+        getZoomPoint: function(e) {
+            if (this.centerPoint) {
+                return this.centerPoint;
+            } else if (this.centerLocation) {
+                return this.map.locationPoint(this.centerLocation);
+            }
+            return MM.getMousePoint(e, this.map);
         }
     };
 
