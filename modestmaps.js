@@ -1030,10 +1030,11 @@ var MM = com.modestmaps = {
     // A shortcut for adding drag, double click,
     // and mouse wheel events to the map. This is the default
     // handler attached to a map if the handlers argument isn't given.
-    MM.MouseHandler = function(map) {
+    MM.MouseHandler = function(map, precise) {
         if (map !== undefined) {
             this.init(map);
         }
+        this.precise = precise === true;
     };
 
     MM.MouseHandler.prototype = {
@@ -1042,7 +1043,7 @@ var MM = com.modestmaps = {
             this.handlers = [
                 new MM.DragHandler(map),
                 new MM.DoubleClickHandler(map),
-                new MM.MouseWheelHandler(map)
+                new MM.MouseWheelHandler(map, this.precise)
             ];
         },
         remove: function() {
