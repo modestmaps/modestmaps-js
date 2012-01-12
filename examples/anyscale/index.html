@@ -18,6 +18,8 @@ function initMap() {
     var provider = new MM.TemplatedMapProvider(template, subdomains);
 
     map = new MM.Map('map', provider, null, [
+        new MM.DragHandler(),
+        new MM.DoubleClickHandler(),
         new MM.MouseWheelHandler(null, true)
     ]);
 
