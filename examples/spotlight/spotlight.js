@@ -5,6 +5,9 @@
  * for 50% transparent black).
  */
 var Spotlight = function(canvas, fillStyle) {
+    if (typeof FlashCanvas != "undefined") {
+        FlashCanvas.initElement(canvas);
+    }
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.clear();
@@ -15,6 +18,8 @@ var Spotlight = function(canvas, fillStyle) {
 
 Spotlight.prototype = {
     fillStyle: "rgba(0,0,0,.6)",
+    strokeWidth: null,
+    strokeAlpha: 0,
     radius: 40,
 
     // clearing resets the canvas and fills it with the fillStyle
@@ -27,6 +32,7 @@ Spotlight.prototype = {
     // fill the canvas with the color defined by fillStyle
     fill: function() {
         this.ctx.fillStyle = this.fillStyle;
+        this.ctx.strokeStyle = "none";
         this.ctx.beginPath();
         this.ctx.rect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fill();
@@ -38,6 +44,11 @@ Spotlight.prototype = {
      */
     drawPoints: function(points) {
         this.ctx.fillStyle = "white";
+        if (!isNaN(this.strokeWidth) && this.strokeAlpha > 0) {
+            this.ctx.strokeStyle = "rgba(255,255,255," + this.strokeAlpha + ")";
+        } else {
+            this.ctx.strokeStyle = "none";
+        }
         var TWO_PI = Math.PI * 2,
             radius = this.radius;
         /*
@@ -135,12 +146,15 @@ SpotlightLayer.prototype = {
         canvas.height = map.dimensions.y;
 
         if (this.locations && this.locations.length) {
-            var points = this.locations.map(function(loc) {
-                var coord = loc.coord || (loc.coord = map.locationCoordinate(loc)),
+            var points = [],
+                len = this.locations.length;
+            for (var i = 0; i < len; i++) {
+                var loc = this.locations[i],
+                    coord = loc.coord || (loc.coord = map.locationCoordinate(loc)),
                     point = map.coordinatePoint(coord);
                 if ("radius" in loc) point.radius = loc.radius;
-                return point;
-            });
+                points[i] = point;
+            }
             this.spotlight.punchout(points);
         } else {
             this.spotlight.clear();

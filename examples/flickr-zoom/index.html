@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ModestMaps JS: Zoom a la Flickr</title>
+        <script type="text/javascript" src="../../modestmaps.js"></script>
+        <script type="text/javascript" src="modestmaps.flickr-zoom.js"></script>
+        <script type="text/javascript">
+        var MM = com.modestmaps,
+            map, handler,
+            outerZoom = 3,
+            midZoom = 9,
+            innerZoom = 13;
+
+        function initMap() {
+            var provider = new MM.TemplatedMapProvider("http://tile.stamen.com/toner/{Z}/{X}/{Y}.png");
+
+            handler = new MM.FlickrZoomHandler(outerZoom, midZoom, innerZoom);
+
+            // initialize the map with only the mouse wheel handler
+            map = new MM.Map("map", provider, null, [handler]);
+            map.setCenterZoom(new MM.Location(37.7647404, -122.4195235), outerZoom);
+        }
+
+        </script>
+        <style type="text/css">
+
+            body {
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-size: 14px;
+                line-height: 16px;
+                padding: 20px;
+                margin: 0;
+            }
+
+            h1 {
+                margin: 0 0 20px 0;
+            }
+
+            #marker {
+                display: block;
+                position: absolute;
+                z-index: 1000;
+                left: 50%;
+                top: 50%;
+                width: 20px;
+                height: 20px;
+                margin-left: -10px;
+                margin-top: -10px;
+                background-color: red;
+                border-radius: 10px;
+            }
+
+            #map {
+                width: 100%;
+                max-width: 500px;
+                height: 150px;
+            }
+
+        </style>
+    </head>
+    <body onload="initMap()">
+        <h1>ModestMaps JS: Zoom a la Flickr</h1>
+        <div id="map">
+            <a id="marker" href="http://stamen.com"></a>
+        </div>
+    </body>
+</html>

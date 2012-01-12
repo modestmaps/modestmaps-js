@@ -883,6 +883,10 @@ var MM = com.modestmaps = {
 
     MM.MouseWheelHandler.prototype = {
         precise: false,
+        // MM.Point to zoom about
+        centerPoint: null,
+        // MM.Location to zoom about
+        centerLocation: null,
 
         init: function(map) {
             this.map = map;
@@ -916,17 +920,26 @@ var MM = com.modestmaps = {
             var timeSince = new Date().getTime() - this.prevTime;
 
             if (Math.abs(delta) > 0 && (timeSince > 200) && !this.precise) {
-                var point = MM.getMousePoint(e, this.map);
+                var point = this.getZoomPoint(e);
                 this.map.zoomByAbout(delta > 0 ? 1 : -1, point);
 
                 this.prevTime = new Date().getTime();
             } else if (this.precise) {
-                var point = MM.getMousePoint(e, this.map);
+                var point = this.getZoomPoint(e);
                 this.map.zoomByAbout(delta * 0.001, point);
             }
 
             // Cancel the event so that the page doesn't scroll
             return MM.cancelEvent(e);
+        },
+
+        getZoomPoint: function(e) {
+            if (this.centerPoint) {
+                return this.centerPoint;
+            } else if (this.centerLocation) {
+                return this.map.locationPoint(this.centerLocation);
+            }
+            return MM.getMousePoint(e, this.map);
         }
     };
 
@@ -1106,7 +1119,9 @@ var MM = com.modestmaps = {
         },
 
         onMapMove: function(map) {
-            if (this.movingMap) {
+            // bail if we're moving the map (updating from a hash),
+            // or if the map has no zoom set
+            if (this.movingMap || this.map.zoom === 0) {
                 return false;
             }
             var hash = this.formatHash(map);
@@ -1126,12 +1141,12 @@ var MM = com.modestmaps = {
             var sansHash = hash.substr(1),
                 parsed = this.parseHash(sansHash);
             if (parsed) {
-                console.log("parsed:", parsed.zoom, parsed.center.toString());
+                // console.log("parsed:", parsed.zoom, parsed.center.toString());
                 this.movingMap = true;
                 this.map.setCenterZoom(parsed.center, parsed.zoom);
                 this.movingMap = false;
             } else {
-                console.warn("parse error; resetting:", this.map.getCenter(), this.map.getZoom());
+                // console.warn("parse error; resetting:", this.map.getCenter(), this.map.getZoom());
                 this.onMapMove(this.map);
             }
         },

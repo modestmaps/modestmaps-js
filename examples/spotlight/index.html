@@ -4,6 +4,7 @@
         <title>ModestMaps: Spotlight Effect with HTML Canvas</title>
         <script type="text/javascript" src="../../modestmaps.js"></script>
         <script type="text/javascript" src="spotlight.js"></script>
+        <!--[if lt IE 9]><script type="text/javascript" src="flashcanvas/flashcanvas.js"></script><![endif]-->
         <script type="text/javascript">
             var map, layer;
             function initMap() {
@@ -17,18 +18,19 @@
                 map.setCenterZoom(new MM.Location(37.7819, -122.3365), 12);
 
                 var locations = [
-                    new MM.Location(37.804, -122.252),
-                    new MM.Location(37.764, -122.419)
-                ];
-                locations.forEach(function(loc) {
-                    layer.addLocation(loc);
-                });
+                        new MM.Location(37.804, -122.252),
+                        new MM.Location(37.764, -122.419)
+                    ],
+                    len = locations.length;
+                for (var i = 0; i < len; i++) {
+                    layer.addLocation(locations[i]);
+                }
             }
         </script>
         <style type="text/css">
             #map {
                 width: auto;
-                height: 600px;
+                height: 400px;
             }
         </style>
     </head>
@@ -37,6 +39,9 @@
 
         <p>The spotlights on this map are pinned to two geographic locations. Check
         out the <a href="markers.html">Crimespotting-inspired example</a>.</p>
+
+        <p><i>HTML canvas support in older browsers courtesy of
+        <a href="http://flashcanvas.net/">FlashCanvas</a></i></p>
 
         <div id="map">
         </div>
