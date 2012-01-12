@@ -34,30 +34,28 @@
             }
         },
 
-        applyOffset: function(tile) {
-            var left = 0,
-                top = -this.offset * this.tileSize.y;
-            tile.style.backgroundPosition = left + "px " + top + "px";
+        applyOffset: function(el) {
+            var left = 0, top = -this.offset * this.tileSize.y;
+            el.style.backgroundPosition = [left, "px ", top, "px"].join("");
         },
 
         applyOffsets: function() {
             for (var key in this.tiles) {
-                this.applyOffset(this.tiles[key]);
+                this.applyOffset(this.tiles[key].firstChild);
             }
         },
 
         getTile: function(coord) {
             var key = coord.toKey();
             if (this.tiles.hasOwnProperty(key)) {
-                return this.tiles[key];
+                var tile = this.tiles[key];
+                this.applyOffset(tile.firstChild);
+                return tile;
             } else {
                 var url = this.template_provider.getTileUrl(coord);
                 if (url) {
                     var tile = document.createElement("div");
                     tile.style.backgroundRepeat = "no-repeat";
-                    tile.backgroundTimeout = setTimeout(function() {
-                        tile.style.backgroundImage = "url(" + url + ")";
-                    }, 100);
 
                     /*
                      * OTE: because using matrix transforms invalidates
@@ -70,9 +68,12 @@
                     strut.style.display = "block";
                     strut.style.width = this.tileSize.x + "px";
                     strut.style.height = this.tileSize.y + "px";
+                    tile.backgroundTimeout = setTimeout(function() {
+                        strut.style.backgroundImage = "url(" + url + ")";
+                    }, 50);
 
                     this.tiles[key] = tile;
-                    this.applyOffset(tile);
+                    this.applyOffset(tile.firstChild);
                     return tile;
                 } else {
                     return null;
@@ -90,7 +91,7 @@
         reAddTile: function(key, coord, tile) {
             // console.log("re-add:", key, tile);
             this.tiles[key] = tile;
-            this.applyOffset(tile);
+            this.applyOffset(tile.firstChild);
         }
     };
 
