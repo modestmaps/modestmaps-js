@@ -1,5 +1,5 @@
 /*!
- * Modest Maps JS v1.0.0
+ * Modest Maps JS v1.0.0-alpha
  * http://modestmaps.com/
  *
  * Copyright (c) 2011 Stamen Design, All Rights Reserved.
@@ -487,10 +487,10 @@ var MM = com.modestmaps = {
 
         // determine if a location is within this extent
         containsLocation: function(loc) {
-            return loc.lat >= this.south
-                && loc.lat <= this.north
-                && loc.lon >= this.west
-                && loc.lon <= this.east;
+            return loc.lat >= this.south &&
+                loc.lat <= this.north &&
+                loc.lon >= this.west &&
+                loc.lon <= this.east;
         },
 
         // turn an extent into an array of locations containing its northwest
@@ -693,13 +693,16 @@ var MM = com.modestmaps = {
     };
 
     MM.extend(MM.MercatorProjection, MM.Projection);
-
     // Providers
     // ---------
     // Providers provide tile URLs and possibly elements for layers.
-    MM.MapProvider = function(getTileUrl) {
-        if (getTileUrl) {
-            this.getTileUrl = getTileUrl;
+    //
+    // MapProvider ->
+    //   TemplatedMapProvider
+    //
+    MM.MapProvider = function(getTile) {
+        if (getTile) {
+            this.getTile = getTile;
         }
     };
 
@@ -720,7 +723,7 @@ var MM = com.modestmaps = {
         },
 
         releaseTile: function(element) {
-            throw "Abstract method not implemented by subclass.";
+          // releaseTile is not required
         },
 
         // use this to tell MapProvider that tiles only exist between certain zoom levels.
@@ -775,8 +778,7 @@ var MM = com.modestmaps = {
      * var placeholder = new MM.TemplatedMapProvider("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
      *
      */
-    MM.TemplatedMapProvider = function(template, subdomains)
-    {
+    MM.TemplatedMapProvider = function(template, subdomains) {
         var isQuadKey = false;
         if (template.match(/{(Q|quadkey)}/)) {
             isQuadKey = true;
@@ -787,10 +789,8 @@ var MM = com.modestmaps = {
                 .replace('{quadkey}', '{Q}');
         }
 
-        var hasSubdomains = false;
-        if (subdomains && subdomains.length && template.indexOf("{S}") >= 0) {
-            hasSubdomains = true;
-        }
+        var hasSubdomains = (subdomains &&
+            subdomains.length && template.indexOf("{S}") >= 0);
 
         var getTileUrl = function(coordinate) {
             var coord = this.sourceCoordinate(coordinate);
@@ -799,13 +799,16 @@ var MM = com.modestmaps = {
             }
             var base = template;
             if (hasSubdomains) {
-                var index = parseInt(coord.zoom + coord.row + coord.column, 10) % subdomains.length;
+                var index = parseInt(coord.zoom + coord.row + coord.column, 10) %
+                    subdomains.length;
                 base = base.replace('{S}', subdomains[index]);
             }
             if (isQuadKey) {
                 return base
                     .replace('{Z}', coord.zoom.toFixed(0))
-                    .replace('{Q}', this.quadKey(coord.row, coord.column, coord.zoom));
+                    .replace('{Q}', this.quadKey(coord.row,
+                        coord.column,
+                        coord.zoom));
             } else {
                 return base
                     .replace('{Z}', coord.zoom.toFixed(0))
@@ -813,41 +816,26 @@ var MM = com.modestmaps = {
                     .replace('{Y}', coord.row.toFixed(0));
             }
         };
-    
+
         MM.MapProvider.call(this, getTileUrl);
     };
 
     MM.TemplatedMapProvider.prototype = {
         // quadKey generator
         quadKey: function(row, column, zoom) {
-            var key = "";
+            var key = '';
             for (var i = 1; i <= zoom; i++) {
                 key += (((row >> zoom - i) & 1) << 1) | ((column >> zoom - i) & 1);
             }
-            return key || "0";
-        }
+            return key || '0';
+        },
+        getTile: function(coord) {
+          return this.getTileUrl(coord);
+        },
+        releaseTile: function() { }
     };
 
     MM.extend(MM.TemplatedMapProvider, MM.MapProvider);
-
-   /**
-    * Possible new kind of provider that deals in elements.
-    */
-    MM.TilePaintingProvider = function(template_provider) {
-        this.template_provider = template_provider;
-    };
-
-    MM.TilePaintingProvider.prototype = {
-
-        getTile: function(coord) {
-            return this.template_provider.getTileUrl(coord);
-        },
-
-        releaseTile: function(coord) {
-        }
-    };
-
-    MM.extend(MM.TilePaintingProvider, MM.MapProvider);
     // Event Handlers
     // --------------
 
@@ -1055,8 +1043,8 @@ var MM = com.modestmaps = {
 
     var HAS_HASHCHANGE = (function() {
         var doc_mode = window.documentMode;
-        return ('onhashchange' in window)
-            && (doc_mode === undefined || doc_mode > 7);
+        return ('onhashchange' in window) &&
+            (doc_mode === undefined || doc_mode > 7);
     })();
 
     MM.Hash = function(map) {
@@ -1074,7 +1062,7 @@ var MM = com.modestmaps = {
         parseHash: function(hash) {
             var args = hash.split("/");
             if (args.length == 3) {
-                var zoom = parseInt(args[0]),
+                var zoom = parseInt(args[0], 10),
                     lat = parseFloat(args[1]),
                     lon = parseFloat(args[2]);
                 if (isNaN(zoom) || isNaN(lat) || isNaN(lon)) {
@@ -1500,7 +1488,8 @@ var MM = com.modestmaps = {
         this.maxOpenRequests = 4;
         this.requestQueue = [];
 
-        this.callbackManager = new MM.CallbackManager(this, ['requestcomplete']);
+        this.callbackManager = new MM.CallbackManager(this, [
+            'requestcomplete', 'requesterror']);
     };
 
     MM.RequestManager.prototype = {
@@ -1540,12 +1529,12 @@ var MM = com.modestmaps = {
         clear: function() {
             this.clearExcept({});
         },
-        
+
         clearRequest: function(id) {
             if(id in this.requestsById) {
                 delete this.requestsById[id];
             }
-            
+
             for(var i = 0; i < this.requestQueue.length; i++) {
                 var request = this.requestQueue[i];
                 if(request && request.id == id) {
@@ -1553,7 +1542,7 @@ var MM = com.modestmaps = {
                 }
             }
         },
-        
+
         // Clear everything in the queue except for certain keys, specified
         // by an object of the form
         //
@@ -1579,7 +1568,7 @@ var MM = com.modestmaps = {
                     img.src = img.coord = img.onload = img.onerror = null;
                 }
             }
-            
+
             // hasOwnProperty protects against prototype additions
             // > "The standard describes an augmentable Object.prototype.
             //  Ignore standards at your own peril."
@@ -1620,7 +1609,7 @@ var MM = com.modestmaps = {
                 }
             }
         },
-        
+
         getProcessQueue: function() {
             // let's only create this closure once...
             if (!this._processQueue) {
@@ -1631,7 +1620,7 @@ var MM = com.modestmaps = {
             }
             return this._processQueue;
         },
-        
+
         // Select images from the `requestQueue` and create image elements for
         // them, attaching their load events to the function returned by
         // `this.getLoadComplete()` so that they can be added to the map.
@@ -1693,7 +1682,7 @@ var MM = com.modestmaps = {
 
                     // unset these straight away so we don't call this twice
                     img.onload = img.onerror = null;
-                    
+
                     // pull it back out of the (hidden) DOM
                     // so that draw will add it correctly later
                     theManager.loadingBay.removeChild(img);
@@ -1711,6 +1700,7 @@ var MM = com.modestmaps = {
                         // really stops loading
                         // FIXME: we'll never retry because this id is still
                         // in requestsById - is that right?
+                        theManager.dispatchCallback('requesterror', img.src);
                         img.src = null;
                     }
 
@@ -2078,7 +2068,6 @@ var MM = com.modestmaps = {
             // Prevent drag for IE
             tile.ondragstart = function() { return false; };
 
-            var scale = Math.pow(2, this.map.coordinate.zoom - tile.coord.zoom);
             var tx = ((this.map.dimensions.x/2) +
                 (tile.coord.column - theCoord.column) *
                 this.map.tileSize.x * scale);
@@ -2086,11 +2075,11 @@ var MM = com.modestmaps = {
                 (tile.coord.row - theCoord.row) *
                 this.map.tileSize.y * scale);
 
+            // TODO: pass only scale or only w/h
             MM.moveElement(tile, {
                 x: Math.round(tx),
                 y: Math.round(ty),
                 scale: scale,
-                // TODO: pass only scale or only w/h
                 width: this.map.tileSize.x,
                 height: this.map.tileSize.y
             });
@@ -2174,10 +2163,6 @@ var MM = com.modestmaps = {
         },
 
         setProvider: function(newProvider) {
-            if ('getTileUrl' in newProvider && (typeof newProvider.getTileUrl === 'function')) {
-                newProvider = new MM.TilePaintingProvider(newProvider);
-            }
-
             var firstProvider = (this.provider === null);
 
             // if we already have a provider the we'll need to
