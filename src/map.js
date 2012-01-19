@@ -430,7 +430,7 @@
             layer = this.coerceLayer(layer);
             this.layers.push(layer);
             // make sure layer.parent doesn't already have a parentNode
-            if (!layer.parent.parentNode) {
+            if (layer.parent.parentNode != this.parent) {
                 this.parent.appendChild(layer.parent); 
             }
             layer.map = this; // TODO: remove map property from MM.Layer?

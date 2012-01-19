@@ -2224,6 +2224,8 @@ var MM = com.modestmaps = {
             };
         },
 
+        // Remove this layer from the DOM, cancel all of its requests
+        // and unbind any callbacks that are bound to it.
         destroy: function() {
             this.requestManager.clear();
             this.requestManager.removeCallback('requestcomplete', this.getTileComplete());
@@ -2669,7 +2671,7 @@ var MM = com.modestmaps = {
             layer = this.coerceLayer(layer);
             this.layers.push(layer);
             // make sure layer.parent doesn't already have a parentNode
-            if (!layer.parent.parentNode) {
+            if (layer.parent.parentNode != this.parent) {
                 this.parent.appendChild(layer.parent); 
             }
             layer.map = this; // TODO: remove map property from MM.Layer?
