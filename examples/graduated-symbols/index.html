@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ModestMaps JS: Graduated Symbols</title>
+        <script type="text/javascript" src="../../modestmaps.js"></script>
+        <script type="text/javascript" src="raphael-min.js"></script>
+        <script type="text/javascript" src="modestmaps.markers.js"></script>
+        <script type="text/javascript">
+        var MM = com.modestmaps,
+            map,
+            markers;
+
+
+        function initMap() {
+            var provider = new MM.TemplatedMapProvider("http://ecn.t{S}.tiles.virtualearth.net/tiles/r{Q}?g=689&mkt=en-us&lbl=l0&stl=m", [0,1,2,3,4,5,6,7]);
+            map = new MM.Map("map", provider);
+            map.setCenterZoom(new MM.Location(37.764, -122.419), 12);
+
+            markers = new MM.VectorMarkerLayer();
+            map.addLayer(markers);
+
+            onLoadMarkers(DATA)
+        }
+
+        function onClick() {
+            var props = this.data("properties");
+            alert(props.name + ": " + props.population);
+        }
+
+        function radius(population) {
+            return 2 + (population / 1000000) * 5;
+        }
+
+        function onLoadMarkers(collection) {
+            // onLoadMarkers() gets a GeoJSON FeatureCollection:
+            // http://geojson.org/geojson-spec.html#feature-collection-objects
+            var features = collection.features,
+                len = features.length,
+                extent = [];
+            // for each feature in the collection, create a marker and add it
+            // to the markers layer
+            for (var i = 0; i < len; i++) {
+                var feature = features[i],
+                    marker = markers.paper.circle(0, 0)
+                        .attr({
+                            fill: "red",
+                            stroke: "none",
+                            r: radius(feature.properties.population)
+                        })
+                        .data("properties", feature.properties)
+                        .click(onClick);
+
+                // give it a title
+                marker.attr("title", feature.properties.name);
+                /*
+                // set the href to link to crimespotting's crime page
+                marker.attr("href", [
+                    "http://en.wikipedia.com/wiki/",
+                    feature.properties.name.replace(/ /g, "_"),
+                    ",_CA"
+                ].join(""));
+                */
+
+                markers.addMarker(marker, feature);
+                // add the marker's location to the extent list
+                extent.push(marker.data("location"));
+            }
+
+            // tell the map to fit all of the locations in the available space
+            map.setExtent(extent);
+        }
+
+        // data from Wikipedia: http://en.wikipedia.org/wiki/List_of_largest_California_cities_by_population
+        var DATA = {
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "Los Angeles",
+                        "population": 3792621
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-118.2436849, 34.0522342]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "San Diego",
+                        "population": 1307402
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-117.1572551, 32.7153292]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "San Jose",
+                        "population": 945942
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-121.8949555, 37.3393857]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "San Francisco",
+                        "population": 805235
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-122.4194155, 37.7749295]
+                    }
+                }
+            ]
+        };
+
+        </script>
+        <style type="text/css">
+
+            body {
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-size: 14px;
+                line-height: 16px;
+                padding: 20px;
+                margin: 0;
+            }
+
+            h1 {
+                margin: 0 0 20px 0;
+            }
+
+            #map {
+                width: 100%;
+                height: 500px;
+            }
+
+            .report {
+                margin-left: -13px;
+                margin-top: -13px;
+                width: 26px;
+                height: 26px;
+            }
+
+            .report img {
+                border: none !important;
+            }
+
+            .report:hover {
+                z-index: 1000;
+            }
+
+        </style>
+    </head>
+    <body onload="initMap()">
+        <h1>ModestMaps JS: GeoJSON Markers</h1>
+        <div id="map">
+        </div>
+    </body>
+</html>
