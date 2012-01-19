@@ -209,6 +209,7 @@ if (!com.modestmaps) {
     MM.VectorMarkerLayer = function(parent) {
         MM.MarkerLayer.call(this, parent);
         this.paper = Raphael(this.parent, 640, 480);
+        this.markers = this.paper.set();
     };
 
     MM.VectorMarkerLayer.prototype = {
@@ -219,20 +220,15 @@ if (!com.modestmaps) {
             if (!this.lastSize || this.map.dimensions.x != this.lastSize.x || this.map.dimensions.y != this.lastSize.y) {
                 this.lastSize = new MM.Point(this.map.dimensions.x * 2, this.map.dimensions.y * 2);
                 this.paper.setSize(this.lastSize.x, this.lastSize.y);
-                // this.resetPosition();
             }
-            MM.MarkerLayer.prototype.draw.call(this, coord);
+            this.repositionAllMarkers();
+        },
+
+        onPanned: function() {
         },
 
         // reset the absolute position of the layer's parent element
         resetPosition: function() {
-            if (this.map) {
-                this.position = new MM.Point(-this.map.dimensions.x / 2, -this.map.dimensions.y / 2);
-                this.parent.style.left = ~~(this.position.x + .5) + "px";
-                this.parent.style.top = ~~(this.position.y + .5) + "px";
-            } else {
-                MM.MarkerLayer.prototype.resetPosition.call(this);
-            }
         },
 
         /**
@@ -277,11 +273,6 @@ if (!com.modestmaps) {
             var coord = marker.data("coord");
             if (coord) {
                 var pos = this.map.coordinatePoint(coord);
-                // offset by the layer parent position if x or y is non-zero
-                if (this.position.x || this.position.y) {
-                    pos.x -= this.position.x;
-                    pos.y -= this.position.y;
-                }
                 var t = ["t", pos.x, ",", pos.y];
                 marker.transform(t.join(""));
             } else {

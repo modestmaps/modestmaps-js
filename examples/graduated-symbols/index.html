@@ -7,8 +7,7 @@
         <script type="text/javascript" src="modestmaps.markers.js"></script>
         <script type="text/javascript">
         var MM = com.modestmaps,
-            map,
-            markers;
+            map, layer;
 
 
         function initMap() {
@@ -16,10 +15,10 @@
             map = new MM.Map("map", provider);
             map.setCenterZoom(new MM.Location(37.764, -122.419), 12);
 
-            markers = new MM.VectorMarkerLayer();
-            map.addLayer(markers);
+            layer = new MM.VectorMarkerLayer();
+            map.addLayer(layer);
 
-            onLoadMarkers(DATA)
+            onLoadMarkers(DATA);
         }
 
         function onClick() {
@@ -41,17 +40,16 @@
             // to the markers layer
             for (var i = 0; i < len; i++) {
                 var feature = features[i],
-                    marker = markers.paper.circle(0, 0)
+                    marker = layer.paper.circle(0, 0)
                         .attr({
                             fill: "red",
                             stroke: "none",
-                            r: radius(feature.properties.population)
+                            r: radius(feature.properties.population),
+                            title: feature.properties.name
                         })
                         .data("properties", feature.properties)
                         .click(onClick);
 
-                // give it a title
-                marker.attr("title", feature.properties.name);
                 /*
                 // set the href to link to crimespotting's crime page
                 marker.attr("href", [
@@ -61,7 +59,7 @@
                 ].join(""));
                 */
 
-                markers.addMarker(marker, feature);
+                layer.addMarker(marker, feature);
                 // add the marker's location to the extent list
                 extent.push(marker.data("location"));
             }
