@@ -3,7 +3,7 @@
 
     MM.Layer = function(provider, parent) {
         this.parent = parent || document.createElement('div');
-        this.parent.style.cssText = 'position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; margin: 0; padding: 0; z-index: 0';
+        this.parent.style.cssText = 'position: absolute; top: 0px; left: 0px; margin: 0; padding: 0; z-index: 0';
 
         this.levels = {};
 
