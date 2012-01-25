@@ -230,8 +230,8 @@
         },
 
         setExtent: function(locations, precise) {
-            // coerce locations to an array if it's a MapExtent instance
-            if (locations instanceof MM.MapExtent) {
+            // coerce locations to an array if it's a Extent instance
+            if (locations instanceof MM.Extent) {
                 locations = locations.toArray();
             }
 
