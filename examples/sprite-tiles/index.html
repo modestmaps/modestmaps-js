@@ -23,9 +23,8 @@
             map.setZoomRange(8, 16);
             map.setCenterZoom({lat: 37.804, lon: -122.252}, 9);
 
-            var template = new MM.TemplatedLayer(baseURL + "inundation_b/{Z}/{X}/{Y}.png");
-            sprite = new MM.SpriteMapProvider(template);
-            map.addLayer(sprite);
+            sprite = new MM.SpriteMapProvider(new MM.TemplatedMapProvider(baseURL + "inundation_b/{Z}/{X}/{Y}.png"));
+            map.addLayer(new MM.Layer(sprite));
 
             var output = $("#output");
             slider = $("#slider").slider({

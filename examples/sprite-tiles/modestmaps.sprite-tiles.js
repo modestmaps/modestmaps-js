@@ -52,7 +52,7 @@
                 this.applyOffset(tile.firstChild);
                 return tile;
             } else {
-                var url = this.template_provider.getTileUrl(coord);
+                var url = this.template_provider.getTile(coord);
                 if (url) {
                     var tile = document.createElement("div");
                     tile.style.backgroundRepeat = "no-repeat";
