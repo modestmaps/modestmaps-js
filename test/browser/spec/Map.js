@@ -13,7 +13,7 @@ describe('Map', function() {
 
     var template = 'http://{S}tile.openstreetmap.org/{Z}/{X}/{Y}.png';
     var subdomains = [ '', 'a.', 'b.', 'c.' ];
-    var provider = new MM.TemplatedMapProvider(template, subdomains);
+    var provider = new MM.TemplatedLayer(template, subdomains);
 
     map = new MM.Map(div, provider, new MM.Point(400, 400));
     map.setCenterZoom(new MM.Location(0, 0), 0);
@@ -23,8 +23,18 @@ describe('Map', function() {
       expect(map.parent).toEqual(div);
   });
 
-  it('has set a proper zoom level', function() {
-      expect(map.getZoom()).toEqual(0);
+  describe('zoom restrictions and ranges', function() {
+
+    it('has set a proper zoom level', function() {
+        expect(map.getZoom()).toEqual(0);
+    });
+
+    it('can restrict its zoomlevel', function() {
+        map.setZoomRange(5, 6);
+        map.setZoom(7);
+        expect(map.getZoom()).toEqual(6);
+    });
+
   });
 
   it('has a center coordinate', function() {
@@ -152,7 +162,7 @@ describe('Map', function() {
       waits(500);
 
       runs(function() {
-          expect(sink.receive).toHaveBeenCalledWith(map, { x: 200, y: 300});
+          expect(sink.receive).toHaveBeenCalledWith(map, new MM.Point(200, 300));
       });
   });
 

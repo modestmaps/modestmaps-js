@@ -5,8 +5,6 @@
 <script type="text/javascript" src="../../modestmaps.js"></script>
 <script type="text/javascript">
 
-var MM = com.modestmaps;
-
 function MarkerClip(map) {
 
     this.map = map;
@@ -95,7 +93,7 @@ var map, markerClip;
 function initMap() {
 
     map = new MM.Map('map', 
-                      new MM.TemplatedMapProvider('http://tile.openstreetmap.org/{Z}/{X}/{Y}.png')); 
+                      new MM.TemplatedLayer('http://tile.openstreetmap.org/{Z}/{X}/{Y}.png')); 
 
     map.setCenterZoom(new MM.Location(0, 0), 1);
 

@@ -199,19 +199,6 @@
             return this;
         },
 
-        /*
-        panZoom: function(dx, dy, zoom) {
-            this.coordinate.column -= dx / this.tileSize.x;
-            this.coordinate.row -= dy / this.tileSize.y;
-            this.coordinate = this.coordinate.zoomTo(zoom);
-
-            // Defer until the browser is ready to draw.
-            MM.getFrame(this.getRedraw());
-            this.dispatchCallback('panned', [dx, dy]);
-            return this;
-        },
-        */
-
         panLeft: function() { return this.panBy(100, 0); },
         panRight: function() { return this.panBy(-100, 0); },
         panDown: function() { return this.panBy(0, -100); },
@@ -359,10 +346,10 @@
 
         // inspecting
         getExtent: function() {
-            var extent = [];
-            extent.push(this.pointLocation(new MM.Point(0, 0)));
-            extent.push(this.pointLocation(this.dimensions));
-            return extent;
+            return new MM.Extent(
+                this.pointLocation(new MM.Point(0, 0)),
+                this.pointLocation(this.dimensions)
+            );
         },
 
         extent: function(locations, precise) {
@@ -399,22 +386,6 @@
             }
         },
 
-        // layers
-        // HACK for 0.x.y - stare at @RandomEtc 
-        // this method means we can also pass a URL template or a MapProvider to addLayer
-        coerceLayer: function(layerish) {
-            if ('draw' in layerish && typeof layerish.draw == 'function') {
-                // good enough, though we should probably enforce .parent and .destroy() too
-                return layerish;
-            } else if (typeof layerish == 'string') {
-                // probably a template string
-                return new MM.Layer(new MM.TemplatedMapProvider(layerish));
-            } else {
-                // probably a MapProvider
-                return new MM.Layer(layerish);
-            }
-        },
-
         // return a copy of the layers array
         getLayers: function() {
             return this.layers.slice();
@@ -427,7 +398,6 @@
 
         // put the given layer on top of all the others
         addLayer: function(layer) {
-            layer = this.coerceLayer(layer);
             this.layers.push(layer);
             // make sure layer.parent doesn't already have a parentNode
             if (layer.parent.parentNode != this.parent) {
@@ -455,8 +425,6 @@
                 throw new Error('invalid index in setLayerAt(): ' + index);
             }
 
-            layer = this.coerceLayer(layer);
-
             if (this.layers[index] != layer) {
 
                 // clear existing layer at this index
@@ -482,9 +450,7 @@
                 throw new Error('invalid index in insertLayerAt(): ' + index);
             }
 
-            layer = this.coerceLayer(layer);
-
-            if(index == this.layers.length) {
+            if (index == this.layers.length) {
                 // it just gets tacked on to the end
                 this.layers.push(layer);
                 this.parent.appendChild(layer.parent);
@@ -578,7 +544,8 @@
                 // this handles infinite limits:
                 // (Infinity - Infinity) is Nan
                 // NaN is never less than anything
-                if (bottomRightLimit.row - topLeftLimit.row < currentBottomRight.row - currentTopLeft.row) {
+                if (bottomRightLimit.row - topLeftLimit.row <
+                    currentBottomRight.row - currentTopLeft.row) {
                     // if the limit is smaller than the current view center it
                     coord.row = (bottomRightLimit.row + topLeftLimit.row) / 2;
                 }
@@ -590,7 +557,8 @@
                         coord.row -= currentBottomRight.row - bottomRightLimit.row;
                     }
                 }
-                if (bottomRightLimit.column - topLeftLimit.column < currentBottomRight.column - currentTopLeft.column) {
+                if (bottomRightLimit.column - topLeftLimit.column <
+                    currentBottomRight.column - currentTopLeft.column) {
                     // if the limit is smaller than the current view, center it
                     coord.column = (bottomRightLimit.column + topLeftLimit.column) / 2;
                 }
