@@ -346,6 +346,19 @@ var MM = com.modestmaps = {
         return Math.acos(c + d + e) * r;
     };
 
+    // parse a string in the format "lat,lon"
+    MM.Location.fromString = function(str, longitudeFirst) {
+        var parts = str.split(/\s*,\s*/);
+        if (parts.length == 2) {
+            var lat = parseFloat(longitudeFirst ? parts[1] : parts[0]),
+                lon = parseFloat(longitudeFirst ? parts[0] : parts[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                return new MM.Location(lat, lon);
+            }
+        }
+        return null;
+    };
+
     // Interpolates along a great circle, f between 0 and 1
     //
     // * FIXME: could be heavily optimized (lots of trig calls to cache)
@@ -1105,7 +1118,7 @@ var MM = com.modestmaps = {
             this.map.addCallback("drawn", this.onMapMove);
             // reset the hash
             this.lastHash = null;
-            this.onHashChange();
+            this.update();
 
             if (!this.isListening) {
                 this.startListening();

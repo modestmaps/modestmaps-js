@@ -51,7 +51,7 @@
             this.map.addCallback("drawn", this.onMapMove);
             // reset the hash
             this.lastHash = null;
-            this.onHashChange();
+            this.update();
 
             if (!this.isListening) {
                 this.startListening();
