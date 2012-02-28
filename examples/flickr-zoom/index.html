@@ -17,7 +17,7 @@
             handler = new MM.FlickrZoomHandler(outerZoom, midZoom, innerZoom);
 
             // initialize the map with only the mouse wheel handler
-            map = new MM.Map("map", provider, null, [handler]);
+            map = new MM.Map("map", new MM.Layer(provider), null, [handler]);
             map.setCenterZoom(new MM.Location(37.7647404, -122.4195235), outerZoom);
         }
 
