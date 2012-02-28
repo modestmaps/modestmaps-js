@@ -155,6 +155,7 @@
 
         mouseMove: function(e) {
             if (this.prevMouse) {
+                this.map.fastForward = true;
                 this.map.panBy(
                     e.clientX - this.prevMouse.x,
                     e.clientY - this.prevMouse.y);
@@ -169,6 +170,8 @@
         mouseUp: function(e) {
             MM.removeEvent(document, 'mouseup', this._mouseUp);
             MM.removeEvent(document, 'mousemove', this._mouseMove);
+            this.map.fastForward = false;
+            this.map.requestRedraw();
 
             this.prevMouse = null;
             this.map.parent.style.cursor = '';

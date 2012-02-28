@@ -28,7 +28,7 @@
 
         provider: null,
         recentTiles: null,
-        recentTilesById: null,
+        recentTilesById: {},
 
         enablePyramidLoading: false,
 
@@ -98,9 +98,9 @@
             // scaled too small (and tiles would be too numerous)
             for (var name in this.levels) {
                 if (this.levels.hasOwnProperty(name)) {
-                    var zoom = parseInt(name,10);
+                    var zoom = parseInt(name, 10);
 
-                    if (zoom >= startCoord.zoom-5 && zoom < startCoord.zoom+2) {
+                    if (zoom >= startCoord.zoom - 5 && zoom < startCoord.zoom + 2) {
                         continue;
                     }
 
@@ -128,11 +128,12 @@
             // cancel requests that aren't visible:
             this.requestManager.clearExcept(validTileKeys);
 
-            // get newly requested tiles, sort according to current view:
-            this.requestManager.processQueue(this.getCenterDistanceCompare());
-
-            // make sure we don't have too much stuff:
-            this.checkCache();
+            if (!this.map.fastForward) {
+                // get newly requested tiles, sort according to current view:
+                this.requestManager.processQueue(this.getCenterDistanceCompare());
+                // make sure we don't have too much stuff:
+                this.checkCache();
+            }
         },
 
         /**
@@ -217,7 +218,7 @@
             }
 
             // if we didn't find a parent, look at the children:
-            if(!tileCovered && !this.enablePyramidLoading) {
+            if (!tileCovered && !this.enablePyramidLoading) {
                 var child_coord = tile_coord.zoomBy(1);
 
                 // mark everything valid whether or not we have it:
@@ -271,7 +272,9 @@
 
             var tileWidth = this.map.tileSize.x * scale;
             var tileHeight = this.map.tileSize.y * scale;
-            var center = new MM.Point(this.map.dimensions.x/2, this.map.dimensions.y/2);
+            var center = new MM.Point(
+                this.map.dimensions.x / 2,
+                this.map.dimensions.y / 2);
             var tiles = this.tileElementsInLevel(level);
 
             while (tiles.length) {
@@ -281,7 +284,9 @@
                     this.provider.releaseTile(tile.coord);
                     this.requestManager.clearRequest(tile.coord.toKey());
                     level.removeChild(tile);
-                } else {
+                }
+
+                if (!(MM.transformProperty && MM._browser.webkit3d)) {
                     // position tiles
                     MM.moveElement(tile, {
                         x: Math.round(center.x +
@@ -293,10 +298,22 @@
                         width: this.map.tileSize.x,
                         height: this.map.tileSize.y
                     });
-
-                    // log last-touched-time of currently cached tiles
-                    this.recentTilesById[tile.id].lastTouchedTime = now;
                 }
+                // log last-touched-time of currently cached tiles
+                this.recentTilesById[tile.id].lastTouchedTime = now;
+            }
+
+            var squareSize = Math.pow(2, zoom) * 256;
+
+            if (MM.transformProperty && MM._browser.webkit3d) {
+                // position tiles
+                MM.moveElement(level, {
+                    x: this.map.fastForward ? (center.x - (theCoord.column * 256)) : Math.round(center.x - (theCoord.column * 256)),
+                    y: this.map.fastForward ? (center.y - (theCoord.row * 256)) : Math.round(center.y - (theCoord.row * 256)),
+                    scale: scale,
+                    width: squareSize,
+                    height: squareSize
+                });
             }
         },
 
@@ -342,7 +359,6 @@
         positionTile: function(tile) {
             // position this tile (avoids a full draw() call):
             var theCoord = this.map.coordinate.zoomTo(tile.coord.zoom);
-            var scale = Math.pow(2, this.map.coordinate.zoom - tile.coord.zoom);
 
             // Start tile positioning and prevent drag for modern browsers
             tile.style.cssText = 'position:absolute;-webkit-user-select: none;-webkit-user-drag: none;-moz-user-drag: none;';
@@ -350,18 +366,15 @@
             // Prevent drag for IE
             tile.ondragstart = function() { return false; };
 
-            var tx = ((this.map.dimensions.x/2) +
-                (tile.coord.column - theCoord.column) *
-                this.map.tileSize.x * scale);
-            var ty = ((this.map.dimensions.y/2) +
-                (tile.coord.row - theCoord.row) *
-                this.map.tileSize.y * scale);
+            var tx = tile.coord.column *
+                this.map.tileSize.x;
+            var ty = tile.coord.row *
+                this.map.tileSize.y;
 
             // TODO: pass only scale or only w/h
             MM.moveElement(tile, {
                 x: Math.round(tx),
                 y: Math.round(ty),
-                scale: scale,
                 width: this.map.tileSize.x,
                 height: this.map.tileSize.y
             });
@@ -425,7 +438,7 @@
                 });
             }
 
-            while (this.tileCacheSize > maxTiles) {
+            while (this.recentTiles.length && this.tileCacheSize > maxTiles) {
                 // delete the oldest record
                 var tileRecord = this.recentTiles.pop();
                 var now = new Date().getTime();
@@ -436,7 +449,7 @@
                 var tile = this.tiles[tileRecord.id];
                 if (tile.parentNode) {
                     // I'm leaving this uncommented for now but you should never see it:
-                    alert("Gah: trying to removing cached tile even though it's still in the DOM");
+                    // alert("Gah: trying to remove cached tile even though it's still in the DOM");
                 } else {
                     delete this.tiles[tileRecord.id];
                     this.tileCacheSize--;
