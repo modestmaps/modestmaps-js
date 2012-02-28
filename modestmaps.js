@@ -413,22 +413,22 @@ var MM = com.modestmaps = {
     // south, east and west bounds.
 
     MM.Extent = function(north, west, south, east) {
-        if (arguments[0] instanceof MM.Location) {
-            var northwest = arguments[0];
-            north = northwest.lat;
-            west = northwest.lon;
-        }
         if (arguments[1] instanceof MM.Location) {
             var southeast = arguments[1];
             south = southeast.lat;
             east = southeast.lon;
         }
+        if (arguments[0] instanceof MM.Location) {
+            var northwest = arguments[0];
+            north = northwest.lat;
+            west = northwest.lon;
+        }
         if (isNaN(south)) south = north;
         if (isNaN(east)) east = west;
-        this.north = Math.max(north, south);
-        this.south = Math.min(north, south);
-        this.east = Math.max(east, west);
-        this.west = Math.min(east, west);
+        this.north = north > south ? north : south;
+        this.south = north > south ? south : north;
+        this.east = east > west ? east : west;
+        this.west = east > west ? west : east;
     };
 
     MM.Extent.prototype = {
