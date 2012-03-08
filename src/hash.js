@@ -117,7 +117,7 @@
         hashChangeInterval: null,
         startListening: function() {
             if (HAS_HASHCHANGE) {
-                window.addEventListener("hashchange", this.onHashChange, false);
+                MM.addEvent(window, "hashchange", this.onHashChange);
             } else {
                 clearInterval(this.hashChangeInterval);
                 this.hashChangeInterval = setInterval(this.onHashChange, 50);
@@ -127,7 +127,7 @@
 
         stopListening: function() {
             if (HAS_HASHCHANGE) {
-                window.removeEventListener("hashchange", this.onHashChange);
+                MM.removeEvent(window, "hashchange", this.onHashChange);
             } else {
                 clearInterval(this.hashChangeInterval);
             }
