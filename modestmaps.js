@@ -2619,9 +2619,14 @@ var MM = com.modestmaps = {
 
         // inspecting
         getExtent: function() {
+            var nw = this.pointLocation(new MM.Point(0, 0)),
+                se = this.pointLocation(this.dimensions);
+            
             return new MM.Extent(
-                this.pointLocation(new MM.Point(0, 0)),
-                this.pointLocation(this.dimensions)
+                nw.lat,
+                nw.lon,
+                se.lat,
+                se.lon
             );
         },
 
