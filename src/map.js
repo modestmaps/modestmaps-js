@@ -529,17 +529,17 @@
 
         enforcePanLimits: function(coord) {
 
-            var limits = this.coordLimits;
-
-            if (limits) {
+            if (this.coordLimits) {
 
                 coord = coord.copy();
 
                 // clamp pan:
-                var topLeftLimit = limits[0].zoomTo(coord.zoom);
-                var bottomRightLimit = limits[1].zoomTo(coord.zoom);
-                var currentTopLeft = this.pointCoordinate(new MM.Point(0,0));
-                var currentBottomRight = this.pointCoordinate(this.dimensions);
+                var topLeftLimit = this.coordLimits[0].zoomTo(coord.zoom);
+                var bottomRightLimit = this.coordLimits[1].zoomTo(coord.zoom);
+                var currentTopLeft = this.pointCoordinate(new MM.Point(0, 0))
+                    .zoomTo(coord.zoom);
+                var currentBottomRight = this.pointCoordinate(this.dimensions)
+                    .zoomTo(coord.zoom);
 
                 // this handles infinite limits:
                 // (Infinity - Infinity) is Nan
@@ -548,12 +548,10 @@
                     currentBottomRight.row - currentTopLeft.row) {
                     // if the limit is smaller than the current view center it
                     coord.row = (bottomRightLimit.row + topLeftLimit.row) / 2;
-                }
-                else {
+                } else {
                     if (currentTopLeft.row < topLeftLimit.row) {
                         coord.row += topLeftLimit.row - currentTopLeft.row;
-                    }
-                    else if (currentBottomRight.row > bottomRightLimit.row) {
+                    } else if (currentBottomRight.row > bottomRightLimit.row) {
                         coord.row -= currentBottomRight.row - bottomRightLimit.row;
                     }
                 }
@@ -561,12 +559,10 @@
                     currentBottomRight.column - currentTopLeft.column) {
                     // if the limit is smaller than the current view, center it
                     coord.column = (bottomRightLimit.column + topLeftLimit.column) / 2;
-                }
-                else {
+                } else {
                     if (currentTopLeft.column < topLeftLimit.column) {
                         coord.column += topLeftLimit.column - currentTopLeft.column;
-                    }
-                    else if (currentBottomRight.column > bottomRightLimit.column) {
+                    } else if (currentBottomRight.column > bottomRightLimit.column) {
                         coord.column -= currentBottomRight.column - bottomRightLimit.column;
                     }
                 }

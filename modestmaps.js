@@ -1,5 +1,5 @@
 /*!
- * Modest Maps JS v1.0.0-alpha
+ * Modest Maps JS v1.0.0-beta
  * http://modestmaps.com/
  *
  * Copyright (c) 2011 Stamen Design, All Rights Reserved.
@@ -1791,7 +1791,7 @@ var MM = com.modestmaps = {
         _tileComplete: null,
 
         getTileComplete: function() {
-            if(!this._tileComplete) {
+            if (!this._tileComplete) {
                 var theLayer = this;
                 this._tileComplete = function(manager, tile) {
 
@@ -1856,7 +1856,7 @@ var MM = com.modestmaps = {
                 if (this.levels.hasOwnProperty(name)) {
                     var zoom = parseInt(name,10);
 
-                    if (zoom >= startCoord.zoom-5 && zoom < startCoord.zoom+2) {
+                    if (zoom >= startCoord.zoom - 5 && zoom < startCoord.zoom + 2) {
                         continue;
                     }
 
@@ -1891,20 +1891,16 @@ var MM = com.modestmaps = {
             this.checkCache();
         },
 
-        /**
-         * For a given tile coordinate in a given level element, ensure that it's
-         * correctly represented in the DOM including potentially-overlapping
-         * parent and child tiles for pyramid loading.
-         *
-         * Return a list of valid (i.e. loadable?) tile keys.
-         */
+        // For a given tile coordinate in a given level element, ensure that it's
+        // correctly represented in the DOM including potentially-overlapping
+        // parent and child tiles for pyramid loading.
+        //
+        // Return a list of valid (i.e. loadable?) tile keys.
         inventoryVisibleTile: function(layer_element, tile_coord) {
             var tile_key = tile_coord.toKey(),
                 valid_tile_keys = [tile_key];
 
-            /*
-             * Check that the needed tile already exists someplace - add it to the DOM if it does.
-             */
+            // Check that the needed tile already exists someplace - add it to the DOM if it does.
             if (tile_key in this.tiles) {
                 var tile = this.tiles[tile_key];
 
@@ -1920,9 +1916,7 @@ var MM = com.modestmaps = {
                 return valid_tile_keys;
             }
 
-            /*
-             * Check that the needed tile has even been requested at all.
-             */
+            // Check that the needed tile has even been requested at all.
             if (!this.requestManager.hasRequest(tile_key)) {
                 var tileToRequest = this.provider.getTile(tile_coord);
                 if (typeof tileToRequest == 'string') {
@@ -1973,7 +1967,7 @@ var MM = com.modestmaps = {
             }
 
             // if we didn't find a parent, look at the children:
-            if(!tileCovered && !this.enablePyramidLoading) {
+            if (!tileCovered && !this.enablePyramidLoading) {
                 var child_coord = tile_coord.zoomBy(1);
 
                 // mark everything valid whether or not we have it:
@@ -1993,8 +1987,8 @@ var MM = com.modestmaps = {
             // this is somewhat future proof, we're looking for DOM elements
             // not necessarily <img> elements
             var tiles = [];
-            for(var tile = level.firstChild; tile; tile = tile.nextSibling) {
-                if(tile.nodeType == 1) {
+            for (var tile = level.firstChild; tile; tile = tile.nextSibling) {
+                if (tile.nodeType == 1) {
                     tiles.push(tile);
                 }
             }
@@ -2037,9 +2031,10 @@ var MM = com.modestmaps = {
                     this.provider.releaseTile(tile.coord);
                     this.requestManager.clearRequest(tile.coord.toKey());
                     level.removeChild(tile);
+                } else {
+                    // log last-touched-time of currently cached tiles
+                    this.recentTilesById[tile.id].lastTouchedTime = now;
                 }
-                // log last-touched-time of currently cached tiles
-                this.recentTilesById[tile.id].lastTouchedTime = now;
             }
 
             // position tiles
@@ -2161,11 +2156,21 @@ var MM = com.modestmaps = {
             return this._redraw;
         },
 
+        numTilesOnScreen: function() {
+            var tileCount = 0;
+            for (var name in this.levels) {
+                if (this.levels.hasOwnProperty(name)) {
+                    var level = this.levels[name];
+                    tileCount += this.tileElementsInLevel(level).length;
+                }
+            }
+            return tileCount;
+        },
+
         // keeps cache below max size
         // (called every time we receive a new tile and add it to the cache)
         checkCache: function() {
-            var numTilesOnScreen = this.parent.getElementsByTagName('img').length;
-            var maxTiles = Math.max(numTilesOnScreen, this.maxTileCacheSize);
+            var maxTiles = Math.max(this.numTilesOnScreen(), this.maxTileCacheSize);
 
             if (this.tileCacheSize > maxTiles) {
                 // sort from newest (highest) to oldest (lowest)
@@ -2802,17 +2807,17 @@ var MM = com.modestmaps = {
 
         enforcePanLimits: function(coord) {
 
-            var limits = this.coordLimits;
-
-            if (limits) {
+            if (this.coordLimits) {
 
                 coord = coord.copy();
 
                 // clamp pan:
-                var topLeftLimit = limits[0].zoomTo(coord.zoom);
-                var bottomRightLimit = limits[1].zoomTo(coord.zoom);
-                var currentTopLeft = this.pointCoordinate(new MM.Point(0,0));
-                var currentBottomRight = this.pointCoordinate(this.dimensions);
+                var topLeftLimit = this.coordLimits[0].zoomTo(coord.zoom);
+                var bottomRightLimit = this.coordLimits[1].zoomTo(coord.zoom);
+                var currentTopLeft = this.pointCoordinate(new MM.Point(0, 0))
+                    .zoomTo(coord.zoom);
+                var currentBottomRight = this.pointCoordinate(this.dimensions)
+                    .zoomTo(coord.zoom);
 
                 // this handles infinite limits:
                 // (Infinity - Infinity) is Nan
@@ -2821,12 +2826,10 @@ var MM = com.modestmaps = {
                     currentBottomRight.row - currentTopLeft.row) {
                     // if the limit is smaller than the current view center it
                     coord.row = (bottomRightLimit.row + topLeftLimit.row) / 2;
-                }
-                else {
+                } else {
                     if (currentTopLeft.row < topLeftLimit.row) {
                         coord.row += topLeftLimit.row - currentTopLeft.row;
-                    }
-                    else if (currentBottomRight.row > bottomRightLimit.row) {
+                    } else if (currentBottomRight.row > bottomRightLimit.row) {
                         coord.row -= currentBottomRight.row - bottomRightLimit.row;
                     }
                 }
@@ -2834,12 +2837,10 @@ var MM = com.modestmaps = {
                     currentBottomRight.column - currentTopLeft.column) {
                     // if the limit is smaller than the current view, center it
                     coord.column = (bottomRightLimit.column + topLeftLimit.column) / 2;
-                }
-                else {
+                } else {
                     if (currentTopLeft.column < topLeftLimit.column) {
                         coord.column += topLeftLimit.column - currentTopLeft.column;
-                    }
-                    else if (currentBottomRight.column > bottomRightLimit.column) {
+                    } else if (currentBottomRight.column > bottomRightLimit.column) {
                         coord.column -= currentBottomRight.column - bottomRightLimit.column;
                     }
                 }
