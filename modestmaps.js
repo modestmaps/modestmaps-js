@@ -381,17 +381,6 @@ var MM = com.modestmaps = {
               Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
               Math.cos(lat1) * Math.cos(lat2) *
               Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
-        var bearing = Math.atan2(
-            Math.sin(lon1 - lon2) *
-            Math.cos(lat2),
-            Math.cos(lat1) *
-            Math.sin(lat2) -
-            Math.sin(lat1) *
-            Math.cos(lat2) *
-            Math.cos(lon1 - lon2)
-        )  / -(Math.PI / 180);
-
-        bearing = bearing < 0 ? 360 + bearing : bearing;
 
         var A = Math.sin((1-f)*d)/Math.sin(d);
         var B = Math.sin(f*d)/Math.sin(d);
@@ -405,6 +394,24 @@ var MM = com.modestmaps = {
         var lonN = Math.atan2(y,x);
 
         return new MM.Location(latN / deg2rad, lonN / deg2rad);
+    };
+    
+    // Returns bearing from one point to another
+    //
+    // * FIXME: bearing is not constant along significant great circle arcs.
+    MM.Location.bearing = function(l1, l2) {
+        var result = Math.atan2(
+            Math.sin(lon1 - lon2) *
+            Math.cos(lat2),
+            Math.cos(lat1) *
+            Math.sin(lat2) -
+            Math.sin(lat1) *
+            Math.cos(lat2) *
+            Math.cos(lon1 - lon2)
+        )  / -(Math.PI / 180);
+
+        // map it into 0-360 range
+        return (result < 0) ? result + 360 : result;
     };
 
     // Extent
@@ -2480,7 +2487,7 @@ var MM = com.modestmaps = {
             return this;
         },
 
-        setExtent: function(locations, precise) {
+        extentCoordinate: function(locations, precise) {
             // coerce locations to an array if it's a Extent instance
             if (locations instanceof MM.Extent) {
                 locations = locations.toArray();
@@ -2535,8 +2542,11 @@ var MM = com.modestmaps = {
             var centerRow = (TL.row + BR.row) / 2;
             var centerColumn = (TL.column + BR.column) / 2;
             var centerZoom = TL.zoom;
+            return new MM.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom);
+        },
 
-            this.coordinate = new MM.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom);
+        setExtent: function(locations, precise) {
+            this.coordinate = this.extentCoordinate(locations, precise);
             this.draw(); // draw calls enforceLimits
             // (if you switch to getFrame, call enforceLimits first)
 
