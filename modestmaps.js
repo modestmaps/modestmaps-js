@@ -148,7 +148,7 @@ var MM = com.modestmaps = {
     MM.coerceLayer = function(layerish) {
         if (typeof layerish == 'string') {
             // Probably a template string
-            return new MM.Layer(new MM.TemplatedMapProvider(layerish));
+            return new MM.TemplatedLayer(layerish);
         } else if ('draw' in layerish && typeof layerish.draw == 'function') {
             // good enough, though we should probably enforce .parent and .destroy() too
             return layerish;
@@ -728,7 +728,7 @@ var MM = com.modestmaps = {
     // Providers provide tile URLs and possibly elements for layers.
     //
     // MapProvider ->
-    //   TemplatedMapProvider
+    //   Template
     //
     MM.MapProvider = function(getTile) {
         if (getTile) {
@@ -794,7 +794,7 @@ var MM = com.modestmaps = {
      * FIXME: need a better explanation here! This is a pretty crucial part of
      * understanding how to use ModestMaps.
      *
-     * TemplatedMapProvider is a tile provider that generates tile URLs from a
+     * Template is a tile provider that generates tile URLs from a
      * template string by replacing the following bits for each tile
      * coordinate:
      *
@@ -806,14 +806,14 @@ var MM = com.modestmaps = {
      *
      * E.g.:
      *
-     * var osm = new MM.TemplatedMapProvider("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
+     * var osm = new MM.Template("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
      *
      * Or:
      *
-     * var placeholder = new MM.TemplatedMapProvider("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
+     * var placeholder = new MM.Template("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
      *
      */
-    MM.TemplatedMapProvider = function(template, subdomains) {
+    MM.Template = function(template, subdomains) {
         var isQuadKey = template.match(/{(Q|quadkey)}/);
         // replace Microsoft style substitution strings
         if (isQuadKey) template = template
@@ -852,7 +852,7 @@ var MM = com.modestmaps = {
         MM.MapProvider.call(this, getTileUrl);
     };
 
-    MM.TemplatedMapProvider.prototype = {
+    MM.Template.prototype = {
         // quadKey generator
         quadKey: function(row, column, zoom) {
             var key = '';
@@ -866,10 +866,10 @@ var MM = com.modestmaps = {
         }
     };
 
-    MM.extend(MM.TemplatedMapProvider, MM.MapProvider);
+    MM.extend(MM.Template, MM.MapProvider);
 
     MM.TemplatedLayer = function(template, subdomains) {
-      return new MM.Layer(new MM.TemplatedMapProvider(template, subdomains));
+      return new MM.Layer(new MM.Template(template, subdomains));
     };
     // Event Handlers
     // --------------
@@ -2963,7 +2963,7 @@ var MM = com.modestmaps = {
           Transformation: MM.Transformation,
           Location: MM.Location,
           MapProvider: MM.MapProvider,
-          TemplatedMapProvider: MM.TemplatedMapProvider,
+          Template: MM.Template,
           Coordinate: MM.Coordinate,
           deriveTransformation: MM.deriveTransformation
       };

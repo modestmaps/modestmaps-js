@@ -3,7 +3,7 @@
     // Providers provide tile URLs and possibly elements for layers.
     //
     // MapProvider ->
-    //   TemplatedMapProvider
+    //   Template
     //
     MM.MapProvider = function(getTile) {
         if (getTile) {
@@ -69,7 +69,7 @@
      * FIXME: need a better explanation here! This is a pretty crucial part of
      * understanding how to use ModestMaps.
      *
-     * TemplatedMapProvider is a tile provider that generates tile URLs from a
+     * Template is a tile provider that generates tile URLs from a
      * template string by replacing the following bits for each tile
      * coordinate:
      *
@@ -81,14 +81,14 @@
      *
      * E.g.:
      *
-     * var osm = new MM.TemplatedMapProvider("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
+     * var osm = new MM.Template("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
      *
      * Or:
      *
-     * var placeholder = new MM.TemplatedMapProvider("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
+     * var placeholder = new MM.Template("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
      *
      */
-    MM.TemplatedMapProvider = function(template, subdomains) {
+    MM.Template = function(template, subdomains) {
         var isQuadKey = template.match(/{(Q|quadkey)}/);
         // replace Microsoft style substitution strings
         if (isQuadKey) template = template
@@ -127,7 +127,7 @@
         MM.MapProvider.call(this, getTileUrl);
     };
 
-    MM.TemplatedMapProvider.prototype = {
+    MM.Template.prototype = {
         // quadKey generator
         quadKey: function(row, column, zoom) {
             var key = '';
@@ -141,8 +141,8 @@
         }
     };
 
-    MM.extend(MM.TemplatedMapProvider, MM.MapProvider);
+    MM.extend(MM.Template, MM.MapProvider);
 
     MM.TemplatedLayer = function(template, subdomains) {
-      return new MM.Layer(new MM.TemplatedMapProvider(template, subdomains));
+        return new MM.Layer(new MM.Template(template, subdomains));
     };
