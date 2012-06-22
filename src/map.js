@@ -88,8 +88,8 @@
         // set up handlers last so that all required attributes/functions are in place if needed
         if (eventHandlers === undefined) {
             this.eventHandlers = [
-                new MM.MouseHandler(this),
-                new MM.TouchHandler(this)
+                MM.MouseHandler().init(this),
+                MM.TouchHandler().init(this)
             ];
         } else {
             this.eventHandlers = eventHandlers;
@@ -400,6 +400,9 @@
         },
 
         // put the given layer on top of all the others
+        // Since this is called for the first layer, which is by definition
+        // added before the map has a valid `coordinate`, we request
+        // a redraw only if the map has a center coordinate.
         addLayer: function(layer) {
             this.layers.push(layer);
             // make sure layer.parent doesn't already have a parentNode
@@ -407,6 +410,9 @@
                 this.parent.appendChild(layer.parent); 
             }
             layer.map = this; // TODO: remove map property from MM.Layer?
+            if (this.coordinate) {
+              MM.getFrame(this.getRedraw());
+            }
             return this;
         },
 
@@ -432,12 +438,15 @@
 
                 // clear existing layer at this index
                 if (index < this.layers.length) {
-                    this.layers[index].destroy();
+                    var other = this.layers[index];
+                    this.parent.insertBefore(layer.parent, other.parent);
+                    other.destroy();
+                } else {
+                // Or if this will be the last layer, it can be simply appended
+                    this.parent.appendChild(layer.parent);
                 }
 
-                // pass it on.
                 this.layers[index] = layer;
-                this.parent.appendChild(layer.parent);
                 layer.map = this; // TODO: remove map property from MM.Layer
 
                 MM.getFrame(this.getRedraw());

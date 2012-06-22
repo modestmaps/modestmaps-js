@@ -1,5 +1,5 @@
 /*!
- * Modest Maps JS v1.0.0-beta1
+ * Modest Maps JS v2.0.1
  * http://modestmaps.com/
  *
  * Copyright (c) 2011 Stamen Design, All Rights Reserved.
@@ -81,10 +81,13 @@ var MM = com.modestmaps = {
 
         var scale = point.scale || 1;
         if (MM._browser.webkit3d) {
-            // return 'scale3d(' + scale + ',' + scale + ', 1) translate3d(' + point.x.toFixed(6) + 'px,' + point.y.toFixed(6) + 'px, 0px)';
-            return 'scale3d(' + scale + ',' + scale + ', 1) translate3d(' + point.x.toFixed(0) + 'px,' + point.y.toFixed(0) + 'px, 0px)';
+            return  'translate3d(' +
+                point.x.toFixed(0) + 'px,' + point.y.toFixed(0) + 'px, 0px)' +
+                'scale3d(' + scale + ',' + scale + ', 1)';
         } else {
-            return 'scale(' + scale + ',' + scale + ') translate(' + point.x.toFixed(6) + 'px,' + point.y.toFixed(6) + 'px)';
+            return  'translate(' +
+                point.x.toFixed(6) + 'px,' + point.y.toFixed(6) + 'px)' +
+                'scale(' + scale + ',' + scale + ')';
         }
     };
 
@@ -130,19 +133,6 @@ var MM = com.modestmaps = {
         if (e.stopPropagation) { e.stopPropagation(); }
         if (e.preventDefault) { e.preventDefault(); }
         return false;
-    };
-
-    // From underscore.js
-    MM.bind = function(func, obj) {
-        var slice = Array.prototype.slice;
-        var nativeBind = Function.prototype.bind;
-        if (func.bind === nativeBind && nativeBind) {
-            return nativeBind.apply(func, slice.call(arguments, 1));
-        }
-        var args = slice.call(arguments, 2);
-        return function() {
-          return func.apply(obj, args.concat(slice.call(arguments)));
-        };
     };
 
     MM.coerceLayer = function(layerish) {
@@ -400,6 +390,11 @@ var MM = com.modestmaps = {
     //
     // * FIXME: bearing is not constant along significant great circle arcs.
     MM.Location.bearing = function(l1, l2) {
+        var deg2rad = Math.PI / 180.0,
+            lat1 = l1.lat * deg2rad,
+            lon1 = l1.lon * deg2rad,
+            lat2 = l2.lat * deg2rad,
+            lon2 = l2.lon * deg2rad;
         var result = Math.atan2(
             Math.sin(lon1 - lon2) *
             Math.cos(lat2),
@@ -775,7 +770,7 @@ var MM = com.modestmaps = {
                 wrappedColumn;
 
             if (coord.column < 0) {
-                wrappedColumn = (coord.column + columnSize) % columnSize;
+                wrappedColumn = ((coord.column % columnSize) + columnSize) % columnSize;
             } else {
                 wrappedColumn = coord.column % columnSize;
             }
@@ -824,6 +819,14 @@ var MM = com.modestmaps = {
         var hasSubdomains = (subdomains &&
             subdomains.length && template.indexOf("{S}") >= 0);
 
+        function quadKey (row, column, zoom) {
+            var key = '';
+            for (var i = 1; i <= zoom; i++) {
+                key += (((row >> zoom - i) & 1) << 1) | ((column >> zoom - i) & 1);
+            }
+            return key || '0';
+        }
+
         var getTileUrl = function(coordinate) {
             var coord = this.sourceCoordinate(coordinate);
             if (!coord) {
@@ -838,7 +841,7 @@ var MM = com.modestmaps = {
             if (isQuadKey) {
                 return base
                     .replace('{Z}', coord.zoom.toFixed(0))
-                    .replace('{Q}', this.quadKey(coord.row,
+                    .replace('{Q}', quadKey(coord.row,
                         coord.column,
                         coord.zoom));
             } else {
@@ -854,13 +857,6 @@ var MM = com.modestmaps = {
 
     MM.Template.prototype = {
         // quadKey generator
-        quadKey: function(row, column, zoom) {
-            var key = '';
-            for (var i = 1; i <= zoom; i++) {
-                key += (((row >> zoom - i) & 1) << 1) | ((column >> zoom - i) & 1);
-            }
-            return key || '0';
-        },
         getTile: function(coord) {
           return this.getTileUrl(coord);
         }
@@ -869,7 +865,7 @@ var MM = com.modestmaps = {
     MM.extend(MM.Template, MM.MapProvider);
 
     MM.TemplatedLayer = function(template, subdomains) {
-      return new MM.Layer(new MM.Template(template, subdomains));
+        return new MM.Layer(new MM.Template(template, subdomains));
     };
     // Event Handlers
     // --------------
@@ -892,391 +888,196 @@ var MM = com.modestmaps = {
         return point;
     };
 
-    // A handler that allows mouse-wheel zooming - zooming in
-    // when page would scroll up, and out when the page would scroll down.
-    MM.MouseWheelHandler = function(map, precise) {
-        // only init() if we get a map
-        if (map) {
-            this.init(map, precise);
-        // allow (null, true) as constructor args
-        } else if (arguments.length > 1) {
-            this.precise = precise ? true : false;
-        }
-    };
+    MM.MouseWheelHandler = function() {
+        var handler = {},
+            map,
+            _zoomDiv,
+            prevTime,
+            precise = false;
 
-    MM.MouseWheelHandler.prototype = {
-        precise: false,
-        // MM.Point to zoom about
-        centerPoint: null,
-        // MM.Location to zoom about
-        centerLocation: null,
-
-        init: function(map) {
-            this.map = map;
-            this._mouseWheel = MM.bind(this.mouseWheel, this);
-
-            this._zoomDiv = document.body.appendChild(document.createElement('div'));
-            this._zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
-            var innerDiv = this._zoomDiv.appendChild(document.createElement('div'));
-            innerDiv.style.height = '2000px';
-            MM.addEvent(map.parent, 'mousewheel', this._mouseWheel);
-        },
-
-        remove: function() {
-            MM.removeEvent(this.map.parent, 'mousewheel', this._mouseWheel);
-            this._zoomDiv.parentNode.removeChild(this._zoomDiv);
-        },
-
-        mouseWheel: function(e) {
+        function mouseWheel(e) {
             var delta = 0;
-            this.prevTime = this.prevTime || new Date().getTime();
+            prevTime = prevTime || new Date().getTime();
 
             try {
-                this._zoomDiv.scrollTop = 1000;
-                this._zoomDiv.dispatchEvent(e);
-                delta = 1000 - this._zoomDiv.scrollTop;
+                _zoomDiv.scrollTop = 1000;
+                _zoomDiv.dispatchEvent(e);
+                delta = 1000 - _zoomDiv.scrollTop;
             } catch (error) {
                 delta = e.wheelDelta || (-e.detail * 5);
             }
 
             // limit mousewheeling to once every 200ms
-            var timeSince = new Date().getTime() - this.prevTime;
+            var timeSince = new Date().getTime() - prevTime;
+            var point = MM.getMousePoint(e, map);
 
-            if (Math.abs(delta) > 0 && (timeSince > 200) && !this.precise) {
-                var point = this.getZoomPoint(e);
-                this.map.zoomByAbout(delta > 0 ? 1 : -1, point);
-
-                this.prevTime = new Date().getTime();
-            } else if (this.precise) {
-                var point = this.getZoomPoint(e);
-                this.map.zoomByAbout(delta * 0.001, point);
+            if (Math.abs(delta) > 0 && (timeSince > 200) && !precise) {
+                map.zoomByAbout(delta > 0 ? 1 : -1, point);
+                prevTime = new Date().getTime();
+            } else if (precise) {
+                map.zoomByAbout(delta * 0.001, point);
             }
 
             // Cancel the event so that the page doesn't scroll
             return MM.cancelEvent(e);
-        },
-
-        getZoomPoint: function(e) {
-            if (this.centerPoint) {
-                return this.centerPoint;
-            } else if (this.centerLocation) {
-                return this.map.locationPoint(this.centerLocation);
-            }
-            return MM.getMousePoint(e, this.map);
         }
+
+        handler.init = function(x) {
+            map = x;
+            _zoomDiv = document.body.appendChild(document.createElement('div'));
+            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
+            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
+            innerDiv.style.height = '2000px';
+            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
+            return handler;
+        };
+
+        handler.precise = function(x) {
+            if (!arguments.length) return precise;
+            precise = x;
+            return handler;
+        };
+
+        handler.remove = function() {
+            MM.removeEvent(map.parent, 'mousewheel', mouseWheel);
+            _zoomDiv.parentNode.removeChild(_zoomDiv);
+        };
+
+        return handler;
     };
 
-    // Handle double clicks, that zoom the map in one zoom level.
-    MM.DoubleClickHandler = function(map) {
-        if (map !== undefined) {
-            this.init(map);
-        }
-    };
+    MM.DoubleClickHandler = function() {
+        var handler = {},
+            map;
 
-    MM.DoubleClickHandler.prototype = {
-
-        init: function(map) {
-            this.map = map;
-            this._doubleClick = MM.bind(this.doubleClick, this);
-            MM.addEvent(map.parent, 'dblclick', this._doubleClick);
-        },
-
-        remove: function() {
-            MM.removeEvent(this.map.parent, 'dblclick', this._doubleClick);
-        },
-
-        doubleClick: function(e) {
+        function doubleClick(e) {
             // Ensure that this handler is attached once.
             // Get the point on the map that was double-clicked
-            var point = MM.getMousePoint(e, this.map);
-
+            var point = MM.getMousePoint(e, map);
             // use shift-double-click to zoom out
-            this.map.zoomByAbout(e.shiftKey ? -1 : 1, point);
-
+            map.zoomByAbout(e.shiftKey ? -1 : 1, point);
             return MM.cancelEvent(e);
         }
+
+        handler.init = function(x) {
+            map = x;
+            MM.addEvent(map.parent, 'dblclick', doubleClick);
+            return handler;
+        };
+
+        handler.remove = function() {
+            MM.removeEvent(map.parent, 'dblclick', doubleClick);
+        };
+
+        return handler;
     };
 
     // Handle the use of mouse dragging to pan the map.
-    MM.DragHandler = function(map) {
-        if (map !== undefined) {
-            this.init(map);
-        }
-    };
+    MM.DragHandler = function() {
+        var handler = {},
+            prevMouse,
+            map;
 
-    MM.DragHandler.prototype = {
+        function mouseDown(e) {
+            if (e.shiftKey || e.button == 2) return;
+            MM.addEvent(document, 'mouseup', mouseUp);
+            MM.addEvent(document, 'mousemove', mouseMove);
 
-        init: function(map) {
-            this.map = map;
-            this._mouseDown = MM.bind(this.mouseDown, this);
-            MM.addEvent(map.parent, 'mousedown', this._mouseDown);
-        },
-
-        remove: function() {
-            MM.removeEvent(this.map.parent, 'mousedown', this._mouseDown);
-        },
-
-        mouseDown: function(e) {
-            MM.addEvent(document, 'mouseup', this._mouseUp = MM.bind(this.mouseUp, this));
-            MM.addEvent(document, 'mousemove', this._mouseMove = MM.bind(this.mouseMove, this));
-
-            this.prevMouse = new MM.Point(e.clientX, e.clientY);
-            this.map.parent.style.cursor = 'move';
+            prevMouse = new MM.Point(e.clientX, e.clientY);
+            map.parent.style.cursor = 'move';
 
             return MM.cancelEvent(e);
-        },
+        }
 
-        mouseMove: function(e) {
-            if (this.prevMouse) {
-                this.map.panBy(
-                    e.clientX - this.prevMouse.x,
-                    e.clientY - this.prevMouse.y);
-                this.prevMouse.x = e.clientX;
-                this.prevMouse.y = e.clientY;
-                this.prevMouse.t = +new Date();
+        function mouseUp(e) {
+            MM.removeEvent(document, 'mouseup', mouseUp);
+            MM.removeEvent(document, 'mousemove', mouseMove);
+
+            prevMouse = null;
+            map.parent.style.cursor = '';
+
+            return MM.cancelEvent(e);
+        }
+
+        function mouseMove(e) {
+            if (prevMouse) {
+                map.panBy(
+                    e.clientX - prevMouse.x,
+                    e.clientY - prevMouse.y);
+                prevMouse.x = e.clientX;
+                prevMouse.y = e.clientY;
+                prevMouse.t = +new Date();
             }
 
             return MM.cancelEvent(e);
-        },
-
-        mouseUp: function(e) {
-            MM.removeEvent(document, 'mouseup', this._mouseUp);
-            MM.removeEvent(document, 'mousemove', this._mouseMove);
-
-            this.prevMouse = null;
-            this.map.parent.style.cursor = '';
-
-            return MM.cancelEvent(e);
         }
+
+        handler.init = function(x) {
+            map = x;
+            MM.addEvent(map.parent, 'mousedown', mouseDown);
+            return handler;
+        };
+
+        handler.remove = function() {
+            MM.removeEvent(map.parent, 'mousedown', mouseDown);
+        };
+
+        return handler;
     };
 
-    // A shortcut for adding drag, double click,
-    // and mouse wheel events to the map. This is the default
-    // handler attached to a map if the handlers argument isn't given.
-    MM.MouseHandler = function(map, precise) {
-        if (map !== undefined) {
-            this.init(map);
-        }
-        this.precise = precise === true;
-    };
+    MM.MouseHandler = function() {
+        var handler = {},
+            map,
+            handlers;
 
-    MM.MouseHandler.prototype = {
-        init: function(map) {
-            this.map = map;
-            this.handlers = [
-                new MM.DragHandler(map),
-                new MM.DoubleClickHandler(map),
-                new MM.MouseWheelHandler(map, this.precise)
+        handler.init = function(x) {
+            map = x;
+            handlers = [
+                MM.DragHandler().init(map),
+                MM.DoubleClickHandler().init(map),
+                MM.MouseWheelHandler().init(map)
             ];
-        },
-        remove: function() {
-            for (var i = 0; i < this.handlers.length; i++) {
-                this.handlers[i].remove();
+            return handler;
+        };
+
+        handler.remove = function() {
+            for (var i = 0; i < handlers.length; i++) {
+                handlers[i].remove();
             }
-        }
+            return handler;
+        };
+
+        return handler;
     };
+    MM.TouchHandler = function() {
+        var handler = {},
+            map,
+            maxTapTime = 250,
+            maxTapDistance = 30,
+            maxDoubleTapDelay = 350,
+            locations = {},
+            taps = [],
+            snapToZoom = true,
+            wasPinching = false,
+            lastPinchCenter = null;
 
-    var HAS_HASHCHANGE = (function() {
-        var doc_mode = window.documentMode;
-        return ('onhashchange' in window) &&
-            (doc_mode === undefined || doc_mode > 7);
-    })();
-
-    MM.Hash = function(map) {
-        this.onMapMove = MM.bind(this.onMapMove, this);
-        this.onHashChange = MM.bind(this.onHashChange, this);
-        if (map) {
-            this.init(map);
-        }
-    };
-
-    MM.Hash.prototype = {
-        map: null,
-        lastHash: null,
-
-        parseHash: function(hash) {
-            var args = hash.split("/");
-            if (args.length == 3) {
-                var zoom = parseInt(args[0], 10),
-                    lat = parseFloat(args[1]),
-                    lon = parseFloat(args[2]);
-                if (isNaN(zoom) || isNaN(lat) || isNaN(lon)) {
-                    return false;
-                } else {
-                    return {
-                        center: new MM.Location(lat, lon),
-                        zoom: zoom
-                    };
-                }
-            } else {
-                return false;
-            }
-        },
-
-        formatHash: function(map) {
-            var center = map.getCenter(),
-                zoom = map.getZoom(),
-                precision = Math.max(0, Math.ceil(Math.log(zoom) / Math.LN2));
-            return "#" + [zoom,
-                center.lat.toFixed(precision),
-                center.lon.toFixed(precision)
-            ].join("/");
-        },
-
-        init: function(map) {
-            this.map = map;
-            this.map.addCallback("drawn", this.onMapMove);
-            // reset the hash
-            this.lastHash = null;
-            this.update();
-
-            if (!this.isListening) {
-                this.startListening();
-            }
-        },
-
-        remove: function() {
-            this.map = null;
-            if (this.isListening) {
-                this.stopListening();
-            }
-        },
-
-        onMapMove: function(map) {
-            // bail if we're moving the map (updating from a hash),
-            // or if the map has no zoom set
-            if (this.movingMap || this.map.zoom === 0) {
-                return false;
-            }
-            var hash = this.formatHash(map);
-            if (this.lastHash != hash) {
-                location.replace(hash);
-                this.lastHash = hash;
-            }
-        },
-
-        movingMap: false,
-        update: function() {
-            var hash = location.hash;
-            if (hash === this.lastHash) {
-                // console.info("(no change)");
-                return;
-            }
-            var sansHash = hash.substr(1),
-                parsed = this.parseHash(sansHash);
-            if (parsed) {
-                // console.log("parsed:", parsed.zoom, parsed.center.toString());
-                this.movingMap = true;
-                this.map.setCenterZoom(parsed.center, parsed.zoom);
-                this.movingMap = false;
-            } else {
-                // console.warn("parse error; resetting:", this.map.getCenter(), this.map.getZoom());
-                this.onMapMove(this.map);
-            }
-        },
-
-        // defer hash change updates every 100ms
-        changeDefer: 100,
-        changeTimeout: null,
-        onHashChange: function() {
-            // throttle calls to update() so that they only happen every
-            // `changeDefer` ms
-            if (!this.changeTimeout) {
-                var that = this;
-                this.changeTimeout = setTimeout(function() {
-                    that.update();
-                    that.changeTimeout = null;
-                }, this.changeDefer);
-            }
-        },
-
-        isListening: false,
-        hashChangeInterval: null,
-        startListening: function() {
-            if (HAS_HASHCHANGE) {
-                MM.addEvent(window, "hashchange", this.onHashChange);
-            } else {
-                clearInterval(this.hashChangeInterval);
-                this.hashChangeInterval = setInterval(this.onHashChange, 50);
-            }
-            this.isListening = true;
-        },
-
-        stopListening: function() {
-            if (HAS_HASHCHANGE) {
-                MM.removeEvent(window, "hashchange", this.onHashChange);
-            } else {
-                clearInterval(this.hashChangeInterval);
-            }
-            this.isListening = false;
-        }
-    };
-    MM.TouchHandler = function(map, options) {
-        if (map) {
-            this.init(map, options);
-        }
-    };
-
-    MM.TouchHandler.prototype = {
-
-        maxTapTime: 250,
-        maxTapDistance: 30,
-        maxDoubleTapDelay: 350,
-        locations: {},
-        taps: [],
-        wasPinching: false,
-        lastPinchCenter: null,
-
-        init: function(map, options) {
-            this.map = map;
-            options = options || {};
-
-            // Fail early if this isn't a touch device.
-            if (!this.isTouchable()) return false;
-
-            this._touchStartMachine = MM.bind(this.touchStartMachine, this);
-            this._touchMoveMachine = MM.bind(this.touchMoveMachine, this);
-            this._touchEndMachine = MM.bind(this.touchEndMachine, this);
-            MM.addEvent(map.parent, 'touchstart',
-                this._touchStartMachine);
-            MM.addEvent(map.parent, 'touchmove',
-                this._touchMoveMachine);
-            MM.addEvent(map.parent, 'touchend',
-                this._touchEndMachine);
-
-            this.options = {};
-            this.options.snapToZoom = options.snapToZoom || true;
-        },
-
-        isTouchable: function() {
+        function isTouchable () {
              var el = document.createElement('div');
              el.setAttribute('ongesturestart', 'return;');
              return (typeof el.ongesturestart === 'function');
-        },
+        }
 
-        remove: function() {
-            // Fail early if this isn't a touch device.
-            if (!this.isTouchable()) return false;
-
-            MM.removeEvent(this.map.parent, 'touchstart',
-                this._touchStartMachine);
-            MM.removeEvent(this.map.parent, 'touchmove',
-                this._touchMoveMachine);
-            MM.removeEvent(this.map.parent, 'touchend',
-                this._touchEndMachine);
-        },
-
-        updateTouches: function(e) {
+        function updateTouches(e) {
             for (var i = 0; i < e.touches.length; i += 1) {
                 var t = e.touches[i];
-                if (t.identifier in this.locations) {
-                    var l = this.locations[t.identifier];
+                if (t.identifier in locations) {
+                    var l = locations[t.identifier];
                     l.x = t.screenX;
                     l.y = t.screenY;
                     l.scale = e.scale;
                 }
                 else {
-                    this.locations[t.identifier] = {
+                    locations[t.identifier] = {
                         scale: e.scale,
                         startPos: { x: t.screenX, y: t.screenY },
                         x: t.screenX,
@@ -1285,44 +1086,44 @@ var MM = com.modestmaps = {
                     };
                 }
             }
-        },
+        }
 
         // Test whether touches are from the same source -
         // whether this is the same touchmove event.
-        sameTouch: function(event, touch) {
+        function sameTouch (event, touch) {
             return (event && event.touch) &&
                 (touch.identifier == event.touch.identifier);
-        },
+        }
 
-        touchStartMachine: function(e) {
-            this.updateTouches(e);
+        function touchStart(e) {
+            updateTouches(e);
             return MM.cancelEvent(e);
-        },
+        }
 
-        touchMoveMachine: function(e) {
+        function touchMove(e) {
             switch (e.touches.length) {
                 case 1:
-                    this.onPanning(e.touches[0]);
+                    onPanning(e.touches[0]);
                     break;
                 case 2:
-                    this.onPinching(e);
+                    onPinching(e);
                     break;
             }
-            this.updateTouches(e);
+            updateTouches(e);
             return MM.cancelEvent(e);
-        },
+        }
 
-        touchEndMachine: function(e) {
+        function touchEnd(e) {
             var now = new Date().getTime();
             // round zoom if we're done pinching
-            if (e.touches.length === 0 && this.wasPinching) {
-                this.onPinched(this.lastPinchCenter);
+            if (e.touches.length === 0 && wasPinching) {
+                onPinched(lastPinchCenter);
             }
 
             // Look at each changed touch in turn.
             for (var i = 0; i < e.changedTouches.length; i += 1) {
                 var t = e.changedTouches[i],
-                    loc = this.locations[t.identifier];
+                    loc = locations[t.identifier];
                 // if we didn't see this one (bug?)
                 // or if it was consumed by pinching already
                 // just skip to the next one
@@ -1337,17 +1138,17 @@ var MM = com.modestmaps = {
                 var pos = { x: t.screenX, y: t.screenY },
                     time = now - loc.time,
                     travel = MM.Point.distance(pos, loc.startPos);
-                if (travel > this.maxTapDistance) {
+                if (travel > maxTapDistance) {
                     // we will to assume that the drag has been handled separately
-                } else if (time > this.maxTapTime) {
+                } else if (time > maxTapTime) {
                     // close in space, but not in time: a hold
                     pos.end = now;
                     pos.duration = time;
-                    this.onHold(pos);
+                    onHold(pos);
                 } else {
                     // close in both time and space: a tap
                     pos.time = now;
-                    this.onTap(pos);
+                    onTap(pos);
                 }
             }
 
@@ -1359,57 +1160,57 @@ var MM = com.modestmaps = {
             for (var j = 0; j < e.touches.length; j++) {
                 validTouchIds[e.touches[j].identifier] = true;
             }
-            for (var id in this.locations) {
+            for (var id in locations) {
                 if (!(id in validTouchIds)) {
                     delete validTouchIds[id];
                 }
             }
 
             return MM.cancelEvent(e);
-        },
+        }
 
-        onHold: function(hold) {
+        function onHold (hold) {
             // TODO
-        },
+        }
 
         // Handle a tap event - mainly watch for a doubleTap
-        onTap: function(tap) {
-            if (this.taps.length &&
-                (tap.time - this.taps[0].time) < this.maxDoubleTapDelay) {
-                this.onDoubleTap(tap);
-                this.taps = [];
+        function onTap(tap) {
+            if (taps.length &&
+                (tap.time - taps[0].time) < maxDoubleTapDelay) {
+                onDoubleTap(tap);
+                taps = [];
                 return;
             }
-            this.taps = [tap];
-        },
+            taps = [tap];
+        }
 
         // Handle a double tap by zooming in a single zoom level to a
         // round zoom.
-        onDoubleTap: function(tap) {
+        function onDoubleTap(tap) {
 
-            var z = this.map.getZoom(), // current zoom
+            var z = map.getZoom(), // current zoom
                 tz = Math.round(z) + 1, // target zoom
                 dz = tz - z;            // desired delate
             // zoom in to a round number
             var p = new MM.Point(tap.x, tap.y);
-            this.map.zoomByAbout(dz, p);
-        },
+            map.zoomByAbout(dz, p);
+        }
 
         // Re-transform the actual map parent's CSS transformation
-        onPanning: function(touch) {
+        function onPanning (touch) {
             var pos = { x: touch.screenX, y: touch.screenY },
-                prev = this.locations[touch.identifier];
-            this.map.panBy(pos.x - prev.x, pos.y - prev.y);
-        },
+                prev = locations[touch.identifier];
+            map.panBy(pos.x - prev.x, pos.y - prev.y);
+        }
 
-        onPinching: function(e) {
+        function onPinching(e) {
             // use the first two touches and their previous positions
             var t0 = e.touches[0],
                 t1 = e.touches[1],
                 p0 = new MM.Point(t0.screenX, t0.screenY),
                 p1 = new MM.Point(t1.screenX, t1.screenY),
-                l0 = this.locations[t0.identifier],
-                l1 = this.locations[t1.identifier];
+                l0 = locations[t0.identifier],
+                l1 = locations[t1.identifier];
 
             // mark these touches so they aren't used as taps/holds
             l0.wasPinch = true;
@@ -1418,7 +1219,7 @@ var MM = com.modestmaps = {
             // scale about the center of these touches
             var center = MM.Point.interpolate(p0, p1, 0.5);
 
-            this.map.zoomByAbout(
+            map.zoomByAbout(
                 Math.log(e.scale) / Math.LN2 -
                 Math.log(l0.scale) / Math.LN2,
                 center );
@@ -1426,22 +1227,48 @@ var MM = com.modestmaps = {
             // pan from the previous center of these touches
             var prevCenter = MM.Point.interpolate(l0, l1, 0.5);
 
-            this.map.panBy(center.x - prevCenter.x,
+            map.panBy(center.x - prevCenter.x,
                            center.y - prevCenter.y);
-            this.wasPinching = true;
-            this.lastPinchCenter = center;
-        },
+            wasPinching = true;
+            lastPinchCenter = center;
+        }
 
         // When a pinch event ends, round the zoom of the map.
-        onPinched: function(p) {
+        function onPinched(p) {
             // TODO: easing
-            if (this.options.snapToZoom) {
-                var z = this.map.getZoom(), // current zoom
-                    tz = Math.round(z);     // target zoom
-                this.map.zoomByAbout(tz - z, p);
+            if (snapToZoom) {
+                var z = map.getZoom(), // current zoom
+                    tz =Math.round(z);     // target zoom
+                map.zoomByAbout(tz - z, p);
             }
-            this.wasPinching = false;
+            wasPinching = false;
         }
+
+        handler.init = function(x) {
+            map = x;
+
+            // Fail early if this isn't a touch device.
+            if (!isTouchable()) return handler;
+
+            MM.addEvent(map.parent, 'touchstart', touchStart);
+            MM.addEvent(map.parent, 'touchmove', touchMove);
+            MM.addEvent(map.parent, 'touchend', touchEnd);
+            return handler;
+        };
+
+        handler.remove = function() {
+            // Fail early if this isn't a touch device.
+            if (!isTouchable()) return handler;
+
+            MM.removeEvent(map.parent, 'touchstart', touchStart);
+            MM.removeEvent(map.parent, 'touchmove', touchMove);
+            MM.removeEvent(map.parent, 'touchend', touchEnd);
+            return handler;
+        };
+
+
+
+        return handler;
     };
     // CallbackManager
     // ---------------
@@ -1735,7 +1562,7 @@ var MM = com.modestmaps = {
                         // really stops loading
                         // FIXME: we'll never retry because this id is still
                         // in requestsById - is that right?
-                        theManager.dispatchCallback('requesterror', img.src);
+                        theManager.dispatchCallback('requesterror', img);
                         img.src = null;
                     }
 
@@ -1753,19 +1580,14 @@ var MM = com.modestmaps = {
     };
 
     // Layer
-
     MM.Layer = function(provider, parent) {
         this.parent = parent || document.createElement('div');
         this.parent.style.cssText = 'position: absolute; top: 0px; left: 0px; margin: 0; padding: 0; z-index: 0';
-
         this.levels = {};
-
         this.requestManager = new MM.RequestManager();
         this.requestManager.addCallback('requestcomplete', this.getTileComplete());
-
-        if (provider) {
-            this.setProvider(provider);
-        }
+        this.requestManager.addCallback('requesterror', this.getTileError());
+        if (provider) this.setProvider(provider);
     };
 
     MM.Layer.prototype = {
@@ -1774,45 +1596,57 @@ var MM = com.modestmaps = {
         parent: null,
         tiles: null,
         levels: null,
-
         requestManager: null,
-        tileCacheSize: null,
-        maxTileCacheSize: null,
-
         provider: null,
-        recentTiles: null,
-        recentTilesById: {},
-
-        enablePyramidLoading: false,
-
+        emptyImage: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
         _tileComplete: null,
 
         getTileComplete: function() {
             if (!this._tileComplete) {
                 var theLayer = this;
                 this._tileComplete = function(manager, tile) {
-
-                    // cache the tile itself:
                     theLayer.tiles[tile.id] = tile;
-                    theLayer.tileCacheSize++;
-
-                    // also keep a record of when we last touched this tile:
-                    var record = {
-                        id: tile.id,
-                        lastTouchedTime: new Date().getTime()
-                    };
-                    theLayer.recentTilesById[tile.id] = record;
-                    theLayer.recentTiles.push(record);
-
-                    // position this tile (avoids a full draw() call):
                     theLayer.positionTile(tile);
                 };
             }
-
             return this._tileComplete;
         },
 
+        getTileError: function() {
+            if (!this._tileError) {
+                var theLayer = this;
+                this._tileError = function(manager, tile) {
+                    tile.src = theLayer.emptyImage;
+                    theLayer.tiles[tile.id] = tile;
+                    theLayer.positionTile(tile);
+                };
+            }
+            return this._tileError;
+        },
+
         draw: function() {
+            // compares manhattan distance from center of
+            // requested tiles to current map center
+            // NB:- requested tiles are *popped* from queue, so we do a descending sort
+            var theCoord = this.map.coordinate.zoomTo(Math.round(this.map.coordinate.zoom));
+
+            function centerDistanceCompare(r1, r2) {
+                if (r1 && r2) {
+                    var c1 = r1.coord;
+                    var c2 = r2.coord;
+                    if (c1.zoom == c2.zoom) {
+                        var ds1 = Math.abs(theCoord.row - c1.row - 0.5) +
+                                  Math.abs(theCoord.column - c1.column - 0.5);
+                        var ds2 = Math.abs(theCoord.row - c2.row - 0.5) +
+                                  Math.abs(theCoord.column - c2.column - 0.5);
+                        return ds1 < ds2 ? 1 : ds1 > ds2 ? -1 : 0;
+                    } else {
+                        return c1.zoom < c2.zoom ? 1 : c1.zoom > c2.zoom ? -1 : 0;
+                    }
+                }
+                return r1 ? 1 : r2 ? -1 : 0;
+            }
+
             // if we're in between zoom levels, we need to choose the nearest:
             var baseZoom = Math.round(this.map.coordinate.zoom);
 
@@ -1882,10 +1716,7 @@ var MM = com.modestmaps = {
             this.requestManager.clearExcept(validTileKeys);
 
             // get newly requested tiles, sort according to current view:
-            this.requestManager.processQueue(this.getCenterDistanceCompare());
-
-            // make sure we don't have too much stuff:
-            this.checkCache();
+            this.requestManager.processQueue(centerDistanceCompare);
         },
 
         // For a given tile coordinate in a given level element, ensure that it's
@@ -1932,39 +1763,16 @@ var MM = com.modestmaps = {
                 var parent_coord = tile_coord.zoomBy(-pz).container();
                 var parent_key = parent_coord.toKey();
 
-                if (this.enablePyramidLoading) {
-                    // mark all parent tiles valid
+                // only mark it valid if we have it already
+                if (parent_key in this.tiles) {
                     valid_tile_keys.push(parent_key);
-                    var parentLevel = this.createOrGetLevel(parent_coord.zoom);
-
-                    //parentLevel.coordinate = parent_coord.copy();
-                    if (parent_key in this.tiles) {
-                        var parentTile = this.tiles[parent_key];
-                        if (parentTile.parentNode != parentLevel) {
-                            parentLevel.appendChild(parentTile);
-                        }
-                    } else if (!this.requestManager.hasRequest(parent_key)) {
-                        // force load of parent tiles we don't already have
-                        var tileToAdd = this.provider.getTile(parent_coord);
-
-                        if (typeof tileToAdd == 'string') {
-                            this.addTileImage(parent_key, parent_coord, tileToAdd);
-                        } else {
-                            this.addTileElement(parent_key, parent_coord, tileToAdd);
-                        }
-                    }
-                } else {
-                    // only mark it valid if we have it already
-                    if (parent_key in this.tiles) {
-                        valid_tile_keys.push(parent_key);
-                        tileCovered = true;
-                        break;
-                    }
+                    tileCovered = true;
+                    break;
                 }
             }
 
             // if we didn't find a parent, look at the children:
-            if (!tileCovered && !this.enablePyramidLoading) {
+            if (!tileCovered) {
                 var child_coord = tile_coord.zoomBy(1);
 
                 // mark everything valid whether or not we have it:
@@ -1997,13 +1805,8 @@ var MM = com.modestmaps = {
          * tiles based on values in valid_tile_keys from inventoryVisibleTile().
          */
         adjustVisibleLevel: function(level, zoom, valid_tile_keys) {
-            // for tracking time of tile usage:
-            var now = new Date().getTime();
-
-            if (!level) {
-                // no tiles for this level yet
-                return;
-            }
+            // no tiles for this level yet
+            if (!level) return;
 
             var scale = 1;
             var theCoord = this.map.coordinate.copy();
@@ -2014,6 +1817,7 @@ var MM = com.modestmaps = {
                 theCoord = theCoord.zoomTo(zoom);
             } else {
                 level.style.display = 'none';
+                return false;
             }
 
             var tileWidth = this.map.tileSize.x * scale;
@@ -2029,17 +1833,19 @@ var MM = com.modestmaps = {
                     this.requestManager.clearRequest(tile.coord.toKey());
                     level.removeChild(tile);
                 } else {
-                    // log last-touched-time of currently cached tiles
-                    this.recentTilesById[tile.id].lastTouchedTime = now;
+                    // position tiles
+                    MM.moveElement(tile, {
+                        x: Math.round(center.x +
+                            (tile.coord.column - theCoord.column) * tileWidth),
+                        y: Math.round(center.y +
+                            (tile.coord.row - theCoord.row) * tileHeight),
+                        scale: scale,
+                        // TODO: pass only scale or only w/h
+                        width: this.map.tileSize.x,
+                        height: this.map.tileSize.y
+                    });
                 }
             }
-
-            // position tiles
-            MM.moveElement(level, {
-                x: -(theCoord.column * 256) + center.x,
-                y: -(theCoord.row * 256) + center.y,
-                scale: scale
-            });
         },
 
         createOrGetLevel: function(zoom) {
@@ -2047,13 +1853,14 @@ var MM = com.modestmaps = {
                 return this.levels[zoom];
             }
 
-            //console.log('creating level ' + zoom);
             var level = document.createElement('div');
-            level.id = this.parent.id+'-zoom-'+zoom;
+            level.id = this.parent.id + '-zoom-' + zoom;
             level.style.cssText = this.parent.style.cssText;
             level.style.zIndex = zoom;
+
             this.parent.appendChild(level);
             this.levels[zoom] = level;
+
             return level;
         },
 
@@ -2065,19 +1872,6 @@ var MM = com.modestmaps = {
             // Expected in draw()
             element.id = key;
             element.coord = coordinate.copy();
-
-            // cache the tile itself:
-            this.tiles[key] = element;
-            this.tileCacheSize++;
-
-            // also keep a record of when we last touched this tile:
-            var record = {
-                id: key,
-                lastTouchedTime: new Date().getTime()
-            };
-            this.recentTilesById[key] = record;
-            this.recentTiles.push(record);
-
             this.positionTile(element);
         },
 
@@ -2086,20 +1880,22 @@ var MM = com.modestmaps = {
             var theCoord = this.map.coordinate.zoomTo(tile.coord.zoom);
 
             // Start tile positioning and prevent drag for modern browsers
-            tile.style.cssText = 'position:absolute;-webkit-user-select: none;-webkit-user-drag: none;-moz-user-drag: none;';
+            tile.style.cssText = 'position:absolute;-webkit-user-select:none;' +
+                '-webkit-user-drag:none;-moz-user-drag:none;-webkit-transform-origin:0 0;' +
+                '-moz-transform-origin:0 0;-o-transform-origin:0 0;-ms-transform-origin:0 0;';
 
             // Prevent drag for IE
             tile.ondragstart = function() { return false; };
 
-            var tx = tile.coord.column *
-                this.map.tileSize.x;
-            var ty = tile.coord.row *
-                this.map.tileSize.y;
+            var scale = Math.pow(2, this.map.coordinate.zoom - tile.coord.zoom);
 
-            // TODO: pass only scale or only w/h
             MM.moveElement(tile, {
-                x: Math.round(tx),
-                y: Math.round(ty),
+                x: Math.round((this.map.dimensions.x/2) +
+                    (tile.coord.column - theCoord.column) * this.map.tileSize.x),
+                y: Math.round((this.map.dimensions.y/2) +
+                    (tile.coord.row - theCoord.row) * this.map.tileSize.y),
+                scale: scale,
+                // TODO: pass only scale or only w/h
                 width: this.map.tileSize.x,
                 height: this.map.tileSize.y
             });
@@ -2149,49 +1945,6 @@ var MM = com.modestmaps = {
             return this._redraw;
         },
 
-        numTilesOnScreen: function() {
-            var tileCount = 0;
-            for (var name in this.levels) {
-                if (this.levels.hasOwnProperty(name)) {
-                    var level = this.levels[name];
-                    tileCount += this.tileElementsInLevel(level).length;
-                }
-            }
-            return tileCount;
-        },
-
-        // keeps cache below max size
-        // (called every time we receive a new tile and add it to the cache)
-        checkCache: function() {
-            var maxTiles = Math.max(this.numTilesOnScreen(), this.maxTileCacheSize);
-
-            if (this.tileCacheSize > maxTiles) {
-                // sort from newest (highest) to oldest (lowest)
-                this.recentTiles.sort(function(t1, t2) {
-                    return t2.lastTouchedTime < t1.lastTouchedTime ? -1 :
-                      t2.lastTouchedTime > t1.lastTouchedTime ? 1 : 0;
-                });
-            }
-
-            while (this.recentTiles.length && this.tileCacheSize > maxTiles) {
-                // delete the oldest record
-                var tileRecord = this.recentTiles.pop();
-                var now = new Date().getTime();
-                delete this.recentTilesById[tileRecord.id];
-                //window.console.log('removing ' + tileRecord.id +
-                //                   ' last seen ' + (now-tileRecord.lastTouchedTime) + 'ms ago');
-                // now actually remove it from the cache...
-                var tile = this.tiles[tileRecord.id];
-                if (tile.parentNode) {
-                    // I'm leaving this uncommented for now but you should never see it:
-                    alert("Gah: trying to removing cached tile even though it's still in the DOM");
-                } else {
-                    delete this.tiles[tileRecord.id];
-                    this.tileCacheSize--;
-                }
-            }
-        },
-
         setProvider: function(newProvider) {
             var firstProvider = (this.provider === null);
 
@@ -2213,16 +1966,10 @@ var MM = com.modestmaps = {
             }
 
             // first provider or not we'll init/reset some values...
-
             this.tiles = {};
-            this.tileCacheSize = 0;
-            this.maxTileCacheSize = 64;
-            this.recentTilesById = {};
-            this.recentTiles = [];
 
             // for later: check geometry of old provider and set a new coordinate center
             // if needed (now? or when?)
-
             this.provider = newProvider;
 
             if (!firstProvider) {
@@ -2230,29 +1977,6 @@ var MM = com.modestmaps = {
             }
         },
 
-        // compares manhattan distance from center of
-        // requested tiles to current map center
-        // NB:- requested tiles are *popped* from queue, so we do a descending sort
-        getCenterDistanceCompare: function() {
-            var theCoord = this.map.coordinate.zoomTo(Math.round(this.map.coordinate.zoom));
-
-            return function(r1, r2) {
-                if (r1 && r2) {
-                    var c1 = r1.coord;
-                    var c2 = r2.coord;
-                    if (c1.zoom == c2.zoom) {
-                        var ds1 = Math.abs(theCoord.row - c1.row - 0.5) +
-                                  Math.abs(theCoord.column - c1.column - 0.5);
-                        var ds2 = Math.abs(theCoord.row - c2.row - 0.5) +
-                                  Math.abs(theCoord.column - c2.column - 0.5);
-                        return ds1 < ds2 ? 1 : ds1 > ds2 ? -1 : 0;
-                    } else {
-                        return c1.zoom < c2.zoom ? 1 : c1.zoom > c2.zoom ? -1 : 0;
-                    }
-                }
-                return r1 ? 1 : r2 ? -1 : 0;
-            };
-        },
 
         // Remove this layer from the DOM, cancel all of its requests
         // and unbind any callbacks that are bound to it.
@@ -2267,7 +1991,6 @@ var MM = com.modestmaps = {
             }
             this.map = null;
         }
-
     };
 
     // Map
@@ -2359,8 +2082,8 @@ var MM = com.modestmaps = {
         // set up handlers last so that all required attributes/functions are in place if needed
         if (eventHandlers === undefined) {
             this.eventHandlers = [
-                new MM.MouseHandler(this),
-                new MM.TouchHandler(this)
+                MM.MouseHandler().init(this),
+                MM.TouchHandler().init(this)
             ];
         } else {
             this.eventHandlers = eventHandlers;
@@ -2671,6 +2394,9 @@ var MM = com.modestmaps = {
         },
 
         // put the given layer on top of all the others
+        // Since this is called for the first layer, which is by definition
+        // added before the map has a valid `coordinate`, we request
+        // a redraw only if the map has a center coordinate.
         addLayer: function(layer) {
             this.layers.push(layer);
             // make sure layer.parent doesn't already have a parentNode
@@ -2678,6 +2404,9 @@ var MM = com.modestmaps = {
                 this.parent.appendChild(layer.parent); 
             }
             layer.map = this; // TODO: remove map property from MM.Layer?
+            if (this.coordinate) {
+              MM.getFrame(this.getRedraw());
+            }
             return this;
         },
 
@@ -2703,12 +2432,15 @@ var MM = com.modestmaps = {
 
                 // clear existing layer at this index
                 if (index < this.layers.length) {
-                    this.layers[index].destroy();
+                    var other = this.layers[index];
+                    this.parent.insertBefore(layer.parent, other.parent);
+                    other.destroy();
+                } else {
+                // Or if this will be the last layer, it can be simply appended
+                    this.parent.appendChild(layer.parent);
                 }
 
-                // pass it on.
                 this.layers[index] = layer;
-                this.parent.appendChild(layer.parent);
                 layer.map = this; // TODO: remove map property from MM.Layer
 
                 MM.getFrame(this.getRedraw());

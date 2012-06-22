@@ -50,7 +50,7 @@
                 wrappedColumn;
 
             if (coord.column < 0) {
-                wrappedColumn = (coord.column + columnSize) % columnSize;
+                wrappedColumn = ((coord.column % columnSize) + columnSize) % columnSize;
             } else {
                 wrappedColumn = coord.column % columnSize;
             }
@@ -99,6 +99,14 @@
         var hasSubdomains = (subdomains &&
             subdomains.length && template.indexOf("{S}") >= 0);
 
+        function quadKey (row, column, zoom) {
+            var key = '';
+            for (var i = 1; i <= zoom; i++) {
+                key += (((row >> zoom - i) & 1) << 1) | ((column >> zoom - i) & 1);
+            }
+            return key || '0';
+        }
+
         var getTileUrl = function(coordinate) {
             var coord = this.sourceCoordinate(coordinate);
             if (!coord) {
@@ -113,7 +121,7 @@
             if (isQuadKey) {
                 return base
                     .replace('{Z}', coord.zoom.toFixed(0))
-                    .replace('{Q}', this.quadKey(coord.row,
+                    .replace('{Q}', quadKey(coord.row,
                         coord.column,
                         coord.zoom));
             } else {
@@ -129,13 +137,6 @@
 
     MM.Template.prototype = {
         // quadKey generator
-        quadKey: function(row, column, zoom) {
-            var key = '';
-            for (var i = 1; i <= zoom; i++) {
-                key += (((row >> zoom - i) & 1) << 1) | ((column >> zoom - i) & 1);
-            }
-            return key || '0';
-        },
         getTile: function(coord) {
           return this.getTileUrl(coord);
         }

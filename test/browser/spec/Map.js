@@ -92,40 +92,65 @@ describe('Map', function() {
 
   describe('Layer Interface', function() {
       it('Can set a new layer at 0', function() {
-          var p = new MM.TemplatedMapProvider(
+          var l = new MM.TemplatedLayer(
               'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
-          var l = new MM.Layer(p);
           map.setLayerAt(0, l);
 
           expect(map.getLayerAt(0)).toEqual(l);
       });
-      it('Can insert a new layer at 0', function() {
-          var p = new MM.TemplatedMapProvider(
-              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
-          var l = new MM.Layer(p);
 
-          expect(map.insertLayerAt(0, l)).toEqual(map);
-          expect(map.getLayerAt(0)).toEqual(l);
-          expect(map.getLayers().length).toEqual(2);
+      it('Sets that layers parent to the first', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+          map.setLayerAt(0, l);
+          expect(map.parent.firstChild).toEqual(l.parent);
       });
-      it('Can remove a new layer at 0', function() {
-          var p = new MM.TemplatedMapProvider(
+
+      function checkOrder() {
+          var layers = map.getLayers();
+          for (var i = 0; i < layers.length; i++) {
+              expect(map.parent.childNodes[i]).toEqual(layers[i].parent);
+          }
+      }
+
+      it('Can insert a new layer at 1 and it will go after the first', function() {
+          var l = new MM.TemplatedLayer(
               'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
-          var l = new MM.Layer(p);
+
+          expect(map.insertLayerAt(1, l)).toEqual(map);
+          expect(map.getLayerAt(1)).toEqual(l);
+          expect(map.getLayers().length).toEqual(2);
+          checkOrder();
+      });
+
+      it('Can insert a new layer at 0', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+
+          expect(map.insertLayerAt(0, l)).toEqual(map);
+          expect(map.getLayerAt(0)).toEqual(l);
+          expect(map.getLayers().length).toEqual(2);
+          checkOrder();
+      });
+
+      it('Can remove a new layer at 0', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
 
           expect(map.insertLayerAt(0, l)).toEqual(map);
 
           expect(map.getLayerAt(0)).toEqual(l);
           expect(map.getLayers().length).toEqual(2);
+          checkOrder();
 
           expect(map.removeLayerAt(0)).toEqual(map);
           expect(map.getLayers().length).toEqual(1);
+          checkOrder();
       });
 
       it('Can swap a new layer at 0', function() {
-          var p = new MM.TemplatedMapProvider(
+          var l = new MM.TemplatedLayer(
               'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
-          var l = new MM.Layer(p);
 
           var l1 = map.getLayerAt(0);
 
@@ -135,12 +160,55 @@ describe('Map', function() {
           expect(map.getLayerAt(0)).toEqual(l);
           expect(map.getLayerAt(1)).toEqual(l1);
           expect(map.getLayers().length).toEqual(2);
+          checkOrder();
+      });
+
+      it('Can set layers below the highest index', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+          var l2 = new MM.TemplatedLayer(
+              'http://a.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+
+
+          expect(map.insertLayerAt(1, l)).toEqual(map);
+          expect(map.setLayerAt(0, l2)).toEqual(map);
+
+          expect(map.getLayers().length).toEqual(2);
+          checkOrder();
+      });
+
+      it('Can set layers at the highest index', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+          var l2 = new MM.TemplatedLayer(
+              'http://a.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+
+
+          expect(map.insertLayerAt(1, l)).toEqual(map);
+          expect(map.setLayerAt(1, l2)).toEqual(map);
+
+          expect(map.getLayers().length).toEqual(2);
+          checkOrder();
+      });
+
+      it('Can set layers in the middle', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+          var l2 = new MM.TemplatedLayer(
+              'http://a.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+          var l3 = new MM.TemplatedLayer(
+              'http://a.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
+
+          expect(map.addLayer(l)).toEqual(map);
+          expect(map.addLayer(l2)).toEqual(map);
+          expect(map.setLayerAt(1, l3)).toEqual(map);
+          expect(map.getLayers().length).toEqual(3);
+          checkOrder();
       });
 
       it('Can remove a specific layer', function() {
-          var p = new MM.TemplatedMapProvider(
+          var l = new MM.TemplatedLayer(
               'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a']);
-          var l = new MM.Layer(p);
 
           expect(map.insertLayerAt(1, l)).toEqual(map);
           expect(map.removeLayer(l)).toEqual(map);

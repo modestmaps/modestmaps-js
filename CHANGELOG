@@ -8,6 +8,38 @@ Following the semantic versioning recommendation best we can:
     minor version, and backwards incompatible API changes increment
     the major version." -- http://semver.org/
 
+v2.0.1
+- Fixing negative coordinate wrapping, identified at https://github.com/mapbox/tilemill/issues/1395
+
+v2.0.0
+- Two breaking changes:
+- requesterror now calls its callbacks with the img element, like
+  requestcomplete, not img.src as before
+- TemplatedMapLayer renamed to Template, refs #14
+
+v1.1.3
+- Fix Location.bearing method
+
+v1.1.2
+- Update addMap API to better deal with layers that do deferred
+  `draw` calls - it now requests a redraw if the map has a center
+
+v1.1.1
+- Fix TouchHandler refactor
+
+v1.1.0
+- Revert futuristic layer-tile handling to cross-browser version
+  that touches all tiles on all moves.
+
+v1.0.3
+- Fixes insertLayerAt behavior with indexes within the layers array.
+  Adds associated tests.
+
+v1.0.2
+- Removes cache infrastructure
+- Rewrites handlers to remove bind usage, now depends on browser cache
+- Adds MM.Location.bearing
+
 v1.0.0-beta1
 - Fixes coordLimits enforcement
 - Removes TilePaintingProvider and auto-casting to it in setProvider,
