@@ -1,5 +1,5 @@
 /*!
- * Modest Maps JS v3.3.3
+ * Modest Maps JS v2.0.2
  * http://modestmaps.com/
  *
  * Copyright (c) 2011 Stamen Design, All Rights Reserved.
@@ -1842,7 +1842,7 @@ var MM = com.modestmaps = {
 
             var level = document.createElement('div');
             level.id = this.parent.id + '-zoom-' + zoom;
-            level.style.cssText = this.parent.style.cssText;
+            level.style.cssText = 'position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; margin: 0; padding: 0;';
             level.style.zIndex = zoom;
 
             this.parent.appendChild(level);
