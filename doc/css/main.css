@@ -1,0 +1,42 @@
+table {
+  border-collapse: collapse;
+}
+
+th, td, caption {
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+caption {
+  font-weight: bold;
+  border: none;
+}
+
+caption .info {
+  font-weight: normal;
+  font-size: smaller;
+  margin-top: .5em;
+}
+
+thead th {
+  background: #ddd;
+}
+
+p, table, pre {
+  margin: 0 0 1em 0;
+}
+
+td p:last-child {
+  margin-bottom: 0;
+}
+
+var, code {
+  font-family: "Courier New", monospace;
+  font-style: normal;
+}
+
+td code {
+  white-space: nowrap;
+}
