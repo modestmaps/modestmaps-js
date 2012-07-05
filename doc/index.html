@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>modestmaps.js / documentation</title>
+    <style type="text/css">
+      @import url(css/main.css);
+    </style>
+  </head>
+  <body>
+    <h1>modestmaps.js / documentation</h1>
+    <div id="toc">
+    </div>
+
+    <div id="api">
+      <h2>API Reference</h2>
+
+      <div class="intro">
+        <p>Say something nice here.</p>
+      </div>
+
+      <div id="usage">
+        <h3>Usage</h3>
+        <p>Using modestmaps.js is as simple as including either the <a
+        href="../modestmaps.js">full source</a> (about 100K, useful for
+        debugging) or the <a href="../modestmaps.min.js">minified source</a>
+        (about 36K, for production environments) in the
+        <code>&lt;head&gt;</code> of your HTML document:</p>
+
+        <pre class="prettyprint">&lt;script type="text/javascript" src="modestmaps.js"&gt;&lt;/script&gt;</pre>
+      </div>
+
+      <div id="Map" class="class">
+        <h3>MM.Map</h3>
+        <p>The Map class is where it's at. Maps have
+        <a href="#Layer">layers</a>,
+        a <a href="#Map.getCenter">center</a> and
+        <a href="#Map.getZoom">zoom</a>,
+        <a href="#Map.dimensions">dimensions</a>,
+        and <a href="#Map.eventHandlers">event handlers</a>
+        that manage interaction.</p>
+
+        <div class="example">
+          <p>First, you'll need to add a parent element for your map in your HTML:</p>
+          <pre class="prettyprint">
+&lt;div id="map"&gt;&lt;/div&gt;
+</pre>
+
+          <p>Then, create your <a href="#TemplatedLayer">tile layer</a>, define
+          some <a href="#Map.dimensions">dimensions</a>, and make your
+          map:</p>
+
+          <pre class="prettyprint">
+var layer = new MM.TemplatedLayer("http://tile.stamen.com/toner/{Z}/{X}/{Y}.png");
+var size = new MM.Point(640, 480);
+var map = new MM.Map("map", layer, size);
+</pre>
+
+          <p>You can set the map's <a href="#Map.setCenter">center</a> and <a
+            href="#Map.setZoom">zoom</a>:</p>
+
+          <pre class="prettyprint">
+map.setCenter(new MM.Location(37.764, -122.419));
+map.setZoom(12);
+</pre>
+        </div>
+
+        <table id="Map.constructor" class="constructor">
+          <caption>
+            <code>MM.Map(<var>parent</var>
+              [, <var>layerOrLayers</var>
+              [, <var>dimensions</var>
+              [, <var>eventHandlers</var>
+              ]]])</code>
+          </caption>
+          <thead>
+            <tr><th>Argument</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+
+            <tr class="required">
+              <td><var>parent</var></td>
+              <td><code>HTMLElement|String</code></td>
+              <td>
+                <p>The parent <a
+                  href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-745549614">element</a>
+                of the map. This can be either an object reference or the ID of
+                the element (as a string, e.g. <code>"map"</code>).</p>
+
+                <p class="note exception">If an element with the provided ID
+                string is not found, an exception is raised.</p>
+
+                <p class="note exception">If <var>parent</var> is not an object
+                or a string, an exception is raised.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <td><var>layerOrLayers</var></td>
+              <td><code>Object|Array</code></td>
+              <td>
+                <p>Either a single layer object or an array of layer objects.
+                Layer objects should be <a href="#Layer">Layer</a>
+                instances or implement the <a
+                  href="#Layer-interface">Layer interface</a>.</p>
+
+                <p class="note version exception">Before <strong>version
+                  3.1.1</strong>, an exception was raised if
+                <var>layerOrLayers</var> was not an object
+                or an array.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <td><var>dimensions</var></td>
+              <td><code>Point</code></td>
+              <td>
+                <p>An optional map size in pixels, expressed as an <a
+                  href="#Point" >Point</a> instance (or any object with
+                <var>x</var> and <var>y</var> attributes).</p>
+
+                <p>If no <var>dimensions</var> are provided, the dimensions are
+                derived from the width and height of the <var>parent</var>
+                element, and the map's <a href="#Map.autoSize"
+                 >autoSize</a> flag is set to true.</p>
+
+                <p class="note tip">Empty <code>&lt;div&gt;</code> elements have
+                no intrinsic height, so if you don't provide dimensions you'll
+                need to provide the map's parent height in CSS (either inline or
+                in a stylesheet).</p>
+              </td>
+            </tr>
+
+            <tr>
+              <td><var>eventHandlers</var></td>
+              <td><code>Array</code></td>
+              <td>
+                <p>An optional array of interaction event handlers, which should
+                implement the <a href="#EventHandler-interface">EventHandler
+                  interface</a>. If no handlers are provided (<code>eventHandlers
+                  === undefined</code>), the map is initialized with <a
+                  href="#MouseHandler">mouse</a> and <a
+                  href="#TouchHandler">touch</a> handlers.</p>
+                
+                <p class="note tip">To initialize the map without any interaction
+                handlers, use <code>null</code> or an empty array
+                (<code>[]</code>).</p>
+                
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <table id="Map-methods" class="methods">
+          <caption>Methods</caption>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Returns</th>
+              <th>Description</th>
+              <th title="Events triggered by this function">Events</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr id="Map.getCenter">
+              <td><code>getCenter()</code></td>
+              <td><code>Location</code></td>
+              <td>
+                <p>Get the map's center <a href="#Location">location</a>.</p>
+              </td>
+              <td>
+              </td>
+            </tr>
+
+            <tr id="Map.setCenter">
+              <td><code>setCenter(<var>location</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Set the map's center <a href="#Location">location</a>.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.getZoom">
+              <td><code>getZoom()</code></td>
+              <td><code>Number</code></td>
+              <td>
+                <p>Get the map's zoom level.</p>
+              </td>
+              <td>
+              </td>
+            </tr>
+
+            <tr id="Map.setZoom">
+              <td><code>setZoom(<var>zoomLevel</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Set the map's zoom level.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.setCenterZoom">
+              <td><code>setCenterZoom(<var>location</var>, <var>zoom</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Set the map's center <a href="#Location">location</a>
+                and zoom level.</p>
+              </td>
+              <td>
+                <a href="#Map-events-centered">centered</a>
+              </td>
+            </tr>
+
+            <tr id="Map.getExtent">
+              <td><code>getExtent()</code></td>
+              <td><code>Extent</code></td>
+              <td>
+                <p>Get the visible bounds of the map as an <a
+                  href="#Extent">Extent</a> instance.</p>
+              </td>
+              <td>
+                <a href="#Map-events-extentset">extentset</a>
+              </td>
+            </tr>
+
+            <tr id="Map.setExtent">
+              <td><code>setExtent(<var>locationsOrExtent</var>, <var>precise</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Modify the center and zoom of the map so that all of the
+                locations in the array or extent are visible. This function
+                accepts either an array of <a
+                  href="#Location">Locations</a> or an <a
+                  href="#Extent">Extent</a> instance.</p>
+              </td>
+              <td>
+                <a href="#Map-events-extentset">extentset</a>
+              </td>
+            </tr>
+
+            <tr id="Map.setSize">
+              <td><code>setSize(<var>dimensions</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Set the map's size in pixels. If the map's <a
+                  href="#Map.autoSize">autoSize</a> flag is true, setting the
+                size manually sets <var>autoSize</var> to <code>false</code>
+                and prevents further automatic resizing.</p>
+
+                <p>The map's current size is available in its <a
+                  href="#Map.dimensions">dimensions</a> property.</p>
+              </td>
+              <td>
+                <a href="#Map-events-resized">resized</a>
+              </td>
+            </tr>
+
+            <tr id="Map.panBy">
+              <td><code>panBy(<var>dx</var>, <var>dy</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Pan the map by the specified x and y values in pixels.
+                Positive values move the map right and down, respectively;
+                negative values move the map left and up.</p>
+              </td>
+              <td>
+                <a href="#Map-events-panned">panned</a>
+              </td>
+            </tr>
+
+            <tr id="Map.panLeft">
+              <td><code>
+                  panLeft()<br>
+                  panRight()<br>
+                  panUp()<br>
+                  panDown()
+              </code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Pan the map to the left, right, up or down by 100 pixels.</p>
+              </td>
+              <td>
+                <a href="#Map-events-panned">panned</a>
+              </td>
+            </tr>
+
+            <tr id="Map.zoomIn">
+              <td><code>zoomIn()</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Increase the map's zoom level by one.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.zoomOut">
+              <td><code>zoomOut()</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Decrease the map's zoom level by one.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.zoomBy">
+              <td><code>zoomBy(<var>zoomOffset</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Zoom the map by the provided offset.
+                Positive offsets zoom in; negative offsets zoom out.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.zoomByAbout">
+              <td><code>zoomByAbout(<var>zoomOffset</var>, <var>point</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Zoom the map by the provided offset at the provided <a
+                  href="#Point">Point</a> in screen coordinates.
+                Positive offsets zoom in; negative offsets zoom out.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.coordinateLocation">
+              <td><code>coordinateLocation(<var>coordinate</var>)</code></td>
+              <td><code>Location</code></td>
+              <td>
+                <p>Convert a <a href="#Coordinate">tile coordinate</a> to a <a
+                  href="#Location">Location</a> (a point on the earth).</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.coordinatePoint">
+              <td><code>coordinatePoint(<var>coordinate</var>)</code></td>
+              <td><code>Point</code></td>
+              <td>
+                <p>Convert a <a href="#Coordinate">tile coordinate</a> to
+                screen coordinates.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.locationCoordinate">
+              <td><code>locationCoordinate(<var>location</var>)</code></td>
+              <td><code>Coordinate</code></td>
+              <td>
+                <p>Convert a <a href="#Location">Location</a> (a point on the
+                earth) to a <a href="#Coordinate">tile coordinate</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.locationPoint">
+              <td><code>locationPoint(<var>location</var>)</code></td>
+              <td><code>Point</code></td>
+              <td>
+                <p>Convert a <a href="#Location">location</a> (a point on the
+                earth) to a screen coordinate.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.pointCoordinate">
+              <td><code>pointCoordinate(<var>point</var>)</code></td>
+              <td><code>Coordinate</code></td>
+              <td>
+                <p>Convert a screen coordinate to a <a href="#Coordinate">tile
+                  coordinate</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.pointLocation">
+              <td><code>pointLocation(<var>point</var>)</code></td>
+              <td><code>Location</code></td>
+              <td>
+                <p>Convert a screen coordinate to a <a
+                  href="#Location">location</a> (a point on the earth).</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.setZoomRange">
+              <td><code>setZoomRange(<var>minZoom</var>, <var>maxZoom</var>)</code></td>
+              <td></td>
+              <td>
+                <p>Set the map's minimum and maximum zoom levels. This function
+                modifies the zoom levels of the map's <a
+                  href="#Map.coordLimits">coordLimits</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.getLayers">
+              <td><code>getLayers()</code></td>
+              <td><code>Array</code></td>
+              <td>
+                <p>Get the map's layers array.</p>
+                <p class="note tip">getLayers() returns a <a
+                  href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/slice">slice</a>
+                of the <a href="#Map.layers">layers</a> array, so you can
+                manipulate it without affecting the map.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.getLayerAt">
+              <td><code>getLayerAt(index)</code></td>
+              <td><code>Layer</code></td>
+              <td>
+                <p>Get the <a href="#Layer">layer</a> at the speficied index.
+                The first layer is at index 0, etc.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.addLayer">
+              <td><code>addLayer(layer)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Add a <a href="#Layer">layer</a> to the map's layer stack.
+                This triggers a <a href="#Map.draw">redraw</a>.</p>
+              </td>
+              <td>
+                <a href="#Map-events-drawn">drawn</a>
+              </td>
+            </tr>
+
+            <tr id="Map.removeLayer">
+              <td><code>removeLayer(layer)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Remove a <a href="#Layer">layer</a> to the map's layer stack.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.setLayerAt">
+              <td><code>setLayerAt(index, layer)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Replaces the existing layer at the provided index with the
+                new <a href="#Layer">layer</a>.</p>
+              </td>
+              <td>
+                <a href="#Map-events-drawn">drawn</a>
+              </td>
+            </tr>
+
+            <tr id="Map.insertLayerAt">
+              <td><code>insertLayerAt(index, layer)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Inserts a <a href="#Layer">layer</a> at the provided index.</p>
+              </td>
+              <td>
+                <a href="#Map-events-drawn">drawn</a>
+              </td>
+            </tr>
+
+            <tr id="Map.removeLayerAt">
+              <td><code>removeLayerAt(index)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Removes the <a href="#Layer">layer</a> at the provided index.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.swapLayersAt">
+              <td><code>swapLayersAt(indexA, indexB)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Swaps the order of two <a href="#Layer">layers</a> at the provided indices.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.enforceLimits">
+              <td><code>enforceLimits(coord)</code></td>
+              <td><code>Coordinate</code></td>
+              <td>
+                <p>Returns a new
+                <a href="#Coordinate">coordinate</a> within the map's
+                <a href="#Map.coordLimits">coordLimits</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.enforceZoomLimits">
+              <td><code>enforceZoomLimits(coord)</code></td>
+              <td><code>Coordinate</code></td>
+              <td>
+                <p>Clamps the zoom level of the provided <a
+                  href="#Coordinate">Coordinate</a>, and returns a new
+                coordinate in the zoom range of the map's <a
+                  href="#Map.coordLimits">coordLimits</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.enforcePanLimits">
+              <td><code>enforcePanLimits(coord)</code></td>
+              <td><code>Coordinate</code></td>
+              <td>
+                <p>Clamps the row and column values of the provided <a
+                  href="#Coordinate">Coordinate</a>, and returns a new
+                coordinate in the range within the map's <a
+                  href="#Map.coordLimits">coordLimits</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.addCallback">
+              <td><code>addCallback(<var>eventType</var>, <var>callback</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Add an event callback (listener) to the map. Callback
+                functions always receive the map instance as their first argument; 
+                additional arguments differ by event type. See <a
+                  href="#Map-events">the events list</a> for supported types.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.removeCallback">
+              <td><code>removeCallback(<var>eventType</var>, <var>callback</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Remove an event callback (listener) added with <a href="#Map.addCallback">addCallback()</a>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.dispatchCallback">
+              <td><code>dispatchCallback(<var>eventType</var>, <var>message</var>)</code></td>
+              <td><code>this</code></td>
+              <td>
+                <p>Dispatch (fire) an event callback (listener).</p>
+                <p class="note warning"><a
+                  href="#CallbackManager">CallbackManager</a> only
+                supports dispatching callbacks with types passed to its
+                constructor, so you can't dispatch custom event types.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.draw">
+              <td><code>draw()</code></td>
+              <td></td>
+              <td>
+                <p>Redraw the map and its layers. First, the map enforces
+                its <a href="#Map.coordLimits">coordLimits</a> on the
+                center and zoom. If <a href="#Map.autoSize">autoSize</a> is
+                <code>true</code>, the map's dimensions are recalculated from
+                its <a href="#Map.parent">parent</a>. Lastly, each of the map's
+                <a href="#Map.layers">layers</a> is <a
+                  href="#Layer.draw">drawn</a>.</p>
+              </td>
+              <td>
+                <a href="#Map-events-drawn">drawn</a>
+              </td>
+            </tr>
+
+            <tr id="Map.requestRedraw">
+              <td><code>requestRedraw()</code></td>
+              <td></td>
+              <td>
+                <p>Requests a call to <a href="#Map.draw">draw()</a> in 1 second.</p>
+              </td>
+              <td>
+                <a href="#Map-events-drawn">drawn</a>
+              </td>
+            </tr>
+
+            <tr id="Map.getRedraw">
+              <td><code>getRedraw()</code></td>
+              <td><code>Function</code></td>
+              <td>
+                <p>Returns a function that calls <a
+                  href="#Map.draw">draw()</a> then clears the redraw
+                timer.</p>
+              </td>
+              <td>
+                <a href="#Map-events-drawn">drawn</a>
+              </td>
+            </tr>
+
+            <tr id="Map.toString">
+              <td><code>toString()</code></td>
+              <td><code>String</code></td>
+              <td>
+                <p>Returns a string representation of the map, e.g.
+                <code>"Map(#map)"</code>.</p>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr id="Map.windowResize">
+              <td><code>windowResize()</code></td>
+              <td><code>Function</code></td>
+              <td>
+                <p>Returns a function that resizes the map on window resize.
+                This is used internally to ensure that resize callbacks can be
+                removed later.</p>
+              </td>
+              <td></td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <table id="Map-getter-setter" class="methods">
+          <caption>Getter/Setter Methods
+            <p class="info">Getter/setter methods behave differently
+            depending on whether they receive arguments: The "getter" form
+            (with no arguments) returns the current value, and the
+            "setter" form sets it to the value provided then returns
+            <code>this</code>, which makes function chaining possible.</p></caption>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Gets/sets</th>
+              <th>Description</th>
+              <th title="Events triggered by this function">Events</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr id="Map.center">
+              <td><code>center([<var>location</var>])</code></td>
+              <td><code>Location</code></td>
+              <td>
+                <p><a href="#Map.getCenter">Get</a> or <a href="#Map.setCenter">set</a> the map's center.</p>
+              </td>
+              <td>
+                <a href="#Map-events-panned">panned</a>
+              </td>
+            </tr>
+
+            <tr id="Map.zoom">
+              <td><code>zoom([<var>level</var>])</code></td>
+              <td><code>Number</code></td>
+              <td>
+                <p><a href="#Map.getZoom">Get</a> or <a href="#Map.setZoom">set</a> the map's zoom level.</p>
+              </td>
+              <td>
+                <a href="#Map-events-zoomed">zoomed</a>
+              </td>
+            </tr>
+
+            <tr id="Map.extent">
+              <td><code>extent([<var>locationsOrExtent</var> [, <var>precise</var>]])</code></td>
+              <td><code>Number</code></td>
+              <td>
+                <p><a href="#Map.getExtent">Get</a> or <a href="#Map.setExtent">set</a> the map's extent.</p>
+              </td>
+              <td>
+                <a href="#Map-events-extentset">extentset</a>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <table id="Map-events">
+          <caption>Events</caption>
+          <thead>
+            <tr><th>Type</th><th>Callback Arguments</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr id="Map-events-zoomed">
+              <td><code>zoomed</code></td>
+              <td><code>(map, zoomOffset)</code></td>
+              <td>fires whenever the map's zoom level changes (as a result of
+                <a href="#Map.zoomBy">zoomBy()</a> or <a
+                  href="#Map.zoomByAbout">zoomByAbout()</a>).</td>
+            </tr>
+
+            <tr id="Map-events-panned">
+              <td><code>panned</code></td>
+              <td><code>(map, [dx, dy])</code></td>
+              <td>fires whenever the map is panned, and receives the pan offset
+                in pixels as a two-element array.</td>
+            </tr>
+
+            <tr id="Map-events-resized">
+              <td><code>resized</code></td>
+              <td><code>(map, dimensions)</code></td>
+              <td>fires whenever the map is resized, and receives the map's new
+                dimensions as a <a href="#Point">Point</a> instance.</td>
+            </tr>
+
+            <tr id="Map-events-extentset">
+              <td><code>extentset</code></td>
+              <td><code>(map, locationsOrExtent)</code></td>
+              <td>fires whenever the map's full extent is set, and receives the
+                <a href="#Extent">Extent</a> or array of <a
+                  href="#Location">Location</a> instances provided to <a
+                  href="#Map.setExtent">setExtent()</a>.</td>
+            </tr>
+
+            <tr id="Map-events-drawn">
+              <td><code>drawn</code></td>
+              <td><code>(map)</code></td>
+              <td>fires whenever the map is <a href="#Map.draw">redrawn</a>.</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <table id="Map-properties">
+          <caption>Properties</caption>
+          <thead>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+
+            <tr id="Map.autoSize">
+              <td><var>autoSize</var></td>
+              <td><code>Boolean</code></td>
+              <td>
+                <p>The <var>autoSize</var> property is set to true if no size
+                is provided in the <a href="#Map.constructor">constructor</a>.
+                When <var>autoSize</var> is true, the map's dimensions will be
+                recalculated <a
+                  href="https://developer.mozilla.org/en/DOM/window.onresize">on
+                  window resize</a>.</p>
+              </td>
+            </tr>
+
+            <tr id="Map.callbackManager">
+              <td><var>callbackManager</var></td>
+              <td><code>CallbackManager</code></td>
+              <td>The map's <a href="#CallbackManager">callback manager</a>.</td>
+            </tr>
+
+            <tr id="Map.coordinate">
+              <td><var>coordinate</var></td>
+              <td><code>Coordinate</code></td>
+              <td>The map's current center <a href="#Coordinate">coordinate</a>.</td>
+            </tr>
+
+            <tr id="Map.coordLimits">
+              <td><var>coordLimits</var></td>
+              <td><code>Array</code></td>
+              <td>
+                <p>An array specifying the map's <a
+                  href="#Coordinate">coordinate</a> bounds, in which the first
+                element defines the top left (northwest) and outermost zoom
+                level, and the second defines the bottom right (southwest) and
+                innermost zoom.</p>
+
+                <p class="note tip">You can adjust the minimum and maximum zoom
+                levels of the map without affecting the bounds with <a
+                  href="#Map.setZoomRange">setZoomRange()</a>.</p>
+
+                <p class="note tip">You can constrain a <a
+                  href="#Coordinate">coordinate</a> to the map's limits with <a
+                  href="#Map.enforceLimits">enforceLimits()</a>.</p>
+              </td>
+            </tr>
+
+            <tr id="Map.eventHandlers">
+              <td><var>eventHandlers</var></td>
+              <td><code>Array</code></td>
+              <td>The map's interaction <a href="#EventHandler-interface">event handlers</a>.</td>
+            </tr>
+
+            <tr id="Map.dimension">
+              <td><var>dimensions</var></td>
+              <td><code>Point</code></td>
+              <td>The map's current dimensions, expressed as a <a
+                href="#Point">Point</a> instance.</td>
+            </tr>
+
+            <tr id="Map.layers">
+              <td><var>layers</var></td>
+              <td><code>Array</code></td>
+              <td>An array of the map's <a href="#Layer">layers</a>.</td>
+            </tr>
+
+            <tr id="Map.parent">
+              <td><var>parent</var></td>
+              <td><code>HTMLElement</code></td>
+              <td>The map's parent (container) DOM element.</td>
+            </tr>
+
+            <tr id="Map.projection">
+              <td><var>projection</var></td>
+              <td><code>Projection</code></td>
+              <td>The map's <a href="#Projection">projection</a>, or <acronym
+                title="Coordinate Reference System">CRS</acronym>.</td>
+            </tr>
+
+            <tr id="Map.tileSize">
+              <td><var>tileSize</var></td>
+              <td><code>Point</code></td>
+              <td>The size of the map's image tiles, expressed as a <a
+                href="#Point">Point</a> instance. By default, tiles are 256
+              pixels square.</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </body>
+</html>
