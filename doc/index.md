@@ -280,7 +280,7 @@ map.swapLayersAt(bottom, top);
 
 <a name="Map.pointLocation"></a>
 ### pointLocation `map.pointLocation(screenPoint)`
-Convert a **point on the screen** to a [location](#Location) (a point on the earth).
+Convert a **point on the screen** to a [location](#Location) (a point on the Earth).
 
 <a name="Map.pointCoordinate"></a>
 ### pointCoordinate `map.pointCoordinate(screenPoint)`
@@ -288,15 +288,15 @@ Convert a **point on the screen** to a [tile coordinate](#Coordinate).
 
 <a name="Map.locationPoint"></a>
 ### locationPoint `locationPoint(location)`
-Convert a **location** (a point on the earth) to a [point](#Point) on the screen.
+Convert a **location** (a point on the Earth) to a [point](#Point) on the screen.
 
 <a name="Map.locationCoordinate"></a>
 ### locationCoordinate `map.locationCoordinate(location)`
-Convert a **location** (a point on the earth) to a [tile coordinate](#Coordinate).
+Convert a **location** (a point on the Earth) to a [tile coordinate](#Coordinate).
 
 <a name="Map.coordinateLocation"></a>
 ### coordinateLocation `map.coordinateLocation(coord)`
-Convert a [tile coordinate](#Coordinate) to a [location](#Location) (a point on the earth).
+Convert a [tile coordinate](#Coordinate) to a [location](#Location) (a point on the Earth).
 
 <a name="Map.coordinatePoint"></a>
 ### coordinatePoint `map.coordinatePoint(coord)`
@@ -513,6 +513,220 @@ map.addCallback("drawn", function(map) {
   console.log("map drawn!");
 });
 ```
+
+<a name="Location"></a>
+## MM.Location
+Location objects represent [geographic coordinates](http://en.wikipedia.org/wiki/Geographic_coordinate_system) on the Earth's surface, expressed as degrees *latitude* and *longitude*. The constructor takes these two values as its arguments:
+
+```
+new MM.Location(latitude, longitude)
+```
+
+Locations are most often used when [getting](#Map.getCenter) and [setting](#Map.setCenter) the center of a [map](#Map). You can read the latitude and longitude of a Location by accessing its `lat` and `lon` properties, respectively:
+
+```
+var center = map.getCenter(),
+    latitude = center.lat,
+    longitude = center.lon;
+```
+
+Note that the [Map](#Map) class doesn't store any references to Location objects internally. Both the [getCenter](#Map.getCenter) and [setCenter](#Map.setCenter) methods convert between **Location** and [Coordinate](#Coordinate) systems, and return copies of objects rather than references. This means that changing the `lat` and `lon` properties of a Location object returned from **getCenter** won't change the map; you have to call **setCenter** with the modified Location object.
+
+<a name="Location.lat"></a>
+### lat `location.lat`
+The location's **latitude**, or distance from the Earth's [equator](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. `-90` is at the bottom of the globe (Antarctica), `0` is at the equator, and `90` is at the top (the Arctic Circle).
+
+**NOTE:** Because ModestMaps uses a [spherical Mercator projection](http://en.wikipedia.org/wiki/Mercator_projection), points at Earth's extreme north and south poles become infinitely large and impossible to model. This limits the effective range of web maps to about `±80º`, depending on zoom level. Setting a map's center to a Location with a latitude outside of this range will most likely have undesired consequences.
+
+<a name="Location.lon"></a>
+### lon `location.lon`
+The location's longitude, or distance from the [prime meridian](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. Positive values are east of the prime meridian; negative values are west. `±180` degrees is the [international date line](http://en.wikipedia.org/wiki/International_Date_Line). Longitude values outside of the `[-180, 180]` range "wrap", so a longitude of `190` degrees may be converted to `-170` in certain calculations.
+
+<a name="Location.fromString"></a>
+### Location.fromString `MM.Location.fromString(str)`
+Parse a string in the format `"lat,lon"` into a new Location object.
+
+<a name="Location.distance"></a>
+### Location.distance `MM.Location.distance(a, b, earthRadius)`
+Get the physical distance (along a [great circle](http://en.wikipedia.org/wiki/Great_circle)) between locations **a** and **b**, assuming an optional **Earth radius**:
+
+* `6378000` meters (the default)
+* `3963.1` "statute" miles
+* `3443.9` nautical miles
+* `6378` kilometers
+
+<a name="Location.interpolate"></a>
+### Location.interpolate `MM.Location.interpolate(a, b, f)`
+Interpolate along a [great circle](http://en.wikipedia.org/wiki/Great_circle) between locations **a** and **b** at point **f** (a number between 0 and 1).
+
+<a name="Location.bearing"></a>
+### Location.bearing `MM.Location.bearing(a, b)`
+Determine the direction in degrees between locations **a** and **b**. Note that bearing direction is not constant along significant [great cirlce](http://en.wikipedia.org/wiki/Great_circle) arcs.
+
+<a name="Location-location"></a>
+### A warning about the `location` variable name
+Because browsers reserve the `window.location` variable for [information](https://developer.mozilla.org/en/DOM/window.location) about the current page location, we suggest using variable names other than `location` to avoid namespace conflicts. `center` and `loc` are good alternatives.
+
+
+<a name="Extent"></a>
+## MM.Extent
+Extent objects represent rectangular geographic bounding boxes, and are identified by their `north`, `south`, `east` and `west` bounds. North and south bounds are expressed as degrees [latitude](#Location.lat); east and west bounds are degrees [longitude](#Location.lon). The constructor takes several forms:
+
+```
+new MM.Extent(north, west, south, east)
+```
+Create an extent bounded by **north**, **west**, **south** and **east** edges.
+
+```
+new MM.Extent(northWest, southEast)
+```
+Create an extent containing both **northWest** and **southEast** [locations](#Location).
+
+<a name="Extent.north"></a>
+### north `extent.north`
+The northern edge of the extent. The [constructor](#Extent) compares northern and southern values and selects the higher of the two as its `north`.
+<a name="Extent.south"></a>
+### south `extent.south`
+The southern edge of the extent. The [constructor](#Extent) compares northern and southern values and selects the lower of the two as its `south`.
+<a name="Extent.east"></a>
+### east `extent.east`
+The eastern edge of the extent. The [constructor](#Extent) compares eastern and western values and selects the higher of the two as its `east`.
+<a name="Extent.west"></a>
+### west `extent.west`
+The western edge of the extent. The [constructor](#Extent) compares eastern and western bounds and selects the lower of the two values as its `west`.
+
+<a name="Extent.northWest"></a>
+### northWest `extent.northWest()`
+Get the extent's northwest corner as a [Location](#Location).
+<a name="Extent.northEast"></a>
+### northEast `extent.northEast()`
+Get the extent's northeast corner as a [Location](#Location).
+<a name="Extent.southEast"></a>
+### southEast `extent.southEast()`
+Get the extent's southeast corner as a [Location](#Location).
+<a name="Extent.southWest"></a>
+### southWest `extent.southWest()`
+Get the extent's southwest corner as a [Location](#Location).
+<a name="Extent.center"></a>
+### center `extent.center()`
+Get the extent's center as a [Location](#Location).
+
+<a name="Extent.containsLocation"></a>
+### containsLocation `extent.containsLocation(lcoation)`
+Returns `true` if the **location** falls within the **extent**, otherwise `false`.
+
+<a name="Extent.encloseLocation"></a>
+### encloseLocation `extent.encloseLocation(location)`
+Update the bounds of **extent** to include the provided **location**.
+
+<a name="Extent.encloseLocations"></a>
+### encloseLocations `extent.encloseLocations(locations)`
+Update the bounds of **extent** to include the provided **locations** (an array of [Location](#Location) objects).
+
+<a name="Extent.encloseExtent"></a>
+### encloseExtent `extent.encloseExtent(otherExtent)`
+Update the bounds of **extent** to include the bounds of the **other extent**.
+
+<a name="Extent.setFromLocations"></a>
+### setFromLocations `extent.setFromLocations(locations)`
+Reset the bounds of the **extent** and enclose the provided **locations**.
+
+<a name="Extent.copy"></a>
+### copy `extent.copy()`
+Copy the **extent** and its `north`, `south`, `east` and `west` values.
+
+<a name="Extent.toArray"></a>
+### toArray `extent.toArray()`
+Returns a two-element array containing the **extent**'s [northwest](#Extent.northWest) and [southeast](#Extent.southEast) locations.
+
+<a name="Extent.fromString"></a>
+### Extent.fromString `MM.Extent.fromString(str)`
+Parse a string in the format `"north,west,south,east"` into a new Extent object.
+
+<a name="Extent.fromArray"></a>
+### Extent.fromArray `MM.Extent.fromArray(locations)`
+Create a new Extent object from an array of [Location](#Location) objects.
+
+<a name="Coordinate"></a>
+## Coordinate
+Coordinate objects are used internally by ModestMaps to model the surface of the Earth in  [Google's spherical Mercator projection](http://en.wikipedia.org/wiki/Google_Maps#Map_projection), which flattens the globe into a square, or *tile*. Coordinate objects represent points within that tile at different `zoom` levels, with `column` and `row` properties indicating their *x* and *y* positions, respectively. Each round number column and row within a zoom level represents a 256-pixel square image displayed in a ModestMaps [tile layer](#Layer).
+
+```
+new Coordinate(row, column, zoom)
+```
+
+<a name="Coordinate.zoom"></a>
+### zoom `coordinate.zoom`
+Coordinates are always expressed relative to a specific **zoom** level. At zoom `0`, the Earth fits into a single square tile, `Coordinate(0, 0, 0)`. With each increase in zoom, every tile is divided into 4 parts, so at zoom level `1` the Earth becomes 4 tiles; at zoom level `2` it becomes 16. Coordinates can be converted to different zoom levels with [zoomTo](#Coordinate.zoomTo).
+
+<a name="Coordinate.column"></a>
+### column `coordinate.column`
+A Coordinate's `column` represents a tile's relative *x* position at its zoom level. At zoom `0` column values range from `0` to `1` (there is only one tile). With each increase in zoom, the number of tile columns doubles, so at zoom `1` column values range from `0` to `2`, and so on.
+
+<a name="Coordinate.row"></a>
+### row `coordinate.row`
+A Coordinate's `row` represents a tile's relative *y* position at its zoom level. At zoom `0` row values range from `0` to `1` (there is only one tile). With each increase in zoom, the number of rows doubles, so at zoom `1` there are two (`0 >= row <= 2`), at zoom `2` there are four (`0 >= row <= 4`), and so on.
+
+<a name="Coordinate.copy"></a>
+### copy `coordinate.copy()`
+Copy the **coordinate**'s `zoom`, `row` and `column` properties into a new **Coordinate** object.
+
+<a name="Coordinate.container"></a>
+### container `coordinate.container()`
+Create a Coordinate object that contains **coordinate** by flooring its `zoom`, `column` and `row` properties. This is the actual "tile" coordinate.
+
+<a name="Coordinate.zoomTo"></a>
+### zoomTo `coordinate.zoomTo(zoom)`
+Copy **coordinate** and adjust its `row` and `column` properties to match the new **zoom** level.
+
+<a name="Coordinate.zoomBy"></a>
+### zoomBy `coordinate.zoomBy(zoomOffset)`
+Zoom **coordinate** by the the specified **zoom offset** and return a new Coordinate object.
+
+<a name="Coordinate.up"></a>
+### up `coordinate.up()`
+Get the Coordinate above **coordinate**.
+
+<a name="Coordinate.right"></a>
+### right `coordinate.right()`
+Get the Coordinate to the right of **coordinate**.
+
+<a name="Coordinate.down"></a>
+### down `coordinate.down()`
+Get the Coordinate below **coordinate**.
+
+<a name="Coordinate.left"></a>
+### left `coordinate.left()`
+Get the Coordinate to the left of **coordinate**.
+
+<a name="Coordinate.toKey"></a>
+### toKey `coordinate.toKey()`
+Generate a string key for the **coordinate**, e.g. `"(1,1,5)"` (`"zoom,row,column"`).
+
+<a name="Coordinate.toString"></a>
+### toString `coordinate.toString()`
+Format the **coordinate** as a human-readable string, e.g. `"(5,4 @ 1)"` (`("row,column @ zoom")`)
+
+
+<a name="Coordinate-pre-projecting"></a>
+### Pre-projecting
+Coordinate are also useful for "pre-projecting" [locations](#Location). Because conversions between screen and geographic coordinates are more computationally expensive than conversions between screen and tile coordinates, you may wish to do the [Location to Coordinate](#Map.locationCoordinate) conversion once then do [Coordinate to Point](#Map.coordinatePoint) conversions subsequently. For example:
+
+```
+var map = new MM.Map("map", …);
+var sfLocation = new MM.Location(37.764, -122.419);
+var sfCoordinate = map.locationCoordinate(sfLocation);
+// assuming there is an "sf" element, with CSS positon: absolute
+var marker = map.parent.appendChild(document.getElementById("sf"));
+map.addCallback("drawn", function() {
+    var point = map.coordinatePoint(sfCoordinate);
+    marker.style.left = point.x + "px";
+    marker.style.top = point.y + "px";
+});
+```
+
+In this example, `map.coordinatePoint(sfCoordinate)` will be much faster than calling `map.locationPoint(sfLocation)` each time the map is redrawn. You probably won't notice the performance gain with one marker, but you certainly will with hundreds.
+
 
 
 <a name="TemplatedLayer"></a>
@@ -747,8 +961,6 @@ var template = new MM.TemplateProvider("http://{S}/tiles/{Z}/{X}/{Y}.png",
 * [coordLimits](#Map.coordLimits)
 * [tileSize](#Map.tileSize)
 
-## [TemplatedLayer](#TemplatedLayer)
-
 ## [Location](#Location)
 
 ## [Extent](#Extent)
@@ -757,6 +969,7 @@ var template = new MM.TemplateProvider("http://{S}/tiles/{Z}/{X}/{Y}.png",
 
 ## [Coordinate](#Coordinate)
 
+## [TemplatedLayer](#TemplatedLayer)
 
 ## [Layer](#Layer)
 * [getProvider](#Layer.getProvider)
