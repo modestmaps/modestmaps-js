@@ -1,8 +1,4 @@
-# Introduction
-
-Welcome to 
-
-# Class Reference
+# modestmaps.js `v2.0.2`
 
 <a name="Map"></a>
 ## MM.Map
