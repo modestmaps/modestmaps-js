@@ -83,6 +83,14 @@ dd{margin-left:2em;margin-bottom:1em;}
 <body>
 <h1>modestmaps.js <code>v2.0.2</code></h1>
 
+<h2>Getting Started</h2>
+
+<h3>Making a Map</h3>
+
+<h3>Moving Around</h3>
+
+<h3>Adding Layers</h3>
+
 <p><a name="Map"></a></p>
 
 <h2>MM.Map</h2>
@@ -1203,6 +1211,105 @@ var terrain = new MM.Template("http://{S}.tile.stamen.com/terrain/{Z}/{X}/{Y}.pn
 <pre><code>var template = new MM.TemplateProvider("http://{S}/tiles/{Z}/{X}/{Y}.png",
     ["example.com", "example.org", "example.net"]);
 </code></pre>
+
+<h2>Package Utilities</h2>
+
+<p>These are provided as useful shortcuts, often used to provide cross-browser compatibility.</p>
+
+<h3>MM.extend <code>MM.extend(childClass, parentClass)</code></h3>
+
+<p>Extend the <code>prototype</code> of <strong>child class</strong> with previously unspecified methods from the <strong>parent class</strong>&rsquo;s <code>prototype</code>. This is how you extend classes in ModestMaps:</p>
+
+<pre><code>var MyLayer = function(provider) {
+    // do something MyLayer-specific
+    // then call the Layer constructor
+    MM.Layer.call(this, provider);
+};
+
+MyLayer.prototype = {
+    getTile: function(coord) {
+        // do something cool here
+    }
+};
+
+MM.extend(MyLayer, MM.Layer);
+</code></pre>
+
+<h3>MM.coerceLayer <code>MM.coerceLayer(layerish)</code></h3>
+
+<p>Coerce the provided <strong>layerish</strong> string or object into a <a href="#Layer">Layer</a>, according to the following rules:</p>
+
+<ol>
+<li>If <strong>layerish</strong> is a string, return a new <a href="#TemplatedLayer">TemplatedLayer</a> with <strong>layerish</strong> as the URL template.</li>
+<li>If <strong>layerish</strong> has a <code>draw</code> function, assume that it&rsquo;s a <a href="#Layer">Layer</a> instance and return it.</li>
+<li>Otherwise, assume that it&rsquo;s a <a href="#MapProvider">MapProvider</a> and return a new <a href="#Layer">Layer</a> with it as the constructor argument: <code>new MM.Layer(layerish)</code>.</li>
+</ol>
+
+
+<h3>MM.addEvent <code>MM.addEvent(element, eventType, listener)</code></h3>
+
+<p>Adds the <strong>listener</strong> to the provided <strong>DOM element</strong> for the given <strong>event type</strong>. In browsers that support <a href="http://www.w3.org/TR/DOM-Level-2-Events/">DOM Level 2 events</a>, this calls <code>element.addEventListener(eventType, listener, false)</code>. In older versions of Internet Explorer, this uses <code>element.attachEvent()</code>.</p>
+
+<pre><code>var link = document.getElementById("null-island"),
+    nullIsland = new MM.Location(0, 0);
+MM.addEvent(link, "click", function(e) {
+    map.setCenterZoom(nullIsland, 12);
+    return MM.cancelEvent(e);
+});
+</code></pre>
+
+<p>You can remove event listeners with <a href="#MM.removeEvent">MM.removeEvent</a>.</p>
+
+<h3>MM.removeEvent <code>MM.removeEvent(element, eventType, listener)</code></h3>
+
+<p>Removes the <strong>listener</strong> from <strong>element</strong> for the given <strong>event type</strong>.</p>
+
+<pre><code>MM.removeEvent(link, "click", onClick);
+</code></pre>
+
+<h3>MM.cancelEvent <code>MM.cancelEvent(event)</code></h3>
+
+<p>Does whatever is necessary to cancel the provided DOM event and returns <code>false</code>. This is useful for preventing the default behavior or <code>click</code> events, e.g.:</p>
+
+<pre><code>var zoomIn = document.getElementById("zoom-in");
+MM.addEvent(zoomIn, "click", function(e) {
+    map.zoomIn();
+    return MM.cancelEvent(e);
+});
+</code></pre>
+
+<h3>MM.getStyle <code>MM.getStyle(element, property)</code></h3>
+
+<p>Get the <strong>element</strong>&rsquo;s <a href="https://developer.mozilla.org/en/DOM/window.getComputedStyle">computed style</a> of the named <strong>CSS property</strong>.</p>
+
+<pre><code>var bgcolor = MM.getStyle(map.parent, "background-color");
+</code></pre>
+
+<h3>MM.moveElement <code>MM.moveElement(element, point)</code></h3>
+
+<p>Updates the CSS properties of <strong>element</strong> so that it appears at the absolute position <strong>point</strong>. If available, this function uses <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a> (which are often hardware accelerated, and thus faster than traditional <code>top</code> and <code>left</code> properties).</p>
+
+<pre><code>var marker = document.getElementById("marker"),
+    sf = new MM.Location(37.764, -122.419);
+map.addCallback("drawn", function() {
+    var point = map.locationPoint(sf);
+    MM.moveElement(marker, point);
+});
+</code></pre>
+
+<p>(See the section on <a href="#Coordinate-pre-projecting">pre-projecting</a> for a slightly better way of doing this.)</p>
+
+<h3>MM.getFrame <code>MM.getFrame(frameCallback)</code></h3>
+
+<p>This is a stand-in for <a href="https://developer.mozilla.org/en/DOM/window.requestAnimationFrame">requestAnimationFrame</a>, a feature of modern browsers that calls the <strong>frame callback</strong> function as often as possible without affecting page repainting.</p>
+
+<h2>MM.transformProperty <code>MM.transformProperty</code></h2>
+
+<p>The name of the property used by the running browser to provide <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a>.</p>
+
+<h2>MM.matrixString <code>MM.matrixString(point)</code></h2>
+
+<p>Convert <strong>point</strong> into a CSS transform-compatible matrix string.</p>
 
 <h1>Table of Contents</h1>
 
