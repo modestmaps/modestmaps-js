@@ -1,5 +1,15 @@
 # modestmaps.js `v2.0.2`
 
+
+## Getting Started
+
+
+### Making a Map
+
+### Moving Around
+
+### Adding Layers
+
 <a name="Map"></a>
 ## MM.Map
 The Map class is the core of **modestmaps.js**.
@@ -957,6 +967,98 @@ var template = new MM.TemplateProvider("http://{S}/tiles/{Z}/{X}/{Y}.png",
     ["example.com", "example.org", "example.net"]);
 ```
 
+
+## Package Utilities
+These are provided as useful shortcuts, often used to provide cross-browser compatibility.
+
+### MM.extend `MM.extend(childClass, parentClass)`
+Extend the `prototype` of **child class** with previously unspecified methods from the **parent class**'s `prototype`. This is how you extend classes in ModestMaps:
+
+```
+var MyLayer = function(provider) {
+    // do something MyLayer-specific
+    // then call the Layer constructor
+    MM.Layer.call(this, provider);
+};
+
+MyLayer.prototype = {
+    getTile: function(coord) {
+        // do something cool here
+    }
+};
+
+MM.extend(MyLayer, MM.Layer);
+```
+
+### MM.coerceLayer `MM.coerceLayer(layerish)`
+Coerce the provided **layerish** string or object into a [Layer](#Layer), according to the following rules:
+
+1. If **layerish** is a string, return a new [TemplatedLayer](#TemplatedLayer) with **layerish** as the URL template.
+2. If **layerish** has a `draw` function, assume that it's a [Layer](#Layer) instance and return it.
+3. Otherwise, assume that it's a [MapProvider](#MapProvider) and return a new [Layer](#Layer) with it as the constructor argument: `new MM.Layer(layerish)`.
+
+### MM.addEvent `MM.addEvent(element, eventType, listener)`
+Adds the **listener** to the provided **DOM element** for the given **event type**. In browsers that support [DOM Level 2 events](http://www.w3.org/TR/DOM-Level-2-Events/), this calls `element.addEventListener(eventType, listener, false)`. In older versions of Internet Explorer, this uses `element.attachEvent()`.
+
+```
+var link = document.getElementById("null-island"),
+    nullIsland = new MM.Location(0, 0);
+MM.addEvent(link, "click", function(e) {
+    map.setCenterZoom(nullIsland, 12);
+    return MM.cancelEvent(e);
+});
+```
+
+You can remove event listeners with [MM.removeEvent](#MM.removeEvent).
+
+### MM.removeEvent `MM.removeEvent(element, eventType, listener)`
+Removes the **listener** from **element** for the given **event type**.
+
+```
+MM.removeEvent(link, "click", onClick);
+```
+
+### MM.cancelEvent `MM.cancelEvent(event)`
+Does whatever is necessary to cancel the provided DOM event and returns `false`. This is useful for preventing the default behavior or `click` events, e.g.:
+
+```
+var zoomIn = document.getElementById("zoom-in");
+MM.addEvent(zoomIn, "click", function(e) {
+    map.zoomIn();
+    return MM.cancelEvent(e);
+});
+```
+
+### MM.getStyle `MM.getStyle(element, property)`
+Get the **element**'s [computed style](https://developer.mozilla.org/en/DOM/window.getComputedStyle) of the named **CSS property**.
+
+```
+var bgcolor = MM.getStyle(map.parent, "background-color");
+```
+
+### MM.moveElement `MM.moveElement(element, point)`
+Updates the CSS properties of **element** so that it appears at the absolute position **point**. If available, this function uses [CSS transforms](http://www.w3.org/TR/css3-transforms/) (which are often hardware accelerated, and thus faster than traditional `top` and `left` properties).
+
+
+```
+var marker = document.getElementById("marker"),
+    sf = new MM.Location(37.764, -122.419);
+map.addCallback("drawn", function() {
+    var point = map.locationPoint(sf);
+    MM.moveElement(marker, point);
+});
+```
+
+(See the section on [pre-projecting](#Coordinate-pre-projecting) for a slightly better way of doing this.)
+
+### MM.getFrame `MM.getFrame(frameCallback)`
+This is a stand-in for [requestAnimationFrame](https://developer.mozilla.org/en/DOM/window.requestAnimationFrame), a feature of modern browsers that calls the **frame callback** function as often as possible without affecting page repainting.
+
+## MM.transformProperty `MM.transformProperty`
+The name of the property used by the running browser to provide [CSS transforms](http://www.w3.org/TR/css3-transforms/).
+
+## MM.matrixString `MM.matrixString(point)`
+Convert **point** into a CSS transform-compatible matrix string.
 
 
 # Table of Contents
