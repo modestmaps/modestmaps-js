@@ -679,7 +679,7 @@ map.removeCallback("drawn", onZoomed);
     longitude = center.lon;
 </code></pre>
 
-<p>Note that the <a href="#Map">Map</a> class doesn&rsquo;t store any references to Location objects internally. Both the <a href="#Map.getCenter">getCenter</a> and <a href="#Map.setCenter">setCenter</a> methods convert between <strong>Location</strong> and <a href="#Coordinate">Coordinate</a> systems, and return copies of objects rather than references. This means that changing the <code>lat</code> and <code>lon</code> properties of a Location object returned from <strong>getCenter</strong> won&rsquo;t change the map; you have to call <strong>setCenter</strong> with the modified Location object.</p>
+<p>Note that the <a href="#Map">Map</a> class doesn&rsquo;t store any references to Location objects internally. Both the <a href="#Map.getCenter">getCenter</a> and <a href="#Map.setCenter">setCenter</a> methods convert between geographic and <a href="#Coordinate">tile coordinate</a> systems, and return copies of objects rather than references. This means that changing the <code>lat</code> and <code>lon</code> properties of a Location object returned from <strong>getCenter</strong> won&rsquo;t change the map&rsquo;s center; you have to call <strong>setCenter</strong> with the modified Location object.</p>
 
 <p><a name="Location.lat"></a></p>
 
@@ -693,7 +693,7 @@ map.removeCallback("drawn", onZoomed);
 
 <h3>lon <code>location.lon</code></h3>
 
-<p>The location&rsquo;s longitude, or distance from the <a href="http://en.wikipedia.org/wiki/Prime_meridian">prime meridian</a> in degrees. Positive values are east of the prime meridian; negative values are west. <code>±180</code> degrees is the <a href="http://en.wikipedia.org/wiki/International_Date_Line">international date line</a>. Longitude values outside of the <code>[-180, 180]</code> range &ldquo;wrap&rdquo;, so a longitude of <code>190</code> degrees may be converted to <code>-170</code> in certain calculations.</p>
+<p>The location&rsquo;s <strong>longitude</strong>, or distance from the <a href="http://en.wikipedia.org/wiki/Prime_meridian">prime meridian</a> in degrees. Positive values are east of the prime meridian; negative values are west. <code>±180</code> degrees is the <a href="http://en.wikipedia.org/wiki/International_Date_Line">international date line</a>. Longitude values outside of the <code>[-180, 180]</code> range &ldquo;wrap&rdquo;, so a longitude of <code>190</code> degrees may be converted to <code>-170</code> in certain calculations.</p>
 
 <p><a name="Location.fromString"></a></p>
 
@@ -717,9 +717,9 @@ map.removeCallback("drawn", onZoomed);
 
 <p><a name="Location.interpolate"></a></p>
 
-<h3>Location.interpolate <code>MM.Location.interpolate(a, b, f)</code></h3>
+<h3>Location.interpolate <code>MM.Location.interpolate(a, b, t)</code></h3>
 
-<p>Interpolate along a <a href="http://en.wikipedia.org/wiki/Great_circle">great circle</a> between locations <strong>a</strong> and <strong>b</strong> at point <strong>f</strong> (a number between 0 and 1).</p>
+<p>Interpolate along a <a href="http://en.wikipedia.org/wiki/Great_circle">great circle</a> between locations <strong>a</strong> and <strong>b</strong> at bias point <strong>t</strong> (a number between 0 and 1).</p>
 
 <p><a name="Location.bearing"></a></p>
 
@@ -737,7 +737,7 @@ map.removeCallback("drawn", onZoomed);
 
 <h2>MM.Extent</h2>
 
-<p>Extent objects represent rectangular geographic bounding boxes, and are identified by their <code>north</code>, <code>south</code>, <code>east</code> and <code>west</code> bounds. North and south bounds are expressed as degrees <a href="#Location.lat">latitude</a>; east and west bounds are degrees <a href="#Location.lon">longitude</a>. The constructor takes several forms:</p>
+<p>Extent objects represent rectangular geographic bounding boxes, and are identified by their <code>north</code>, <code>south</code>, <code>east</code> and <code>west</code> bounds. North and south bounds are expressed as degrees <a href="#Location.lat">latitude</a>; east and west bounds are degrees <a href="#Location.lon">longitude</a>. The constructor takes two forms:</p>
 
 <pre><code>new MM.Extent(north, west, south, east)
 </code></pre>
@@ -802,11 +802,24 @@ map.removeCallback("drawn", onZoomed);
 
 <p>Returns <code>true</code> if the <strong>location</strong> falls within the <strong>extent</strong>, otherwise <code>false</code>.</p>
 
+<pre><code>var extent = new MM.Extent(37.8, -122.5, 37.6, -122.3);
+var sf = new MM.Location(37.764, -122.419);
+var oakland = new MM.Location(37.804, -122.271);
+extent.containsLocation(sf); // true
+extent.containsLocation(oakland); // false
+</code></pre>
+
 <p><a name="Extent.encloseLocation"></a></p>
 
 <h3>encloseLocation <code>extent.encloseLocation(location)</code></h3>
 
 <p>Update the bounds of <strong>extent</strong> to include the provided <strong>location</strong>.</p>
+
+<pre><code>var extent = new MM.Extent(37.8, -122.5, 37.6, -122.3);
+var oakland = new MM.Location(37.804, -122.271);
+extent.encloseLocation(oakland);
+extent.containsLocation(oakland); // true
+</code></pre>
 
 <p><a name="Extent.encloseLocations"></a></p>
 
@@ -850,9 +863,47 @@ map.removeCallback("drawn", onZoomed);
 
 <p>Create a new Extent object from an array of <a href="#Location">Location</a> objects.</p>
 
+<p><a name="Point"></a></p>
+
+<h2>MM.Point</h2>
+
+<p>Point objects represent <em>x</em> and <em>y</em> coordinates on the screen, such as a <a href="#Map.dimensions">map&rsquo;s dimensions</a> and the position of mouse or touch interactions.</p>
+
+<pre><code>new MM.Point(x, y)
+</code></pre>
+
+<p>Create a new Point object with <strong>x</strong> and <strong>y</strong> coordinates. <code>parseFloat()</code> is used to convert string values to numbers. The resulting object has <code>x</code> and <code>y</code> properties.</p>
+
+<p>Point objects can be used with <a href="#Map.pointLocation">pointLocation</a> to determine the <a href="#Location">geographic coordinates</a> of a point on the  screen inside a map. For instance:</p>
+
+<pre><code>// define the map's dimensions
+var size = new MM.Point(640, 480);
+// create a map without any layers or event handlers
+var map = new MM.Map("map", [], size, []);
+// zoom to San Francisco
+map.setCenterZoom(new MM.Location(37.764, -122.419), 8);
+// get the geographic coordinates of the bottom right corner
+var southEast = map.pointLocation(size);
+</code></pre>
+
+<p>And vice-versa, you can use <a href="#Map.locationPoint">locationPoint</a> to get the screen position of a geographic coordinate:</p>
+
+<pre><code>var oakland = new MM.Location(37.804, -122.271);
+var point = map.locationPoint(oakland);
+// do something with point.x and point.y
+</code></pre>
+
+<h3>Point.distance <code>MM.Point.distance(a, b)</code></h3>
+
+<p>Compute the <a href="http://en.wikipedia.org/wiki/Euclidean_distance">Euclidian distance</a> between two Point objects.</p>
+
+<h3>Point.interpolate <code>MM.Point.interpolate(a, b, t)</code></h3>
+
+<p>Compute the point on a straight line between points <strong>a</strong> and <strong>b</strong> at normal distance <strong>t</strong>, a number between <code>0</code> and <code>1</code>. (If <code>t == .5</code> the point will be halfway between <strong>a</strong> and <strong>b</strong>.)</p>
+
 <p><a name="Coordinate"></a></p>
 
-<h2>Coordinate</h2>
+<h2>MM.Coordinate</h2>
 
 <p>Coordinate objects are used internally by ModestMaps to model the surface of the Earth in  <a href="http://en.wikipedia.org/wiki/Google_Maps#Map_projection">Google&rsquo;s spherical Mercator projection</a>, which flattens the globe into a square, or <em>tile</em>. Coordinate objects represent points within that tile at different <code>zoom</code> levels, with <code>column</code> and <code>row</code> properties indicating their <em>x</em> and <em>y</em> positions, respectively. Each round number column and row within a zoom level represents a 256-pixel square image displayed in a ModestMaps <a href="#Layer">tile layer</a>.</p>
 
@@ -1155,15 +1206,6 @@ var terrain = new MM.Template("http://{S}.tile.stamen.com/terrain/{Z}/{X}/{Y}.pn
 
 <h1>Table of Contents</h1>
 
-<h2><a href="#StepByStep">Step by Step</a></h2>
-
-<ul>
-<li><a href="#Making-a-map">Making a map</a></li>
-<li><a href="#Adding-layers">Adding layers</a></li>
-<li>???</li>
-</ul>
-
-
 <h2><a href="#Map">Map</a></h2>
 
 <ul>
@@ -1217,11 +1259,58 @@ var terrain = new MM.Template("http://{S}.tile.stamen.com/terrain/{Z}/{X}/{Y}.pn
 
 <h2><a href="#Location">Location</a></h2>
 
+<ul>
+<li><a href="#Location.lat">latitude</a> and <a href="#Location.lon">longitude</a></li>
+<li><a href="#Location.fromString">Location.fromString</a></li>
+<li><a href="#Location.fromString">Location.distance</a></li>
+<li><a href="#Location.fromString">Location.interpolate</a></li>
+<li><a href="#Location.fromString">Location.bearing</a></li>
+</ul>
+
+
 <h2><a href="#Extent">Extent</a></h2>
+
+<ul>
+<li><a href="#Extent.north">north</a>, <a href="#Extent.east">east</a>, <a href="#Extent.south">south</a> and <a href="#Extent.west">west</a></li>
+<li><a href="#Extent.northWest">northWest</a></li>
+<li><a href="#Extent.northEast">northEast</a></li>
+<li><a href="#Extent.southEast">southEast</a></li>
+<li><a href="#Extent.southWest">southWest</a></li>
+<li><a href="#Extent.containsLocation">containsLocation</a></li>
+<li><a href="#Extent.encloseLocation">encloseLocation</a></li>
+<li><a href="#Extent.encloseLocations">encloseLocations</a></li>
+<li><a href="#Extent.encloseExtent">encloseExtent</a></li>
+<li><a href="#Extent.setFromLocations">setFromLocations</a></li>
+<li><a href="#Extent.copy">copy</a></li>
+<li><a href="#Extent.toArray">toArray</a></li>
+<li><a href="#Extent.fromString">Extent.fromString</a></li>
+<li><a href="#Extent.fromArray">Extent.fromArray</a></li>
+</ul>
+
 
 <h2><a href="#Point">Point</a></h2>
 
+<ul>
+<li><a href="#Point.distance">Point.distance</a></li>
+<li><a href="#Point.interpolate">Point.interpolate</a></li>
+</ul>
+
+
 <h2><a href="#Coordinate">Coordinate</a></h2>
+
+<ul>
+<li><a href="#Coordinate.zoom">zoom</a>, <a href="#Coordinate.column">column</a> and <a href="#Coordinate.row">row</a></li>
+<li><a href="#Coordinate.zoomTo">zoomTo</a></li>
+<li><a href="#Coordinate.zoomBy">zoomBy</a></li>
+<li><a href="#Coordinate.container">container</a></li>
+<li><a href="#Coordinate.up">up</a></li>
+<li><a href="#Coordinate.down">down</a></li>
+<li><a href="#Coordinate.left">left</a></li>
+<li><a href="#Coordinate.right">right</a></li>
+<li><a href="#Coordinate.toKey">toKey</a></li>
+<li><a href="#Coordinate.toString">toString</a></li>
+</ul>
+
 
 <h2><a href="#TemplatedLayer">TemplatedLayer</a></h2>
 

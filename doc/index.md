@@ -530,7 +530,7 @@ var center = map.getCenter(),
     longitude = center.lon;
 ```
 
-Note that the [Map](#Map) class doesn't store any references to Location objects internally. Both the [getCenter](#Map.getCenter) and [setCenter](#Map.setCenter) methods convert between **Location** and [Coordinate](#Coordinate) systems, and return copies of objects rather than references. This means that changing the `lat` and `lon` properties of a Location object returned from **getCenter** won't change the map; you have to call **setCenter** with the modified Location object.
+Note that the [Map](#Map) class doesn't store any references to Location objects internally. Both the [getCenter](#Map.getCenter) and [setCenter](#Map.setCenter) methods convert between geographic and [tile coordinate](#Coordinate) systems, and return copies of objects rather than references. This means that changing the `lat` and `lon` properties of a Location object returned from **getCenter** won't change the map's center; you have to call **setCenter** with the modified Location object.
 
 <a name="Location.lat"></a>
 ### lat `location.lat`
@@ -540,7 +540,7 @@ The location's **latitude**, or distance from the Earth's [equator](http://en.wi
 
 <a name="Location.lon"></a>
 ### lon `location.lon`
-The location's longitude, or distance from the [prime meridian](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. Positive values are east of the prime meridian; negative values are west. `±180` degrees is the [international date line](http://en.wikipedia.org/wiki/International_Date_Line). Longitude values outside of the `[-180, 180]` range "wrap", so a longitude of `190` degrees may be converted to `-170` in certain calculations.
+The location's **longitude**, or distance from the [prime meridian](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. Positive values are east of the prime meridian; negative values are west. `±180` degrees is the [international date line](http://en.wikipedia.org/wiki/International_Date_Line). Longitude values outside of the `[-180, 180]` range "wrap", so a longitude of `190` degrees may be converted to `-170` in certain calculations.
 
 <a name="Location.fromString"></a>
 ### Location.fromString `MM.Location.fromString(str)`
@@ -556,8 +556,8 @@ Get the physical distance (along a [great circle](http://en.wikipedia.org/wiki/G
 * `6378` kilometers
 
 <a name="Location.interpolate"></a>
-### Location.interpolate `MM.Location.interpolate(a, b, f)`
-Interpolate along a [great circle](http://en.wikipedia.org/wiki/Great_circle) between locations **a** and **b** at point **f** (a number between 0 and 1).
+### Location.interpolate `MM.Location.interpolate(a, b, t)`
+Interpolate along a [great circle](http://en.wikipedia.org/wiki/Great_circle) between locations **a** and **b** at bias point **t** (a number between 0 and 1).
 
 <a name="Location.bearing"></a>
 ### Location.bearing `MM.Location.bearing(a, b)`
@@ -570,7 +570,7 @@ Because browsers reserve the `window.location` variable for [information](https:
 
 <a name="Extent"></a>
 ## MM.Extent
-Extent objects represent rectangular geographic bounding boxes, and are identified by their `north`, `south`, `east` and `west` bounds. North and south bounds are expressed as degrees [latitude](#Location.lat); east and west bounds are degrees [longitude](#Location.lon). The constructor takes several forms:
+Extent objects represent rectangular geographic bounding boxes, and are identified by their `north`, `south`, `east` and `west` bounds. North and south bounds are expressed as degrees [latitude](#Location.lat); east and west bounds are degrees [longitude](#Location.lon). The constructor takes two forms:
 
 ```
 new MM.Extent(north, west, south, east)
@@ -615,9 +615,24 @@ Get the extent's center as a [Location](#Location).
 ### containsLocation `extent.containsLocation(lcoation)`
 Returns `true` if the **location** falls within the **extent**, otherwise `false`.
 
+```
+var extent = new MM.Extent(37.8, -122.5, 37.6, -122.3);
+var sf = new MM.Location(37.764, -122.419);
+var oakland = new MM.Location(37.804, -122.271);
+extent.containsLocation(sf); // true
+extent.containsLocation(oakland); // false
+```
+
 <a name="Extent.encloseLocation"></a>
 ### encloseLocation `extent.encloseLocation(location)`
 Update the bounds of **extent** to include the provided **location**.
+
+```
+var extent = new MM.Extent(37.8, -122.5, 37.6, -122.3);
+var oakland = new MM.Location(37.804, -122.271);
+extent.encloseLocation(oakland);
+extent.containsLocation(oakland); // true
+```
 
 <a name="Extent.encloseLocations"></a>
 ### encloseLocations `extent.encloseLocations(locations)`
@@ -647,8 +662,45 @@ Parse a string in the format `"north,west,south,east"` into a new Extent object.
 ### Extent.fromArray `MM.Extent.fromArray(locations)`
 Create a new Extent object from an array of [Location](#Location) objects.
 
+
+<a name="Point"></a>
+## MM.Point
+Point objects represent *x* and *y* coordinates on the screen, such as a [map's dimensions](#Map.dimensions) and the position of mouse or touch interactions.
+
+```
+new MM.Point(x, y)
+```
+Create a new Point object with **x** and **y** coordinates. `parseFloat()` is used to convert string values to numbers. The resulting object has `x` and `y` properties.
+
+Point objects can be used with [pointLocation](#Map.pointLocation) to determine the [geographic coordinates](#Location) of a point on the  screen inside a map. For instance:
+
+```
+// define the map's dimensions
+var size = new MM.Point(640, 480);
+// create a map without any layers or event handlers
+var map = new MM.Map("map", [], size, []);
+// zoom to San Francisco
+map.setCenterZoom(new MM.Location(37.764, -122.419), 8);
+// get the geographic coordinates of the bottom right corner
+var southEast = map.pointLocation(size);
+```
+
+And vice-versa, you can use [locationPoint](#Map.locationPoint) to get the screen position of a geographic coordinate:
+
+```
+var oakland = new MM.Location(37.804, -122.271);
+var point = map.locationPoint(oakland);
+// do something with point.x and point.y
+```
+
+### Point.distance `MM.Point.distance(a, b)`
+Compute the [Euclidian distance](http://en.wikipedia.org/wiki/Euclidean_distance) between two Point objects.
+
+### Point.interpolate `MM.Point.interpolate(a, b, t)`
+Compute the point on a straight line between points **a** and **b** at normal distance **t**, a number between `0` and `1`. (If `t == .5` the point will be halfway between **a** and **b**.)
+
 <a name="Coordinate"></a>
-## Coordinate
+## MM.Coordinate
 Coordinate objects are used internally by ModestMaps to model the surface of the Earth in  [Google's spherical Mercator projection](http://en.wikipedia.org/wiki/Google_Maps#Map_projection), which flattens the globe into a square, or *tile*. Coordinate objects represent points within that tile at different `zoom` levels, with `column` and `row` properties indicating their *x* and *y* positions, respectively. Each round number column and row within a zoom level represents a 256-pixel square image displayed in a ModestMaps [tile layer](#Layer).
 
 ```
@@ -909,11 +961,6 @@ var template = new MM.TemplateProvider("http://{S}/tiles/{Z}/{X}/{Y}.png",
 
 # Table of Contents
 
-## [Step by Step](#StepByStep)
-* [Making a map](#Making-a-map)
-* [Adding layers](#Adding-layers)
-* ???
-
 ## [Map](#Map)
 * [getCenter](#Map.getCenter)
 * [setCenter](#Map.setCenter)
@@ -962,12 +1009,43 @@ var template = new MM.TemplateProvider("http://{S}/tiles/{Z}/{X}/{Y}.png",
 * [tileSize](#Map.tileSize)
 
 ## [Location](#Location)
+* [latitude](#Location.lat) and [longitude](#Location.lon)
+* [Location.fromString](#Location.fromString)
+* [Location.distance](#Location.fromString)
+* [Location.interpolate](#Location.fromString)
+* [Location.bearing](#Location.fromString)
 
 ## [Extent](#Extent)
+* [north](#Extent.north), [east](#Extent.east), [south](#Extent.south) and [west](#Extent.west)
+* [northWest](#Extent.northWest)
+* [northEast](#Extent.northEast)
+* [southEast](#Extent.southEast)
+* [southWest](#Extent.southWest)
+* [containsLocation](#Extent.containsLocation)
+* [encloseLocation](#Extent.encloseLocation)
+* [encloseLocations](#Extent.encloseLocations)
+* [encloseExtent](#Extent.encloseExtent)
+* [setFromLocations](#Extent.setFromLocations)
+* [copy](#Extent.copy)
+* [toArray](#Extent.toArray)
+* [Extent.fromString](#Extent.fromString)
+* [Extent.fromArray](#Extent.fromArray)
 
 ## [Point](#Point)
+* [Point.distance](#Point.distance)
+* [Point.interpolate](#Point.interpolate)
 
 ## [Coordinate](#Coordinate)
+* [zoom](#Coordinate.zoom), [column](#Coordinate.column) and [row](#Coordinate.row)
+* [zoomTo](#Coordinate.zoomTo)
+* [zoomBy](#Coordinate.zoomBy)
+* [container](#Coordinate.container)
+* [up](#Coordinate.up)
+* [down](#Coordinate.down)
+* [left](#Coordinate.left)
+* [right](#Coordinate.right)
+* [toKey](#Coordinate.toKey)
+* [toString](#Coordinate.toString)
 
 ## [TemplatedLayer](#TemplatedLayer)
 
