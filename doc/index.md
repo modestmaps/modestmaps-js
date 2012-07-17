@@ -544,13 +544,13 @@ Note that the [Map](#Map) class doesn't store any references to Location objects
 
 <a name="Location.lat"></a>
 ### lat `location.lat`
-The location's **latitude**, or distance from the Earth's [equator](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. `-90` is at the bottom of the globe (Antarctica), `0` is at the equator, and `90` is at the top (the Arctic Circle).
+The location's **latitude**, or distance from the Earth's [equator](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. `-90` is at the bottom of the globe (the south pole in Antarctica), `0` is at the equator, and `90` is at the top (the north pole in the Arctic Ocean).
 
-**NOTE:** Because ModestMaps uses a [spherical Mercator projection](http://en.wikipedia.org/wiki/Mercator_projection), points at Earth's extreme north and south poles become infinitely large and impossible to model. This limits the effective range of web maps to about `±80º`, depending on zoom level. Setting a map's center to a Location with a latitude outside of this range will most likely have undesired consequences.
+**NOTE:** Because ModestMaps uses a [spherical Mercator projection](http://en.wikipedia.org/wiki/Mercator_projection), points at Earth's extreme north and south poles become infinitely large and impossible to model. This limits the effective range of web maps to `±85º`, depending on zoom level. Setting a map's center to a Location with a latitude outside of this range will most likely have undesired consequences.
 
 <a name="Location.lon"></a>
 ### lon `location.lon`
-The location's **longitude**, or distance from the [prime meridian](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. Positive values are east of the prime meridian; negative values are west. `±180` degrees is the [international date line](http://en.wikipedia.org/wiki/International_Date_Line). Longitude values outside of the `[-180, 180]` range "wrap", so a longitude of `190` degrees may be converted to `-170` in certain calculations.
+The location's **longitude**, or distance from the [prime meridian](http://en.wikipedia.org/wiki/Prime_meridian) in degrees. Positive values are east of the prime meridian (towards Asia); negative values are west (towards North America). `±180` degrees is near the [international date line](http://en.wikipedia.org/wiki/International_Date_Line). Longitude values outside of the `[-180, 180]` range "wrap", so a longitude of `190` degrees may be converted to `-170` in certain calculations.
 
 <a name="Location.fromString"></a>
 ### Location.fromString `MM.Location.fromString(str)`
@@ -723,11 +723,11 @@ Coordinates are always expressed relative to a specific **zoom** level. At zoom 
 
 <a name="Coordinate.column"></a>
 ### column `coordinate.column`
-A Coordinate's `column` represents a tile's relative *x* position at its zoom level. At zoom `0` column values range from `0` to `1` (there is only one tile). With each increase in zoom, the number of tile columns doubles, so at zoom `1` column values range from `0` to `2`, and so on.
+A Coordinate's `column` represents a tile's relative *x* position at its zoom level. At zoom `0` there is one column. With each increase in zoom, the number of columns doubles, so at zoom `1` there are two (`0 >= column < 2`), at zoom `2` there are four (`0 >= column < 4`), and so on.
 
 <a name="Coordinate.row"></a>
 ### row `coordinate.row`
-A Coordinate's `row` represents a tile's relative *y* position at its zoom level. At zoom `0` row values range from `0` to `1` (there is only one tile). With each increase in zoom, the number of rows doubles, so at zoom `1` there are two (`0 >= row <= 2`), at zoom `2` there are four (`0 >= row <= 4`), and so on.
+A Coordinate's `row` represents a tile's relative *y* position at its zoom level. At zoom `0` there is only one tile. With each increase in zoom, the number of rows doubles, so at zoom `1` there are two (`0 >= row < 2`), at zoom `2` there are four (`0 >= row < 4`), and so on.
 
 <a name="Coordinate.copy"></a>
 ### copy `coordinate.copy()`
