@@ -1,5 +1,5 @@
 /*!
- * Modest Maps JS v3.3.1
+ * Modest Maps JS {VERSION}
  * http://modestmaps.com/
  *
  * Copyright (c) 2011 Stamen Design, All Rights Reserved.
