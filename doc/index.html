@@ -10,6 +10,13 @@
         <div id="toc">
             <h1>modestmaps.js</h1>
             <p class="version"><code>v2.0.2</code></p>
+<h2><a href="#source">Getting the Source</a></h2>
+<h2><a href="#quick-start">Quick Start</a></h2>
+<ul>
+<li><a href="#quick.map">Making a map</a></li>
+<li><a href="#quick.moving">Moving around</a></li>
+<li><a href="#quick.layers">Working with layers</a></li>
+</ul>
 <h2><a href="#Map">Map</a></h2>
 <ul>
 <li><a href="#Map.getCenter">getCenter</a></li>
@@ -122,20 +129,104 @@
 
         <div id="content" class="container">
 <h1>modestmaps.js</h1>
-<h2>Getting Started</h2>
-<p>Something here.
+<p>Modest Maps is a bare-bones geographic map display and interaction library. It was designed and conceived by <a href="http://www.tom-carden.co.uk/">Tom Carden</a>, tweaked by <a href="http://mike.teczno.com/">Michal Migurski</a>, and is maintained and hacked on primarily by <a href="http://macwright.org/">Tom MacWright</a> and <a href="http://github.com/shawnbot">Shawn Allen</a>.
 
+</p>
+<p><a name="source"></a>
+</p>
+<h2>Getting the Source</h2>
+<p>You can get modestmaps.js by cloning <a href="https://github.com/modestmaps/modestmaps-js/">the github repo</a> or downloading it:
+
+</p>
+<ul>
+<li><a href="https://github.com/modestmaps/modestmaps-js/zipball/v2.0.2">modestmaps.js-v2.0.2.zip</a> (zip archive)</li>
+<li><a href="../modestmaps.js">modestmaps.js</a> (source JavaScript, 100K)</li>
+<li><a href="../modestmaps.min.js">modestmaps.min.js</a> (minified JavaScript, 36K)</li>
+</ul>
+<p>After you&#39;ve downloaded it, you can include by putting this <code>&lt;script&gt;</code> tag into the <code>&lt;head&gt;</code> of your HTML document:
+
+</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot; src=&quot;modestmaps.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p><a name="quick-start"></a>
+</p>
+<h2>Quick Start</h2>
+<p><a name="quick.map"></a>
 </p>
 <h3>Making a Map</h3>
-<p>Something here.
+<p>Making a map is easy. First, you&#39;ll need a place for your map in the HTML:
 
+</p>
+<pre><code>&lt;div id=&quot;map&quot;&gt;&lt;/div&gt;</code></pre>
+<p>Then, add a script below:
+
+</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+var tiles = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);
+var size = new MM.Point(640, 480);
+var map = new MM.Map(&quot;map&quot;, tiles, size);
+&lt;/script&gt;</code></pre>
+<p>This will create a map showing <a href="http://maps.stamen.com/toner/">Stamen&#39;s toner tiles</a> in a 640x480-pixel area. See the docs below for more info on <a href="#TemplatedLayer">layers</a> and <a href="#Map.dimensions">map dimensions</a>.
+
+</p>
+<p>If you want the size of your map to be determined by CSS, you can style your div like so:
+
+</p>
+<pre><code>#map {
+    height: 500px;
+}</code></pre>
+<p>Then, leave off the <code>size</code> argument to the constructor:
+
+</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+var tiles = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);
+var map = new MM.Map(&quot;map&quot;, tiles);
+&lt;/script&gt;</code></pre>
+<p>For more info on resizing, see the <a href="#Map.constructor">Map constructor</a> and <a href="#Map.autoSize">autoSize</a> docs.
+
+</p>
+<p><a name="quick.moving"></a>
 </p>
 <h3>Moving Around</h3>
-<p>Something here.
+<p>Once you&#39;ve got your map initialized, you can move it around the world. Geographic locations in modestmaps.js are modeled with the <a href="#Location">Location</a> class, which is called with <em>latitude</em> and <em>longitude</em> values:
 
 </p>
-<h3>Adding Layers</h3>
-<p>Something here.
+<pre><code>var oakland = new MM.Location(37.804, -122.271);</code></pre>
+<p>Once you&#39;ve got a location, you can tell the map to center on it by calling <a href="#Map.setCenter">setCenter</a>:
+
+</p>
+<pre><code>// center on Oakland, California
+map.setCenter(oakland);
+// center on Amsterdam, Netherlands
+map.setCenter(new MM.Location(52.3702157, 4.8951679));</code></pre>
+<p>You can get the current center of the map with <a href="#Map.getCenter">getCenter</a>. You can also modify the visible area by setting its <a href="#Extent">extent</a>, which is defined by two or more locations. <a href="#Map.setCenter">Setting</a> a map&#39;s extent adjusts its center and zoom level so that the rectangular bounding box surrounding the locations is entirely visible:
+
+</p>
+<pre><code>var oakland = new MM.Location(37.804, -122.271),
+    amsterdam = new MM.Location(52.3702157, 4.8951679);
+var extent = new MM.Extent(oakland, amsterdam);
+map.setExtent(extent)</code></pre>
+<p>You can change the map&#39;s zoom level with the <a href="#Map.zoomIn">zoomIn</a>, <a href="#Map.zoomOut">zoomOut</a> and <a href="#Map.zoomTo">zoomTo</a> methods:
+
+</p>
+<pre><code>map.zoomIn();   // increase zoom by 1
+map.zoomOut();  // decrease zoom by 1
+map.zoomTo(12); // zoom to level 12</code></pre>
+<p><a name="quick.layers"></a>
+</p>
+<h3>Working with Layers</h3>
+<p>One popular feature of many online maps is a &quot;hybrid&quot; style, which overlays satellite imagery with graphical labels. You can achieve this effect in modestmaps.js by creating two <a href="#TemplatedLayer">tile layers</a>, and passing them both to the <a href="#Map.constructor">Map constructor</a> as an array:
+
+</p>
+<pre><code>var baseURL = &quot;http://tile.stamen.com/&quot;,
+    watercolor = new MM.TemplatedLayer(baseURL + &quot;watercolor/{Z}/{X}/{Y}.jpg&quot;),
+    labels = new MM.TemplatedLayer(baseURL + &quot;toner-labels/{Z}/{X}/{Y}.jpg&quot;);
+var map = new MM.Map(&quot;map&quot;, [watercolor, labels]);</code></pre>
+<p>Or you can create the map with one layer, then add the overlay later:
+
+</p>
+<pre><code>var map = new MM.Map(&quot;map&quot;, watercolor);
+map.addLayer(labels);</code></pre>
+<p>See the <a href="#Map.addLayer">addLayer</a> docs and the <a href="#TemplatedLayer">TemplatedLayer</a> class reference for more on working with layers.
 
 </p>
 <p><a name="Map"></a>

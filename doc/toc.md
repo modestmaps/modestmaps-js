@@ -1,3 +1,9 @@
+## [Getting the Source](#source)
+## [Quick Start](#quick-start)
+* [Making a map](#quick.map)
+* [Moving around](#quick.moving)
+* [Working with layers](#quick.layers)
+
 ## [Map](#Map)
 * [getCenter](#Map.getCenter)
 * [setCenter](#Map.setCenter)
