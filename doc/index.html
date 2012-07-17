@@ -693,15 +693,15 @@ map.removeCallback("drawn", onZoomed);
 
 <h3>lat <code>location.lat</code></h3>
 
-<p>The location&rsquo;s <strong>latitude</strong>, or distance from the Earth&rsquo;s <a href="http://en.wikipedia.org/wiki/Prime_meridian">equator</a> in degrees. <code>-90</code> is at the bottom of the globe (Antarctica), <code>0</code> is at the equator, and <code>90</code> is at the top (the Arctic Circle).</p>
+<p>The location&rsquo;s <strong>latitude</strong>, or distance from the Earth&rsquo;s <a href="http://en.wikipedia.org/wiki/Prime_meridian">equator</a> in degrees. <code>-90</code> is at the bottom of the globe (the south pole in Antarctica), <code>0</code> is at the equator, and <code>90</code> is at the top (the north pole in the Arctic Ocean).</p>
 
-<p><strong>NOTE:</strong> Because ModestMaps uses a <a href="http://en.wikipedia.org/wiki/Mercator_projection">spherical Mercator projection</a>, points at Earth&rsquo;s extreme north and south poles become infinitely large and impossible to model. This limits the effective range of web maps to about <code>±80º</code>, depending on zoom level. Setting a map&rsquo;s center to a Location with a latitude outside of this range will most likely have undesired consequences.</p>
+<p><strong>NOTE:</strong> Because ModestMaps uses a <a href="http://en.wikipedia.org/wiki/Mercator_projection">spherical Mercator projection</a>, points at Earth&rsquo;s extreme north and south poles become infinitely large and impossible to model. This limits the effective range of web maps to <code>±85º</code>, depending on zoom level. Setting a map&rsquo;s center to a Location with a latitude outside of this range will most likely have undesired consequences.</p>
 
 <p><a name="Location.lon"></a></p>
 
 <h3>lon <code>location.lon</code></h3>
 
-<p>The location&rsquo;s <strong>longitude</strong>, or distance from the <a href="http://en.wikipedia.org/wiki/Prime_meridian">prime meridian</a> in degrees. Positive values are east of the prime meridian; negative values are west. <code>±180</code> degrees is the <a href="http://en.wikipedia.org/wiki/International_Date_Line">international date line</a>. Longitude values outside of the <code>[-180, 180]</code> range &ldquo;wrap&rdquo;, so a longitude of <code>190</code> degrees may be converted to <code>-170</code> in certain calculations.</p>
+<p>The location&rsquo;s <strong>longitude</strong>, or distance from the <a href="http://en.wikipedia.org/wiki/Prime_meridian">prime meridian</a> in degrees. Positive values are east of the prime meridian (towards Asia); negative values are west (towards North America). <code>±180</code> degrees is near the <a href="http://en.wikipedia.org/wiki/International_Date_Line">international date line</a>. Longitude values outside of the <code>[-180, 180]</code> range &ldquo;wrap&rdquo;, so a longitude of <code>190</code> degrees may be converted to <code>-170</code> in certain calculations.</p>
 
 <p><a name="Location.fromString"></a></p>
 
@@ -928,13 +928,13 @@ var point = map.locationPoint(oakland);
 
 <h3>column <code>coordinate.column</code></h3>
 
-<p>A Coordinate&rsquo;s <code>column</code> represents a tile&rsquo;s relative <em>x</em> position at its zoom level. At zoom <code>0</code> column values range from <code>0</code> to <code>1</code> (there is only one tile). With each increase in zoom, the number of tile columns doubles, so at zoom <code>1</code> column values range from <code>0</code> to <code>2</code>, and so on.</p>
+<p>A Coordinate&rsquo;s <code>column</code> represents a tile&rsquo;s relative <em>x</em> position at its zoom level. At zoom <code>0</code> there is one column. With each increase in zoom, the number of columns doubles, so at zoom <code>1</code> there are two (<code>0 &gt;= column &lt; 2</code>), at zoom <code>2</code> there are four (<code>0 &gt;= column &lt; 4</code>), and so on.</p>
 
 <p><a name="Coordinate.row"></a></p>
 
 <h3>row <code>coordinate.row</code></h3>
 
-<p>A Coordinate&rsquo;s <code>row</code> represents a tile&rsquo;s relative <em>y</em> position at its zoom level. At zoom <code>0</code> row values range from <code>0</code> to <code>1</code> (there is only one tile). With each increase in zoom, the number of rows doubles, so at zoom <code>1</code> there are two (<code>0 &gt;= row &lt;= 2</code>), at zoom <code>2</code> there are four (<code>0 &gt;= row &lt;= 4</code>), and so on.</p>
+<p>A Coordinate&rsquo;s <code>row</code> represents a tile&rsquo;s relative <em>y</em> position at its zoom level. At zoom <code>0</code> there is only one tile. With each increase in zoom, the number of rows doubles, so at zoom <code>1</code> there are two (<code>0 &gt;= row &lt; 2</code>), at zoom <code>2</code> there are four (<code>0 &gt;= row &lt; 4</code>), and so on.</p>
 
 <p><a name="Coordinate.copy"></a></p>
 
