@@ -1,16 +1,120 @@
 # modestmaps.js
+Modest Maps is a bare-bones geographic map display and interaction library. It was designed and conceived by [Tom Carden], tweaked by [Michal Migurski], and is maintained and hacked on primarily by [Tom MacWright] and [Shawn Allen].
 
-## Getting Started
-Something here.
+[Tom Carden]: http://www.tom-carden.co.uk/
+[Michal Migurski]: http://mike.teczno.com/
+[Tom MacWright]: http://macwright.org/
+[Shawn Allen]: http://github.com/shawnbot
 
+<a name="source"></a>
+## Getting the Source
+You can get modestmaps.js by cloning [the github repo](https://github.com/modestmaps/modestmaps-js/) or downloading it:
+
+* [modestmaps.js-{VERSION}.zip](https://github.com/modestmaps/modestmaps-js/zipball/{VERSION}) (zip archive)
+* [modestmaps.js](../modestmaps.js) (source JavaScript, 100K)
+* [modestmaps.min.js](../modestmaps.min.js) (minified JavaScript, 36K)
+
+After you've downloaded it, you can include by putting this `<script>` tag into the `<head>` of your HTML document:
+
+```
+<script type="text/javascript" src="modestmaps.js"></script>
+```
+
+<a name="quick-start"></a>
+## Quick Start
+
+<a name="quick.map"></a>
 ### Making a Map
-Something here.
+Making a map is easy. First, you'll need a place for your map in the HTML:
 
+```
+<div id="map"></div>
+```
+
+Then, add a script below:
+
+```
+<script type="text/javascript">
+var tiles = new MM.TemplatedLayer("http://tile.stamen.com/toner/{Z}/{X}/{Y}.png");
+var size = new MM.Point(640, 480);
+var map = new MM.Map("map", tiles, size);
+</script>
+```
+
+This will create a map showing [Stamen's toner tiles](http://maps.stamen.com/toner/) in a 640x480-pixel area. See the docs below for more info on [layers](#TemplatedLayer) and [map dimensions](#Map.dimensions).
+
+If you want the size of your map to be determined by CSS, you can style your div like so:
+
+```
+#map {
+    height: 500px;
+}
+```
+
+Then, leave off the `size` argument to the constructor:
+
+```
+<script type="text/javascript">
+var tiles = new MM.TemplatedLayer("http://tile.stamen.com/toner/{Z}/{X}/{Y}.png");
+var map = new MM.Map("map", tiles);
+</script>
+```
+
+For more info on resizing, see the [Map constructor](#Map.constructor) and [autoSize](#Map.autoSize) docs.
+
+<a name="quick.moving"></a>
 ### Moving Around
-Something here.
+Once you've got your map initialized, you can move it around the world. Geographic locations in modestmaps.js are modeled with the [Location](#Location) class, which is called with *latitude* and *longitude* values:
 
-### Adding Layers
-Something here.
+```
+var oakland = new MM.Location(37.804, -122.271);
+```
+
+Once you've got a location, you can tell the map to center on it by calling [setCenter](#Map.setCenter):
+
+```
+// center on Oakland, California
+map.setCenter(oakland);
+// center on Amsterdam, Netherlands
+map.setCenter(new MM.Location(52.3702157, 4.8951679));
+```
+
+You can get the current center of the map with [getCenter](#Map.getCenter). You can also modify the visible area by setting its [extent](#Extent), which is defined by two or more locations. [Setting](#Map.setCenter) a map's extent adjusts its center and zoom level so that the rectangular bounding box surrounding the locations is entirely visible:
+
+```
+var oakland = new MM.Location(37.804, -122.271),
+    amsterdam = new MM.Location(52.3702157, 4.8951679);
+var extent = new MM.Extent(oakland, amsterdam);
+map.setExtent(extent)
+```
+
+You can change the map's zoom level with the [zoomIn](#Map.zoomIn), [zoomOut](#Map.zoomOut) and [zoomTo](#Map.zoomTo) methods:
+
+```
+map.zoomIn();   // increase zoom by 1
+map.zoomOut();  // decrease zoom by 1
+map.zoomTo(12); // zoom to level 12
+```
+
+<a name="quick.layers"></a>
+### Working with Layers
+One popular feature of many online maps is a "hybrid" style, which overlays satellite imagery with graphical labels. You can achieve this effect in modestmaps.js by creating two [tile layers](#TemplatedLayer), and passing them both to the [Map constructor](#Map.constructor) as an array:
+
+```
+var baseURL = "http://tile.stamen.com/",
+    watercolor = new MM.TemplatedLayer(baseURL + "watercolor/{Z}/{X}/{Y}.jpg"),
+    labels = new MM.TemplatedLayer(baseURL + "toner-labels/{Z}/{X}/{Y}.jpg");
+var map = new MM.Map("map", [watercolor, labels]);
+```
+
+Or you can create the map with one layer, then add the overlay later:
+
+```
+var map = new MM.Map("map", watercolor);
+map.addLayer(labels);
+```
+
+See the [addLayer](#Map.addLayer) docs and the [TemplatedLayer](#TemplatedLayer) class reference for more on working with layers.
 
 <a name="Map"></a>
 ## MM.Map

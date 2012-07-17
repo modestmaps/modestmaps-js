@@ -78,7 +78,7 @@ div.run {
   }
 
 p, div.container ul {
-  margin: 25px 0;
+  margin: 0 0 25px 0;
   width: 550px;
 }
   p.warning {
