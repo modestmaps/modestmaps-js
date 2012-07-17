@@ -17,7 +17,6 @@ JS_FILES = \
 	src/convenience.js \
 	src/end.js
 
-DOCCO = ./node_modules/.bin/docco
 EXPRESSO = ./node_modules/.bin/expresso
 VERSION = `cat VERSION`
 
@@ -34,9 +33,6 @@ modestmaps.js: $(JS_FILES) Makefile
 clean:
 	rm -f modestmaps.js
 	rm -f modestmaps.min.js
-
-doc: modestmaps.js
-	$(DOCCO) $@
 
 tests:
 	$(EXPRESSO) test/*.test.js
