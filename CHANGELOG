@@ -8,6 +8,13 @@ Following the semantic versioning recommendation best we can:
     minor version, and backwards incompatible API changes increment
     the major version." -- http://semver.org/
 
+v3.3.3
+- Fixes empty gif image
+
+v3.3.2
+- Fixes problem with parent tiles by again assigning the element to have an
+  empty image as its src.
+
 v3.3.1
 - Fixes bug where Layer.draw would try to draw even if not attached to a map.
 
