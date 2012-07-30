@@ -278,7 +278,7 @@
 
             var level = document.createElement('div');
             level.id = this.parent.id + '-zoom-' + zoom;
-            level.style.cssText = this.parent.style.cssText;
+            level.style.cssText = 'position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; margin: 0; padding: 0;';
             level.style.zIndex = zoom;
 
             this.parent.appendChild(level);
