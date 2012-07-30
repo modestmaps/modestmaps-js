@@ -35,7 +35,12 @@
         }
 
         this.layers = [];
-        if(!(layerOrLayers instanceof Array)) {
+
+        if (!layerOrLayers) {
+            layerOrLayers = [];
+        }
+
+        if (!(layerOrLayers instanceof Array)) {
             layerOrLayers = [ layerOrLayers ];
         }
 
@@ -162,6 +167,7 @@
         setZoomRange: function(minZoom, maxZoom) {
             this.coordLimits[0] = this.coordLimits[0].zoomTo(minZoom);
             this.coordLimits[1] = this.coordLimits[1].zoomTo(maxZoom);
+            return this;
         },
 
         // zooming
@@ -394,6 +400,14 @@
             return this.layers.slice();
         },
 
+        // return the first layer with given name
+        getLayer: function(name) {
+            for (var i = 0; i < this.layers.length; i++) {
+                if (name == this.layers[i].name)
+                    return this.layers[i];
+            }
+        },
+
         // return the layer at the given index
         getLayerAt: function(index) {
             return this.layers[index];
@@ -419,7 +433,7 @@
         // find the given layer and remove it
         removeLayer: function(layer) {
             for (var i = 0; i < this.layers.length; i++) {
-                if (layer == this.layers[i]) {
+                if (layer == this.layers[i] || layer == this.layers[i].name) {
                     this.removeLayerAt(i);
                     break;
                 }
@@ -520,6 +534,34 @@
 
             return this;
         },
+
+        // Enable and disable layers.
+        // Disabled layers are not displayed, are not drawn, and do not request
+        // tiles. They do maintain their layer index on the map.
+        enableLayer: function(name) {
+            var l = this.getLayer(name);
+            if (l) l.enable();
+            return this;
+        },
+
+        enableLayerAt: function(index) {
+            var l = this.getLayerAt(index);
+            if (l) l.enable();
+            return this;
+        },
+
+        disableLayer: function(name) {
+            var l = this.getLayer(name);
+            if (l) l.disable();
+            return this;
+        },
+
+        disableLayerAt: function(index) {
+            var l = this.getLayerAt(index);
+            if (l) l.disable();
+            return this;
+        },
+
 
         // limits
 

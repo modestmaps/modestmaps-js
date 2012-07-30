@@ -4,6 +4,10 @@ describe('Location', function() {
         expect(p.lon).toEqual(1);
         expect(p.lat).toEqual(0);
     });
+    it('produces a nice string', function() {
+        var p = new MM.Location(0, 1);
+        expect(p.toString()).toEqual('(0.000, 1.000)');
+    });
     it('can be copied', function() {
         var p = new MM.Location(0, 1);
         expect(p.lon).toEqual(1);
@@ -26,5 +30,11 @@ describe('Location', function() {
 
         expect(MM.Location.interpolate(a, b, 0.5).lat).toBeCloseTo(0);
         expect(MM.Location.interpolate(a, b, 0.5).lon).toBeCloseTo(5.5);
+    });
+
+    it('can produce a bearing between points', function() {
+        var a = new MM.Location(0, 1);
+        var b = new MM.Location(0, 10);
+        expect(MM.Location.bearing(a, b)).toEqual(90);
     });
 });

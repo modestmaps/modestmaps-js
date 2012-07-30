@@ -1,8 +1,9 @@
 
     // Layer
-    MM.Layer = function(provider, parent) {
+    MM.Layer = function(provider, parent, name) {
         this.parent = parent || document.createElement('div');
         this.parent.style.cssText = 'position: absolute; top: 0px; left: 0px; margin: 0; padding: 0; z-index: 0';
+        this.name = name;
         this.levels = {};
         this.requestManager = new MM.RequestManager();
         this.requestManager.addCallback('requestcomplete', this.getTileComplete());
@@ -14,11 +15,12 @@
 
         map: null, // TODO: remove
         parent: null,
+        name: null,
+        enabled: true,
         tiles: null,
         levels: null,
         requestManager: null,
         provider: null,
-        emptyImage: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
         _tileComplete: null,
 
         getTileComplete: function() {
@@ -36,15 +38,16 @@
             if (!this._tileError) {
                 var theLayer = this;
                 this._tileError = function(manager, tile) {
-                    tile.src = theLayer.emptyImage;
-                    theLayer.tiles[tile.id] = tile;
-                    theLayer.positionTile(tile);
+                    tile.element.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    theLayer.tiles[tile.element.id] = tile.element;
+                    theLayer.positionTile(tile.element);
                 };
             }
             return this._tileError;
         },
 
         draw: function() {
+            if (!this.enabled || !this.map) return;
             // compares manhattan distance from center of
             // requested tiles to current map center
             // NB:- requested tiles are *popped* from queue, so we do a descending sort
@@ -302,7 +305,8 @@
             // Start tile positioning and prevent drag for modern browsers
             tile.style.cssText = 'position:absolute;-webkit-user-select:none;' +
                 '-webkit-user-drag:none;-moz-user-drag:none;-webkit-transform-origin:0 0;' +
-                '-moz-transform-origin:0 0;-o-transform-origin:0 0;-ms-transform-origin:0 0;';
+                '-moz-transform-origin:0 0;-o-transform-origin:0 0;-ms-transform-origin:0 0;' +
+                'width:' + this.map.tileSize.x + 'px; height: ' + this.map.tileSize.y + 'px;';
 
             // Prevent drag for IE
             tile.ondragstart = function() { return false; };
@@ -397,12 +401,26 @@
             }
         },
 
+        // Enable a layer and show its dom element
+        enable: function() {
+            this.enabled = true;
+            this.parent.style.display = '';
+            this.draw();
+        },
+
+        // Disable a layer, don't display in DOM, clear all requests
+        disable: function() {
+            this.enabled = false;
+            this.requestManager.clear();
+            this.parent.style.display = 'none';
+        },
 
         // Remove this layer from the DOM, cancel all of its requests
         // and unbind any callbacks that are bound to it.
         destroy: function() {
             this.requestManager.clear();
             this.requestManager.removeCallback('requestcomplete', this.getTileComplete());
+            this.requestManager.removeCallback('requesterror', this.getTileError());
             // TODO: does requestManager need a destroy function too?
             this.provider = null;
             // If this layer was ever attached to the DOM, detach it.

@@ -23,6 +23,12 @@ describe('Map', function() {
       expect(map.parent).toEqual(div);
   });
 
+  it('can be initialized without a layer', function() {
+      expect(function() {
+          map = new MM.Map(document.createElement('div'));
+      }).not.toThrow();
+  });
+
   describe('zoom restrictions and ranges', function() {
 
     it('has set a proper zoom level', function() {
@@ -32,6 +38,13 @@ describe('Map', function() {
     it('can restrict its zoomlevel', function() {
         map.setZoomRange(5, 6);
         map.setZoom(7);
+        expect(map.getZoom()).toEqual(6);
+    });
+
+    it('returns itself from chainable functions', function() {
+        expect(map.setZoomRange(5, 6)).toEqual(map);
+        expect(map.setZoom(7)).toEqual(map);
+        expect(map.setCenter({ lat: 5, lon: 5 })).toEqual(map);
         expect(map.getZoom()).toEqual(6);
     });
 
@@ -214,6 +227,41 @@ describe('Map', function() {
           expect(map.removeLayer(l)).toEqual(map);
 
           expect(map.getLayers().length).toEqual(1);
+      });
+
+      it('Can set and get a named layer', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a'], 'name');
+          map.addLayer(l);
+          expect(map.getLayer('name')).toEqual(l);
+      });
+
+      it('Can remove a named layer', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a'], 'name');
+          map.addLayer(l);
+          var numLayers = map.getLayers().length;
+          expect(map.removeLayer('name').getLayers().length).toEqual(numLayers - 1);
+      });
+
+      it('Can disable and enable a layer by index', function() {
+          map.disableLayerAt(0);
+          expect(map.getLayerAt(0).enabled).toEqual(false);
+          expect(map.getLayerAt(0).parent.style.display).toEqual('none');
+          map.enableLayerAt(0);
+          expect(map.getLayerAt(0).enabled).toEqual(true);
+          expect(map.getLayerAt(0).parent.style.display).not.toEqual('none');
+      });
+
+      it('Can disable and enable a layer by name', function() {
+          var l = new MM.TemplatedLayer(
+              'http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png', ['a'], 'name');
+          map.addLayer(l).disableLayer('name');
+          expect(map.getLayer('name').enabled).toEqual(false);
+          expect(map.getLayer('name').parent.style.display).toEqual('none');
+          map.enableLayerAt(1);
+          expect(map.getLayer('name').enabled).toEqual(true);
+          expect(map.getLayer('name').parent.style.display).not.toEqual('none');
       });
   });
 
