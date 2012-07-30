@@ -419,7 +419,10 @@
         // a redraw only if the map has a center coordinate.
         addLayer: function(layer) {
             this.layers.push(layer);
-            this.parent.appendChild(layer.parent);
+            // make sure layer.parent doesn't already have a parentNode
+            if (layer.parent.parentNode != this.parent) {
+                this.parent.appendChild(layer.parent); 
+            }
             layer.map = this; // TODO: remove map property from MM.Layer?
             if (this.coordinate) {
               MM.getFrame(this.getRedraw());

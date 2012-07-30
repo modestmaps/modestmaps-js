@@ -18,7 +18,9 @@ function initMap() {
     var provider = new MM.TemplatedLayer(template, subdomains);
 
     map = new MM.Map('map', provider, null, [
-        MM.MouseWheelHandler().precise(true)
+        new MM.DragHandler(),
+        new MM.DoubleClickHandler(),
+        new MM.MouseWheelHandler().precise(true)
     ]);
 
     map.setCenterZoom(new MM.Location(37.811530, -122.2666097), 14);

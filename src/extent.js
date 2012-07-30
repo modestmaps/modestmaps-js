@@ -17,10 +17,10 @@
         }
         if (isNaN(south)) south = north;
         if (isNaN(east)) east = west;
-        this.north = Math.max(north, south);
-        this.south = Math.min(north, south);
-        this.east = Math.max(east, west);
-        this.west = Math.min(east, west);
+        this.north = north > south ? north : south;
+        this.south = north > south ? south : north;
+        this.east = east > west ? east : west;
+        this.west = east > west ? west : east;
     };
 
     MM.Extent.prototype = {

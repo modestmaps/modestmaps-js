@@ -17,7 +17,11 @@ JS_FILES = \
 	src/convenience.js \
 	src/end.js
 
-all: modestmaps.js modestmaps.min.js
+DOCCO = ./node_modules/.bin/docco
+EXPRESSO = ./node_modules/.bin/expresso
+VERSION = `cat VERSION`
+
+all: modestmaps.js modestmaps.min.js update-version
 
 modestmaps.min.js: modestmaps.js
 	rm -f modestmaps.min.js
@@ -25,8 +29,14 @@ modestmaps.min.js: modestmaps.js
 
 modestmaps.js: $(JS_FILES) Makefile
 	rm -f modestmaps.js
-	cat $(JS_FILES) >> modestmaps.js
+	cat $(JS_FILES) | perl -pi -e "s/{VERSION}/$(VERSION)/g" > modestmaps.js
+
+update-version:
+	perl -pi -e "s/\"version\": \"[^\"]+/\"version\": \"$(VERSION)/g" package.json
 
 clean:
-	rm modestmaps.js
-	rm modestmaps.min.js
+	rm -f modestmaps.js
+	rm -f modestmaps.min.js
+
+tests:
+	$(EXPRESSO) test/*.test.js

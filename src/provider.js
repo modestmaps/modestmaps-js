@@ -22,11 +22,11 @@
         ],
 
         getTileUrl: function(coordinate) {
-            throw "Abstract method not implemented by subclass.";
+            throw "Abstract method getTileUrl() not implemented by subclass.";
         },
 
         getTile: function(coordinate) {
-            throw "Abstract method not implemented by subclass.";
+            throw "Abstract method getTile() not implemented by subclass.";
         },
 
         // releaseTile is not required
@@ -67,7 +67,7 @@
      * FIXME: need a better explanation here! This is a pretty crucial part of
      * understanding how to use ModestMaps.
      *
-     * TemplatedMapProvider is a tile provider that generates tile URLs from a
+     * Template is a tile provider that generates tile URLs from a
      * template string by replacing the following bits for each tile
      * coordinate:
      *
@@ -79,11 +79,11 @@
      *
      * E.g.:
      *
-     * var osm = new MM.TemplatedMapProvider("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
+     * var osm = new MM.Template("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
      *
      * Or:
      *
-     * var placeholder = new MM.TemplatedMapProvider("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
+     * var placeholder = new MM.Template("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
      *
      */
     MM.Template = function(template, subdomains) {

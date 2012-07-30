@@ -138,7 +138,7 @@ var MM = com.modestmaps = {
     MM.coerceLayer = function(layerish) {
         if (typeof layerish == 'string') {
             // Probably a template string
-            return new MM.Layer(new MM.TemplatedLayer(layerish));
+            return new MM.TemplatedLayer(layerish);
         } else if ('draw' in layerish && typeof layerish.draw == 'function') {
             // good enough, though we should probably enforce .parent and .destroy() too
             return layerish;
@@ -339,6 +339,19 @@ var MM = com.modestmaps = {
         return Math.acos(c + d + e) * r;
     };
 
+    // parse a string in the format "lat,lon"
+    MM.Location.fromString = function(str, longitudeFirst) {
+        var parts = str.split(/\s*,\s*/);
+        if (parts.length == 2) {
+            var lat = parseFloat(longitudeFirst ? parts[1] : parts[0]),
+                lon = parseFloat(longitudeFirst ? parts[0] : parts[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                return new MM.Location(lat, lon);
+            }
+        }
+        return null;
+    };
+
     // Interpolates along a great circle, f between 0 and 1
     //
     // * FIXME: could be heavily optimized (lots of trig calls to cache)
@@ -395,6 +408,7 @@ var MM = com.modestmaps = {
         // map it into 0-360 range
         return (result < 0) ? result + 360 : result;
     };
+
     // Extent
     // ----------
     // An object representing a map's rectangular extent, defined by its north,
@@ -413,10 +427,10 @@ var MM = com.modestmaps = {
         }
         if (isNaN(south)) south = north;
         if (isNaN(east)) east = west;
-        this.north = Math.max(north, south);
-        this.south = Math.min(north, south);
-        this.east = Math.max(east, west);
-        this.west = Math.min(east, west);
+        this.north = north > south ? north : south;
+        this.south = north > south ? south : north;
+        this.east = east > west ? east : west;
+        this.west = east > west ? west : east;
     };
 
     MM.Extent.prototype = {
@@ -728,11 +742,11 @@ var MM = com.modestmaps = {
         ],
 
         getTileUrl: function(coordinate) {
-            throw "Abstract method not implemented by subclass.";
+            throw "Abstract method getTileUrl() not implemented by subclass.";
         },
 
         getTile: function(coordinate) {
-            throw "Abstract method not implemented by subclass.";
+            throw "Abstract method getTile() not implemented by subclass.";
         },
 
         // releaseTile is not required
@@ -773,7 +787,7 @@ var MM = com.modestmaps = {
      * FIXME: need a better explanation here! This is a pretty crucial part of
      * understanding how to use ModestMaps.
      *
-     * TemplatedMapProvider is a tile provider that generates tile URLs from a
+     * Template is a tile provider that generates tile URLs from a
      * template string by replacing the following bits for each tile
      * coordinate:
      *
@@ -785,11 +799,11 @@ var MM = com.modestmaps = {
      *
      * E.g.:
      *
-     * var osm = new MM.TemplatedMapProvider("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
+     * var osm = new MM.Template("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
      *
      * Or:
      *
-     * var placeholder = new MM.TemplatedMapProvider("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
+     * var placeholder = new MM.Template("http://placehold.it/256/f0f/fff.png&text={Z}/{X}/{Y}");
      *
      */
     MM.Template = function(template, subdomains) {
@@ -1566,7 +1580,7 @@ var MM = com.modestmaps = {
     // Layer
     MM.Layer = function(provider, parent, name) {
         this.parent = parent || document.createElement('div');
-        this.parent.style.cssText = 'position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; margin: 0; padding: 0; z-index: 0';
+        this.parent.style.cssText = 'position: absolute; top: 0px; left: 0px; margin: 0; padding: 0; z-index: 0';
         this.name = name;
         this.levels = {};
         this.requestManager = new MM.RequestManager();
@@ -2415,7 +2429,10 @@ var MM = com.modestmaps = {
         // a redraw only if the map has a center coordinate.
         addLayer: function(layer) {
             this.layers.push(layer);
-            this.parent.appendChild(layer.parent);
+            // make sure layer.parent doesn't already have a parentNode
+            if (layer.parent.parentNode != this.parent) {
+                this.parent.appendChild(layer.parent); 
+            }
             layer.map = this; // TODO: remove map property from MM.Layer?
             if (this.coordinate) {
               MM.getFrame(this.getRedraw());
