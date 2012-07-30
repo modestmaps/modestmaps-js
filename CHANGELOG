@@ -8,6 +8,11 @@ Following the semantic versioning recommendation best we can:
     minor version, and backwards incompatible API changes increment
     the major version." -- http://semver.org/
 
+v3.3.4
+- Layers no longer copy their CSS properties from their parent nodes,
+  so that parent node CSS can be changed with properties like `clip` and
+  `opacity` without this having per-zoom-level effects.
+
 v3.3.3
 - Fixes empty gif image
 
