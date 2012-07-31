@@ -10,7 +10,7 @@ Modest Maps is a bare-bones geographic map display and interaction library. It w
 ## Getting the Source
 You can get modestmaps.js by cloning [the github repo](https://github.com/modestmaps/modestmaps-js/) or downloading it:
 
-* [modestmaps.js-{VERSION}.zip](https://github.com/modestmaps/modestmaps-js/zipball/{VERSION}) (zip archive)
+* [modestmaps.js-v{VERSION}.zip](https://github.com/modestmaps/modestmaps-js/zipball/v{VERSION}) (zip archive)
 * [modestmaps.js](../modestmaps.js) (source JavaScript, 100K)
 * [modestmaps.min.js](../modestmaps.min.js) (minified JavaScript, 36K)
 
