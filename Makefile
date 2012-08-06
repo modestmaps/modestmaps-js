@@ -17,7 +17,6 @@ JS_FILES = \
 	src/convenience.js \
 	src/end.js
 
-EXPRESSO = ./node_modules/.bin/expresso
 VERSION = `cat VERSION`
 
 all: modestmaps.js modestmaps.min.js update-version
@@ -36,6 +35,3 @@ update-version:
 clean:
 	rm -f modestmaps.js
 	rm -f modestmaps.min.js
-
-tests:
-	$(EXPRESSO) test/*.test.js
