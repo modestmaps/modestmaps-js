@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>modestmaps.js v3.3.4</title>
+        <style type="text/css">
+            @import url(css/main.css);
+        </style>
+    </head>
+    <body>
+        <div id="toc">
+            <h1>modestmaps.js</h1>
+            <p class="version"><code>v3.3.4</code></p>
+<h2><a href="#source">Getting the Source</a></h2>
+<h2><a href="#quick-start">Quick Start</a></h2>
+<ul>
+<li><a href="#quick.map">Making a map</a></li>
+<li><a href="#quick.moving">Moving around</a></li>
+<li><a href="#quick.layers">Working with layers</a></li>
+</ul>
+<h2><a href="#Map">Map</a></h2>
+<ul>
+<li><a href="#Map.getCenter">getCenter</a></li>
+<li><a href="#Map.setCenter">setCenter</a></li>
+<li><a href="#Map.getZoom">getZoom</a></li>
+<li><a href="#Map.setZoom">setZoom</a></li>
+<li><a href="#Map.setCenterZoom">setCenterZoom</a></li>
+<li><a href="#Map.getExtent">getExtent</a></li>
+<li><a href="#Map.setExtent">setExtent</a></li>
+<li><a href="#Map.zoomIn">zoomIn</a></li>
+<li><a href="#Map.zoomOut">zoomOut</a></li>
+<li><a href="#Map.zoomBy">zoomBy</a></li>
+<li><a href="#Map.zoomByAbout">zoomByAbout</a></li>
+<li><a href="#Map.panBy">panBy</a></li>
+<li><a href="#Map.panLeft">panLeft</a></li>
+<li><a href="#Map.panRight">panRight</a></li>
+<li><a href="#Map.panUp">panUp</a></li>
+<li><a href="#Map.panDown">panDown</a></li>
+<li><a href="#Map.center">center</a></li>
+<li><a href="#Map.zoom">zoom</a></li>
+<li><a href="#Map.extent">extent</a></li>
+<li><a href="#Map.addLayer">addLayer</a></li>
+<li><a href="#Map.removeLayer">removeLayer</a></li>
+<li><a href="#Map.getLayers">getLayers</a></li>
+<li><a href="#Map.getLayerAt">getLayerAt</a></li>
+<li><a href="#Map.setLayerAt">setLayerAt</a></li>
+<li><a href="#Map.insertLayerAt">insertLayerAt</a></li>
+<li><a href="#Map.removeLayerAt">removeLayerAt</a></li>
+<li><a href="#Map.swapLayersAt">swapLayersAt</a></li>
+<li><a href="#Map.addCallback">addCallback</a></li>
+<li><a href="#Map.removeCallback">removeCallback</a></li>
+<li><a href="#Map.pointLocation">pointLocation</a></li>
+<li><a href="#Map.pointCoordinate">pointCoordinate</a></li>
+<li><a href="#Map.locationPoint">locationPoint</a></li>
+<li><a href="#Map.locationCoordinate">locationCoordinate</a></li>
+<li><a href="#Map.coordinateLocation">coordinateLocation</a></li>
+<li><a href="#Map.coordinatePoint">coordinatePoint</a></li>
+<li><a href="#Map.setZoomRange">setZoomRange</a></li>
+<li><a href="#Map.setSize">setSize</a></li>
+<li><a href="#Map.autoSize">autoSize</a></li>
+<li><a href="#Map.dimensions">dimensions</a></li>
+<li><a href="#Map.draw">draw</a></li>
+<li><a href="#Map.requestRedraw">requestRedraw</a></li>
+<li><a href="#Map.parent">parent</a></li>
+<li><a href="#Map.coordinate">coordinate</a></li>
+<li><a href="#Map.coordLimits">coordLimits</a></li>
+<li><a href="#Map.tileSize">tileSize</a></li>
+</ul>
+<h2><a href="#Location">Location</a></h2>
+<ul>
+<li><a href="#Location.lat">latitude</a> and <a href="#Location.lon">longitude</a></li>
+<li><a href="#Location.fromString">Location.fromString</a></li>
+<li><a href="#Location.fromString">Location.distance</a></li>
+<li><a href="#Location.fromString">Location.interpolate</a></li>
+<li><a href="#Location.fromString">Location.bearing</a></li>
+</ul>
+<h2><a href="#Extent">Extent</a></h2>
+<ul>
+<li><a href="#Extent.north">north</a>, <a href="#Extent.east">east</a>, <a href="#Extent.south">south</a> and <a href="#Extent.west">west</a></li>
+<li><a href="#Extent.northWest">northWest</a></li>
+<li><a href="#Extent.northEast">northEast</a></li>
+<li><a href="#Extent.southEast">southEast</a></li>
+<li><a href="#Extent.southWest">southWest</a></li>
+<li><a href="#Extent.containsLocation">containsLocation</a></li>
+<li><a href="#Extent.encloseLocation">encloseLocation</a></li>
+<li><a href="#Extent.encloseLocations">encloseLocations</a></li>
+<li><a href="#Extent.encloseExtent">encloseExtent</a></li>
+<li><a href="#Extent.setFromLocations">setFromLocations</a></li>
+<li><a href="#Extent.copy">copy</a></li>
+<li><a href="#Extent.toArray">toArray</a></li>
+<li><a href="#Extent.fromString">Extent.fromString</a></li>
+<li><a href="#Extent.fromArray">Extent.fromArray</a></li>
+</ul>
+<h2><a href="#Point">Point</a></h2>
+<ul>
+<li><a href="#Point.distance">Point.distance</a></li>
+<li><a href="#Point.interpolate">Point.interpolate</a></li>
+</ul>
+<h2><a href="#Coordinate">Coordinate</a></h2>
+<ul>
+<li><a href="#Coordinate.zoom">zoom</a>, <a href="#Coordinate.column">column</a> and <a href="#Coordinate.row">row</a></li>
+<li><a href="#Coordinate.zoomTo">zoomTo</a></li>
+<li><a href="#Coordinate.zoomBy">zoomBy</a></li>
+<li><a href="#Coordinate.container">container</a></li>
+<li><a href="#Coordinate.up">up</a></li>
+<li><a href="#Coordinate.down">down</a></li>
+<li><a href="#Coordinate.left">left</a></li>
+<li><a href="#Coordinate.right">right</a></li>
+<li><a href="#Coordinate.toKey">toKey</a></li>
+<li><a href="#Coordinate.toString">toString</a></li>
+</ul>
+<h2><a href="#TemplatedLayer">TemplatedLayer</a></h2>
+<h2><a href="#Layer">Layer</a></h2>
+<ul>
+<li><a href="#Layer.getProvider">getProvider</a></li>
+<li><a href="#Layer.setProvider">setProvider</a></li>
+<li><a href="#Layer.draw">draw</a></li>
+<li><a href="#Layer.requestRedraw">requestRedraw</a></li>
+</ul>
+<h2><a href="#Template">Template</a></h2>
+<h2><a href="#MapProvider">MapProvider</a></h2>
+<ul>
+<li><a href="#MapProvider.getTile">getTile</a></li>
+<li><a href="#MapProvider.getTileUrl">getTileUrl</a></li>
+<li><a href="#MapProvider.releaseTile">releaseTile</a></li>
+<li><a href="#MapProvider.reAddTile">reAddTile</a></li>
+</ul>
+
+        </div>
+
+        <div id="content" class="container">
+<h1>modestmaps.js</h1>
+<p>Modest Maps is a bare-bones geographic map display and interaction library. It was designed and conceived by <a href="http://www.tom-carden.co.uk/">Tom Carden</a>, tweaked by <a href="http://mike.teczno.com/">Michal Migurski</a>, and is maintained and hacked on primarily by <a href="http://macwright.org/">Tom MacWright</a> and <a href="http://github.com/shawnbot">Shawn Allen</a>.
+
+</p>
+<p><a name="source"></a>
+</p>
+<h2>Getting the Source</h2>
+<p>You can get modestmaps.js by cloning <a href="https://github.com/modestmaps/modestmaps-js/">the github repo</a> or downloading it:
+
+</p>
+<ul>
+<li><a href="https://github.com/modestmaps/modestmaps-js/zipball/v3.3.4">modestmaps.js-v3.3.4.zip</a> (zip archive)</li>
+<li><a href="../modestmaps.js">modestmaps.js</a> (source JavaScript, 100K)</li>
+<li><a href="../modestmaps.min.js">modestmaps.min.js</a> (minified JavaScript, 36K)</li>
+</ul>
+<p>After you&#39;ve downloaded it, you can include by putting this <code>&lt;script&gt;</code> tag into the <code>&lt;head&gt;</code> of your HTML document:
+
+</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot; src=&quot;modestmaps.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p><a name="quick-start"></a>
+</p>
+<h2>Quick Start</h2>
+<p><a name="quick.map"></a>
+</p>
+<h3>Making a Map</h3>
+<p>Making a map is easy. First, you&#39;ll need a place for your map in the HTML:
+
+</p>
+<pre><code>&lt;div id=&quot;map&quot;&gt;&lt;/div&gt;</code></pre>
+<p>Then, add a script below:
+
+</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+var tiles = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);
+var size = new MM.Point(640, 480);
+var map = new MM.Map(&quot;map&quot;, tiles, size);
+&lt;/script&gt;</code></pre>
+<p>This will create a map showing <a href="http://maps.stamen.com/toner/">Stamen&#39;s toner tiles</a> in a 640x480-pixel area. See the docs below for more info on <a href="#TemplatedLayer">layers</a> and <a href="#Map.dimensions">map dimensions</a>.
+
+</p>
+<p>If you want the size of your map to be determined by CSS, you can style your div like so:
+
+</p>
+<pre><code>#map {
+    height: 500px;
+}</code></pre>
+<p>Then, leave off the <code>size</code> argument to the constructor:
+
+</p>
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+var tiles = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);
+var map = new MM.Map(&quot;map&quot;, tiles);
+&lt;/script&gt;</code></pre>
+<p>For more info on resizing, see the <a href="#Map.constructor">Map constructor</a> and <a href="#Map.autoSize">autoSize</a> docs.
+
+</p>
+<p><a name="quick.moving"></a>
+</p>
+<h3>Moving Around</h3>
+<p>Once you&#39;ve got your map initialized, you can move it around the world. Geographic locations in modestmaps.js are modeled with the <a href="#Location">Location</a> class, which is called with <em>latitude</em> and <em>longitude</em> values:
+
+</p>
+<pre><code>var oakland = new MM.Location(37.804, -122.271);</code></pre>
+<p>Once you&#39;ve got a location, you can tell the map to center on it by calling <a href="#Map.setCenter">setCenter</a>:
+
+</p>
+<pre><code>// center on Oakland, California
+map.setCenter(oakland);
+// center on Amsterdam, Netherlands
+map.setCenter(new MM.Location(52.3702157, 4.8951679));</code></pre>
+<p>You can get the current center of the map with <a href="#Map.getCenter">getCenter</a>. You can also modify the visible area by setting its <a href="#Extent">extent</a>, which is defined by two or more locations. <a href="#Map.setCenter">Setting</a> a map&#39;s extent adjusts its center and zoom level so that the rectangular bounding box surrounding the locations is entirely visible:
+
+</p>
+<pre><code>var oakland = new MM.Location(37.804, -122.271),
+    amsterdam = new MM.Location(52.3702157, 4.8951679);
+var extent = new MM.Extent(oakland, amsterdam);
+map.setExtent(extent)</code></pre>
+<p>You can change the map&#39;s zoom level with the <a href="#Map.zoomIn">zoomIn</a>, <a href="#Map.zoomOut">zoomOut</a> and <a href="#Map.zoomTo">zoomTo</a> methods:
+
+</p>
+<pre><code>map.zoomIn();   // increase zoom by 1
+map.zoomOut();  // decrease zoom by 1
+map.zoomTo(12); // zoom to level 12</code></pre>
+<p><a name="quick.layers"></a>
+</p>
+<h3>Working with Layers</h3>
+<p>One popular feature of many online maps is a &quot;hybrid&quot; style, which overlays satellite imagery with graphical labels. You can achieve this effect in modestmaps.js by creating two <a href="#TemplatedLayer">tile layers</a>, and passing them both to the <a href="#Map.constructor">Map constructor</a> as an array:
+
+</p>
+<pre><code>var baseURL = &quot;http://tile.stamen.com/&quot;,
+    watercolor = new MM.TemplatedLayer(baseURL + &quot;watercolor/{Z}/{X}/{Y}.jpg&quot;),
+    labels = new MM.TemplatedLayer(baseURL + &quot;toner-labels/{Z}/{X}/{Y}.jpg&quot;);
+var map = new MM.Map(&quot;map&quot;, [watercolor, labels]);</code></pre>
+<p>Or you can create the map with one layer, then add the overlay later:
+
+</p>
+<pre><code>var map = new MM.Map(&quot;map&quot;, watercolor);
+map.addLayer(labels);</code></pre>
+<p>See the <a href="#Map.addLayer">addLayer</a> docs and the <a href="#TemplatedLayer">TemplatedLayer</a> class reference for more on working with layers.
+
+</p>
+<p><a name="Map"></a>
+</p>
+<h2>MM.Map</h2>
+<p>The Map class is the core of <strong>modestmaps.js</strong>.
+
+</p>
+<pre><code>new MM.Map(parent [, layerOrLayers [, dimensions [, eventHandlers]]])</code></pre>
+<p>Creates a new map inside the given <strong>parent</strong> element, containing the specified <strong>layers</strong>, optionally with the specified <strong>dimensions</strong> in pixels and custom <strong>event handlers</strong>. The <strong>Map</strong> constructor arguments are described in detail below:
+
+</p>
+<h4>parent</h4>
+<p>The parent <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-745549614">element</a> of the map. This is typically a <code>String</code> indicating the ID of the element:
+
+</p>
+<pre><code>var map = new MM.Map(&quot;map&quot;, []);</code></pre>
+<p>You can also provide an element reference:
+
+</p>
+<pre><code>var firstDiv = new MM.Map(document.querySelector(&quot;div.map&quot;), ...);</code></pre>
+<p>Here&#39;s a pattern for inserting maps into a series of classed elements, using <a href="https://developer.mozilla.org/en/DOM/document.getElementsByClassName">document.getElementsByClassName</a>:
+
+</p>
+<pre><code>var elements = document.getElementsByClassName(&quot;map&quot;),
+    maps = [];
+for (var i = 0; i &lt; elements.length; i++) {
+  maps[i] = new MM.Map(elements[i], ...);
+}</code></pre>
+<p>If an element with the provided ID string is not found, an exception is raised.
+
+</p>
+<p>If <strong>parent</strong> is not an object or a string, an exception is raised.
+
+
+</p>
+<h4>layerOrLayers</h4>
+<p>Either a single <a href="#Layer">layer</a> object or an array of layer objects. Layer objects should either be instances of the <a href="#Layer">Layer</a> class or implement the <a href="#Layer-Interface">Layer interface</a>.
+
+</p>
+<p>Here&#39;s an example of a map with two tile layers, from maps.stamen.com:
+
+</p>
+<pre><code>var baseURL = &quot;http://tile.stamen.com/&quot;,
+    watercolor = new MM.TemplatedLayer(baseURL + &quot;watercolor/{Z}/{X}/{Y}.png&quot;),
+    labels = new MM.TemplatedLayer(baseURL + &quot;toner-labels/{Z}/{X}/{Y}.png&quot;);
+var map = new MM.Map(&quot;map&quot;, [watercolor, labels]);</code></pre>
+<p>NOTE: Before modestmaps.js <em>v3.1.1</em>, an exception was raised if <strong>layerOrLayers</strong> was not an object or an array.
+
+
+</p>
+<h4>dimensions</h4>
+<p>An optional map size in pixels, expressed as a <a href="#Point">Point</a> object.
+
+</p>
+<pre><code>var size = new MM.Point(512, 512);
+var map = new MM.Map(&quot;map&quot;, [], size);
+console.log(&quot;map size:&quot;, map.dimensions.x, &quot;x&quot;, map.dimensions.y);</code></pre>
+<p>If <strong>dimensions</strong> is <code>null</code> or <code>undefined</code>, the dimensions are derived from
+the width and height of the parent element, and the map&#39;s <a href="#Map.autoSize">autoSize</a>
+flag is set to <code>true</code>.
+
+</p>
+<p>Empty <code>&lt;div&gt;</code> elements have no intrinsic height, so if you don&#39;t provide dimensions you&#39;ll need to provide the map&#39;s parent height in CSS (either inline or in a stylesheet).
+
+</p>
+<h4>eventHandlers</h4>
+<p>An optional array of interaction event handlers, which should implement the <a href="#EventHandler-Interface">EventHandler interface</a>. If no handlers are provided (<code>eventHandlers === undefined</code>), the map is initialized with <a href="#MouseHandler">mouse</a> and <a href="#TouchHandler">touch</a> handlers.
+
+</p>
+<p>For instance, to create a map without scroll wheel zooming (which is enabled by default), you can provide <a href="#DragHandler">drag</a>, and <a href="#DoubleClickHandler">double-click</a> handlers:
+
+</p>
+<pre><code>var map = new MM.Map(&quot;map&quot;, [], null, [
+  new MM.DragHandler(),
+  new MM.DoubleClickHandler()
+]);</code></pre>
+<p>The <a href="#TouchHandler">touch</a> handler provides panning and zooming in touch-enabled browsers:
+
+</p>
+<pre><code>var map = new MM.Map(&quot;map&quot;, [], null, [
+  new MM.TouchHandler()
+]);</code></pre>
+<p>To initialize the map without any interaction handlers, specify <strong>eventHandlers</strong> as <code>null</code> or an empty array (<code>[]</code>).
+
+
+</p>
+<p><a name="Map.getCenter"></a>
+</p>
+<h3>getCenter <code>map.getCenter()</code></h3>
+<p>Get the map&#39;s center <strong>location</strong>.
+
+</p>
+<pre><code>var center = map.getCenter();
+console.log(&quot;center latitude:&quot;, center.lat, &quot;+ longitude:&quot;, center.lon);</code></pre>
+<p><a name="Map.setCenter"></a>
+</p>
+<h3>setCenter <code>map.setCenter(location)</code></h3>
+<p>Set the map&#39;s center <strong>location</strong>.
+
+</p>
+<pre><code>var center = new MM.Location(37.764, -122.419);
+map.setCenter(center);</code></pre>
+<p><a name="Map.getZoom"></a>
+</p>
+<h3>getZoom <code>map.getZoom()</code><a name="Map.getZoom"></a></h3>
+<p>Get the map&#39;s <strong>zoom level</strong>.
+
+</p>
+<pre><code>var zoom = map.getZoom();
+console.log(&quot;zoom level:&quot;, zoom);</code></pre>
+<p><a name="Map.setZoom"></a>
+</p>
+<h3>setZoom <code>map.setZoom(zoom)</code></h3>
+<p>Set the map&#39;s <strong>zoom level</strong>.
+
+</p>
+<pre><code>map.setZoom(17);</code></pre>
+<p><a name="Map.setCenterZoom"></a>
+</p>
+<h3>setCenterZoom <code>map.setCenterZoom(location, zoom)</code></h3>
+<p>Set the map&#39;s center <strong>location</strong> and <strong>zoom level</strong>.
+
+</p>
+<pre><code>map.setCenterZoom(new MM.Location(37.764, -122.419), 17);</code></pre>
+<p><a name="Map.getExtent"></a>
+</p>
+<h3>getExtent <code>map.getExtent()</code></h3>
+<p>Get the visible extent (bounds) of the map as an <a href="#Extent">Extent</a> object.
+
+</p>
+<pre><code>var extent = map.getExtent();
+console.log(&quot;northwest location:&quot;, extent.northWest());
+console.log(&quot;southeast location:&quot;, extent.southEast());</code></pre>
+<p><a name="Map.setExtent"></a>
+</p>
+<h3>setExtent <code>map.setExtent(extent [, precise])</code></h3>
+<p>Modify the center and zoom of the map so that the provided <strong>extent</strong> is visible. If <strong>precise</strong> is <code>true</code>, resulting zoom levels may be fractional. (By default, the map&#39;s zoom level is rounded down to keep tile images from blurring.)
+
+</p>
+<pre><code>var extent = new MM.Extent(
+  new MM.Location(55.679, 12.584),
+  new MM.Location(55.668, 12.607)
+);
+map.setExtent(extent, true);</code></pre>
+<p>NOTE: For historical reasons, <strong>setExtent</strong> also accepts an array of <a href="#Location">Location</a> objects, which are converted using <a href="#Extent.fromArray">Extent.fromArray</a>.
+
+</p>
+<p><a name="Map.zoomIn"></a>
+</p>
+<h3>zoomIn <code>map.zoomIn()</code></h3>
+<p>Increase the map&#39;s zoom level by one.
+
+</p>
+<p><a name="Map.zoomOut"></a>
+</p>
+<h3>zoomOut <code>map.zoomOut()</code></h3>
+<p>Decrease the map&#39;s zoom level by one.
+
+</p>
+<p><a name="Map.zoomBy"></a>
+</p>
+<h3>zoomBy <code>map.zoomBy(zoomOffset)</code></h3>
+<p>Zoom the map by the provided <strong>offset</strong>. Positive offsets zoom in; negative offsets zoom out.
+
+</p>
+<pre><code>// this is the equivalent of calling map.zoomIn() twice:
+map.zoomBy(2);</code></pre>
+<p><a name="Map.zoomByAbout"></a>
+</p>
+<h3>zoomByAbout <code>map.zoomByAbout(zoomOffset, point)</code></h3>
+<p>Zoom the map by the provided <strong>zoom offset</strong> from a <strong>point</strong> on the screen in pixels. Positive offsets zoom in; negative offsets zoom out. This function is used by <a href="#DoubleClickHandler">DoubleClickHandler</a> to zoom in on the point where the map is double-clicked.
+
+</p>
+<pre><code>// zoom in on the upper left corner
+var point = new MM.Point(0, 0);
+map.zoomByAbout(1, point);</code></pre>
+<p><a name="Map.panBy"></a>
+</p>
+<h3>panBy <code>map.panBy(x, y)</code></h3>
+<p>Pan the map by the specified <strong>x</strong> and <strong>y</strong> distance in pixels. Positive values move the map right and down, respectively; negative values move the map left and up.
+
+</p>
+<pre><code>// pan 500 pixels to the right
+map.panBy(500, 0);
+// pan 200 pixels up
+map.panBy(0, -200);</code></pre>
+<p><a name="Map.panLeft"></a>
+</p>
+<h3>panLeft <code>map.panLeft()</code></h3>
+<p><a name="Map.panRight"></a>
+</p>
+<h3>panRight <code>map.panRight()</code></h3>
+<p><a name="Map.panUp"></a>
+</p>
+<h3>panUp <code>map.panUp()</code></h3>
+<p><a name="Map.panDown"></a>
+</p>
+<h3>panDown <code>map.panDown()</code></h3>
+<p>Pan the map to the left, right, up or down by 100 pixels. To vary the offset distance, use <a href="#Map.panBy">panBy</a>.
+
+</p>
+<p><a name="Map.getLayers"></a>
+</p>
+<h3>getLayers <code>map.getLayers()</code></h3>
+<p>Get a copy of the map&#39;s layers array.
+
+</p>
+<pre><code>var layers = map.getLayers();
+var base = layers[0];</code></pre>
+<p><a name="Map.getLayerAt"></a>
+</p>
+<h3>getLayerAt <code>map.getLayerAt(index)</code></h3>
+<p>Get the layer at a specific <strong>index</strong>. The first layer is at index <code>0</code>, the second at <code>1</code>, etc.
+
+</p>
+<pre><code>var map = new MM.Map(...);
+var base = map.getLayerAt(0);
+base.parent.id = &quot;base&quot;;</code></pre>
+<p><a name="Map.addLayer"></a>
+</p>
+<h3>addLayer <code>map.addLayer(layer)</code></h3>
+<p>Add <strong>layer</strong> to the map&#39;s <a href="#Map.layers">layer stack</a>]. This triggers a <a href="#Map.redraw">redraw</a>.
+
+</p>
+<pre><code>var layer = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner-lines/{Z}/{X}/{Y}.png&quot;);
+map.addLayer(layer);</code></pre>
+<p><a name="Map.removeLayer"></a>
+</p>
+<h3>removeLayer <code>map.removeLayer(layer)</code></h3>
+<p>Remove <strong>layer</strong> from the map&#39;s <a href="#Map.layers">layer stack</a>.
+
+</p>
+<p><a name="Map.setLayerAt"></a>
+</p>
+<h3>setLayerAt <code>map.setLayerAt(index, newLayer)</code></h3>
+<p>Replace the existing layer at <strong>index</strong> with the <strong>new layer</strong>.
+
+</p>
+<pre><code>var layer = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);
+map.setLayerAt(0, layer);</code></pre>
+<p><a name="Map.insertLayerAt"></a>
+</p>
+<h3>insertLayerAt <code>map.insertLayerAt(index, layer)</code></h3>
+<p>Insert a <strong>layer</strong> at the provided <strong>index</strong>.
+
+</p>
+<pre><code>// let&#39;s assume the map has 2 layers already
+var layer = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner-lines/{Z}/{X}/{Y}.png&quot;);
+map.insertLayerAt(1, layer);
+// (now it has 3, with our new layer at index 1)</code></pre>
+<p><a name="Map.removeLayerAt"></a>
+</p>
+<h3>removeLayerAt <code>map.removeLayerAt(index)</code></h3>
+<p>Remove the layer at the provided index.
+
+</p>
+<pre><code>// remove the second layer
+map.removeLayerAt(1);</code></pre>
+<p><a name="Map.swapLayersAt"></a>
+</p>
+<h3>swapLayersAt <code>map.swapLayersAt(indexA, indexB)</code></h3>
+<p>Swap the z-index (order) or the layers at <strong>indexA</strong> and <strong>indexB</strong>.
+
+</p>
+<pre><code>// swap the bottom and top layers
+var bottom = 0,
+    top = map.getLayers().length - 1;
+map.swapLayersAt(bottom, top);</code></pre>
+<p><a name="Map.pointLocation"></a>
+</p>
+<h3>pointLocation <code>map.pointLocation(screenPoint)</code></h3>
+<p>Convert a <strong>point on the screen</strong> to a <a href="#Location">location</a> (a point on the Earth).
+
+</p>
+<p><a name="Map.pointCoordinate"></a>
+</p>
+<h3>pointCoordinate <code>map.pointCoordinate(screenPoint)</code></h3>
+<p>Convert a <strong>point on the screen</strong> to a <a href="#Coordinate">tile coordinate</a>.
+
+</p>
+<p><a name="Map.locationPoint"></a>
+</p>
+<h3>locationPoint <code>locationPoint(location)</code></h3>
+<p>Convert a <strong>location</strong> (a point on the Earth) to a <a href="#Point">point</a> on the screen.
+
+</p>
+<p><a name="Map.locationCoordinate"></a>
+</p>
+<h3>locationCoordinate <code>map.locationCoordinate(location)</code></h3>
+<p>Convert a <strong>location</strong> (a point on the Earth) to a <a href="#Coordinate">tile coordinate</a>.
+
+</p>
+<p><a name="Map.coordinateLocation"></a>
+</p>
+<h3>coordinateLocation <code>map.coordinateLocation(coord)</code></h3>
+<p>Convert a <a href="#Coordinate">tile coordinate</a> to a <a href="#Location">location</a> (a point on the Earth).
+
+</p>
+<p><a name="Map.coordinatePoint"></a>
+</p>
+<h3>coordinatePoint <code>map.coordinatePoint(coord)</code></h3>
+<p>Convert a <a href="#Coordinate">tile coordinate</a> to a <a href="#Point">point</a> on the screen.
+
+</p>
+<p><a name="Map.setZoomRange"></a>
+</p>
+<h3>setZoomRange <code>map.setZoomRange(minZoom, maxZoom)</code></h3>
+<p>Set the map&#39;s <strong>minimum</strong> and <strong>maximum</strong> zoom levels. This function modifies the zoom levels of the map&#39;s <a href="#Map.coordLimits">coordLimits</a>.
+
+</p>
+<p><a name="Map.setSize"></a>
+</p>
+<h3>setSize <code>map.setSize(dimensions)</code></h3>
+<p>Set the map&#39;s <strong>dimensions</strong> in pixels. If the map&#39;s <a href="#Map.autoSize">autoSize</a> flag is <code>true</code>, setting the size manually sets <strong>autoSize</strong> to <code>false</code> and prevents further automatic resizing.
+
+</p>
+<pre><code>map.setSize(new MM.Point(640, 480));</code></pre>
+<p>NOTE: The map&#39;s current size is available in its <a href="#Map.dimensions">dimensions</a> property.
+
+</p>
+<p><a name="Map.addCallback"></a>
+</p>
+<h3>addCallback <code>map.addCallback(eventType, callback)</code></h3>
+<p>Add a <strong>callback function</strong> (listener) to the map for a specific <strong>event type</strong>. Callback functions always receive the map instance as their first argument; additional arguments differ by event type. See the <a href="#Map-events">events list</a> for supported types.
+
+</p>
+<pre><code>function onPanned(map, offset) {
+  console.log(&quot;panned by&quot;, offset[0], offset[1]);
+}
+
+map.addCallback(&quot;panned&quot;, onPanned);</code></pre>
+<p>You can remove callbacks with <a href="#Map.removeCallback">removeCallback</a>.
+
+</p>
+<p><a name="Map.removeCallback"></a>
+</p>
+<h3>removeCallback <code>map.removeCallback(eventType, callback)</code></h3>
+<p>Remove a <strong>callback function</strong> (listener) for the given <strong>event type</strong>. You can add callbacks with <a href="#Map.addCallback">addCallback</a>.
+
+</p>
+<pre><code>map.removeCallback(&quot;panned&quot;, onPanned);</code></pre>
+<p><a name="Map.draw"></a>
+</p>
+<h3>draw <code>map.draw()</code></h3>
+<p>Redraw the map and its layers. First, the map enforces its <a href="#Map.coordLimits">coordLimits</a> on its center and zoom. If <a href="#Map.autoSize">autoSize</a> is <code>true</code>, the map&#39;s dimensions are recalculated from its <a href="#Map.parent">parent</a>. Lastly, each of the map&#39;s layers is <a href="#Layer.draw">drawn</a>.
+
+</p>
+<p><a name="Map.requestRedraw"></a>
+</p>
+<h3>requestRedraw <code>map.requestRedraw()</code></h3>
+<p>Request a &quot;lazy&quot; call to <a href="#Map.draw">draw</a> in 1 second. This is useful if you&#39;re responding to lots of user input and know that you&#39;ll need to redraw the map <em>eventually</em>, but not immediately.
+
+</p>
+<p>Multiple calls to <strong>requestRedraw</strong> within 1 second of one another will be ignored, so this is a perfectly reasonable thing to do:
+
+</p>
+<pre><code>setInterval(function() {
+  map.requestRedraw();
+}, 100);</code></pre>
+<h2>Hybrid Methods</h2>
+<p>Hybrid methods behave differently depending on whether they receive arguments: The &quot;getter&quot; form (with no arguments) returns the current value, and the &quot;setter&quot; form sets it to the value provided then returns <code>this</code>, which makes function chaining possible (a la <a href="http://jquery.com">jQuery</a>, <a href="http://d3js.com">d3</a>, and <a href="http://polymaps.org">Polymaps</a>).
+
+</p>
+<p><a name="Map.center"></a>
+</p>
+<h3>center <code>map.center([location])</code></h3>
+<p><a href="#Map.getCenter">Get</a> or <a href="#Map.setCenter">set</a> the map&#39;s center <strong>location</strong>.
+
+</p>
+<pre><code>var center = map.center();
+center.lat += .1;
+map.center(center);</code></pre>
+<p><a name="Map.zoom"></a>
+</p>
+<h3>zoom <code>map.zoom([level])</code></h3>
+<p><a href="#Map.getZoom">Get</a> or <a href="#Map.setZoom">set</a> the map&#39;s <strong>zoom level</strong>.
+
+</p>
+<pre><code>var zoom = map.zoom();
+zoom -= 3;
+map.zoom(zoom);</code></pre>
+<p><a name="Map.extent"></a>
+</p>
+<h3>extent <code>map.extent([locationsOrExtent [, precise]])</code></h3>
+<p><a href="#Map.getZoom">Get</a> or <a href="#Map.setZoom">set</a> the map&#39;s extent. If <strong>precise</strong> is <code>true</code>, resulting zoom levels may be fractional.
+
+</p>
+<pre><code>// get the extent, check if it contains a location…
+var extent = map.extent(),
+    loc = new MM.Location(37.764, -122.419);
+if (!extent.containsLocation(loc)) {
+  // then enclose the location and set the map&#39;s new extent
+  extent.encloseLocation(loc);
+  map.extent(extent);
+}</code></pre>
+<h2>Map Properties</h2>
+<p><a name="Map.autoSize"></a>
+</p>
+<h3>autoSize <code>map.autoSize</code></h3>
+<p>The <strong>autoSize</strong> property is set to <code>true</code> if no dimensions are provided in the <a href="#Map">constructor</a>. When <strong>autoSize</strong> is <code>true</code>, the map&#39;s dimensions are recalculated (and the map is <a href="#Map.draw">redrawn</a>) <a href="https://developer.mozilla.org/en/DOM/window.onresize">on window resize</a>.
+
+</p>
+<p><a name="Map.coordinate"></a>
+</p>
+<h3>coordinate <code>map.coordinate</code></h3>
+<p>The map&#39;s current center <a href="#Coordinate">coordinate</a>.
+
+</p>
+<p><a name="Map.coordLimits"></a>
+</p>
+<h3>coordLimits <code>map.coordLimits</code></h3>
+<p>An array specifying the map&#39;s coordinate bounds, in which the first element defines the top left (northwest) and outermost zoom level, and the second defines the bottom right (southwest) and innermost zoom.
+
+</p>
+<p>You can adjust the minimum and maximum zoom levels of the map without affecting the bounds with <a href="#Map.setZoomRange">setZoomRange</a>.
+
+</p>
+<p><a name="Map.dimensions"></a>
+</p>
+<h3>dimensions <code>map.dimensions</code></h3>
+<p>The map&#39;s current dimensions, expressed as a <a href="#Point">Point</a>.
+
+</p>
+<pre><code>// the bottom right screen coordinate is also its southeast point
+var southEast = map.pointLocation(map.dimensions);</code></pre>
+<p><a name="Map.parent"></a>
+</p>
+<h3>parent <code>map.parent</code></h3>
+<p>The map&#39;s parent (container) DOM element.
+
+</p>
+<pre><code>map.parent.style.backgroundColor = &quot;green&quot;;</code></pre>
+<p><a name="Map.projection"></a>
+</p>
+<h3>projection <code>map.projection</code></h3>
+<p>The map&#39;s projection, also known as Coordinate Reference System (CRS) or Spatial Reference System (SRS).
+
+</p>
+<p><a name="Map.tileSize"></a>
+</p>
+<h3>tileSize <code>map.tileSize</code></h3>
+<p>The pixel dimensions of the map&#39;s individual image tiles, expressed as a <a href="#Point">Point</a>. By default, tiles are <strong>256</strong> pixels square.
+
+</p>
+<pre><code>// you can use the tile size to estimate the number of tiles visible
+// at any given moment:
+var maxRows = Math.ceil(map.dimensions.x / map.tileSize.x);
+var maxCols = Math.ceil(map.dimensions.y / map.tileSize.y);
+var maxTiles = maxRows * maxCols;
+console.log(&quot;max tiles:&quot;, maxTiles);</code></pre>
+<p><a name="Map-events"></a>
+</p>
+<h2>Map Events</h2>
+<p>Map events are triggered when the map moves (either in response to a direct function call or indirectly, through user interaction with an event handlers) or is <a href="#Map.draw">drawn</a>. You can start and stop listening for map events with <a href="#Map.addCallback">addCallback</a> and <a href="#Map.removeCallback">removeCallback</a>:
+
+</p>
+<pre><code>function onDrawn(map) {
+  console.log(&quot;map drawn!&quot;);
+}
+
+// After this, the onDrawn will be called whenever the map changes.
+map.addCallback(&quot;drawn&quot;, onZoomed);
+// Later, remove the callback.
+map.removeCallback(&quot;drawn&quot;, onZoomed);</code></pre>
+<p><a name="Map-zoomed"></a>
+</p>
+<h3>&quot;zoomed&quot; <code>function(map, zoomOffset) { ... }</code></h3>
+<p>Fires when the <strong>map&#39;s</strong> zoom level changes, usually in response to <a href="#Map.zoomBy">zoomBy</a> or <a href="#Map.zoomByAbout">zoomByAbout</a>. Note that the <strong>zoom offset</strong> is the <em>difference</em> between the last zoom level and the new zoom level. You can query the map&#39;s current zoom level (rather than the offset) with <a href="#Map.getZoom">getZoom</a>.
+
+</p>
+<pre><code>map.addCallback(&quot;zoomed&quot;, function(map, zoomOffset) {
+  console.log(&quot;map zoomed by:&quot;, zoomOffset);
+});</code></pre>
+<p><a name="Map-panned"></a>
+</p>
+<h3>&quot;panned&quot; <code>function(map, panOffset) { ... }</code></h3>
+<p>Fires when the <strong>map</strong> is panned, and receives the <strong>pan offset</strong> (delta) in pixels as a two-element array (<code>[dx, dy]</code>).
+
+</p>
+<pre><code>map.addCallback(&quot;panned&quot;, function(map, panOffset) {
+  var dx = panOffset[0],
+      dy = panOffset[1];
+  console.log(&quot;map panned by x:&quot;, dx, &quot;y:&quot;, dy);
+});</code></pre>
+<p><a name="Map-resized"></a>
+</p>
+<h3>&quot;resized&quot; <code>function(map, dimensions) { ... }</code></h3>
+<p>Fires when the <strong>map</strong> is resized, and receives the map&#39;s new <strong>dimensions</strong> as a <a href="#Point">Point</a> object.
+
+</p>
+<pre><code>map.addCallback(&quot;panned&quot;, function(map, dimensions) {
+  console.log(&quot;map dimensions:&quot;, dimensions.x, &quot;y:&quot;, dimensions.y);
+});</code></pre>
+<p><a name="Map-extentset"></a>
+</p>
+<h3>&quot;extentset&quot; <code>function(map, locationsOrExtent) { ... }</code></h3>
+<p>Fires whenever the <strong>map&#39;s</strong> full extent is set, and receives the <a href="#Extent">Extent</a> or array of <a href="#Location">Location</a> objects provided to <a href="#Map.setExtent">setExtent</a> or <a href="#Map.extent">extent</a>.
+
+</p>
+<pre><code>map.addCallback(&quot;extentset&quot;, function(map, extent) {
+  // convert to an Extent instance if it&#39;s a Location array
+  if (extent instanceof Array) {
+    extent = MM.Extent.fromArray(extent);
+  }
+  console.log(&quot;map extent:&quot;, extent);
+});</code></pre>
+<p><a name="Map-drawn"></a>
+</p>
+<h3>&quot;drawn&quot; <code>function(map) { ... }</code></h3>
+<p>Fires whenever the <strong>map</strong> is <a href="#Map.draw">redrawn</a>.
+
+</p>
+<pre><code>map.addCallback(&quot;drawn&quot;, function(map) {
+  console.log(&quot;map drawn!&quot;);
+});</code></pre>
+<p><a name="Location"></a>
+</p>
+<h2>MM.Location</h2>
+<p>Location objects represent <a href="http://en.wikipedia.org/wiki/Geographic_coordinate_system">geographic coordinates</a> on the Earth&#39;s surface, expressed as degrees <em>latitude</em> and <em>longitude</em>. The constructor takes these two values as its arguments:
+
+</p>
+<pre><code>new MM.Location(latitude, longitude)</code></pre>
+<p>Locations are most often used when <a href="#Map.getCenter">getting</a> and <a href="#Map.setCenter">setting</a> the center of a <a href="#Map">map</a>. You can read the latitude and longitude of a Location by accessing its <code>lat</code> and <code>lon</code> properties, respectively:
+
+</p>
+<pre><code>var center = map.getCenter(),
+    latitude = center.lat,
+    longitude = center.lon;</code></pre>
+<p>Note that the <a href="#Map">Map</a> class doesn&#39;t store any references to Location objects internally. Both the <a href="#Map.getCenter">getCenter</a> and <a href="#Map.setCenter">setCenter</a> methods convert between geographic and <a href="#Coordinate">tile coordinate</a> systems, and return copies of objects rather than references. This means that changing the <code>lat</code> and <code>lon</code> properties of a Location object returned from <strong>getCenter</strong> won&#39;t change the map&#39;s center; you have to call <strong>setCenter</strong> with the modified Location object.
+
+</p>
+<p><a name="Location.lat"></a>
+</p>
+<h3>lat <code>location.lat</code></h3>
+<p>The location&#39;s <strong>latitude</strong>, or distance from the Earth&#39;s <a href="http://en.wikipedia.org/wiki/Prime_meridian">equator</a> in degrees. <code>-90</code> is at the bottom of the globe (the south pole in Antarctica), <code>0</code> is at the equator, and <code>90</code> is at the top (the north pole in the Arctic Ocean).
+
+</p>
+<p><strong>NOTE:</strong> Because ModestMaps uses a <a href="http://en.wikipedia.org/wiki/Mercator_projection">spherical Mercator projection</a>, points at Earth&#39;s extreme north and south poles become infinitely large and impossible to model. This limits the effective range of web maps to <code>±85º</code>, depending on zoom level. Setting a map&#39;s center to a Location with a latitude outside of this range will most likely have undesired consequences.
+
+</p>
+<p><a name="Location.lon"></a>
+</p>
+<h3>lon <code>location.lon</code></h3>
+<p>The location&#39;s <strong>longitude</strong>, or distance from the <a href="http://en.wikipedia.org/wiki/Prime_meridian">prime meridian</a> in degrees. Positive values are east of the prime meridian (towards Asia); negative values are west (towards North America). <code>±180</code> degrees is near the <a href="http://en.wikipedia.org/wiki/International_Date_Line">international date line</a>. Longitude values outside of the <code>[-180, 180]</code> range &quot;wrap&quot;, so a longitude of <code>190</code> degrees may be converted to <code>-170</code> in certain calculations.
+
+</p>
+<p><a name="Location.fromString"></a>
+</p>
+<h3>Location.fromString <code>MM.Location.fromString(str)</code></h3>
+<p>Parse a string in the format <code>&quot;lat,lon&quot;</code> into a new Location object.
+
+</p>
+<p><a name="Location.distance"></a>
+</p>
+<h3>Location.distance <code>MM.Location.distance(a, b, earthRadius)</code></h3>
+<p>Get the physical distance (along a <a href="http://en.wikipedia.org/wiki/Great_circle">great circle</a>) between locations <strong>a</strong> and <strong>b</strong>, assuming an optional <strong>Earth radius</strong>:
+
+</p>
+<ul>
+<li><code>6378000</code> meters (the default)</li>
+<li><code>3963.1</code> &quot;statute&quot; miles</li>
+<li><code>3443.9</code> nautical miles</li>
+<li><code>6378</code> kilometers</li>
+</ul>
+<p><a name="Location.interpolate"></a>
+</p>
+<h3>Location.interpolate <code>MM.Location.interpolate(a, b, t)</code></h3>
+<p>Interpolate along a <a href="http://en.wikipedia.org/wiki/Great_circle">great circle</a> between locations <strong>a</strong> and <strong>b</strong> at bias point <strong>t</strong> (a number between 0 and 1).
+
+</p>
+<p><a name="Location.bearing"></a>
+</p>
+<h3>Location.bearing <code>MM.Location.bearing(a, b)</code></h3>
+<p>Determine the direction in degrees between locations <strong>a</strong> and <strong>b</strong>. Note that bearing direction is not constant along significant <a href="http://en.wikipedia.org/wiki/Great_circle">great cirlce</a> arcs.
+
+</p>
+<p><a name="Location-location"></a>
+</p>
+<h3>A warning about the <code>location</code> variable name</h3>
+<p>Because browsers reserve the <code>window.location</code> variable for <a href="https://developer.mozilla.org/en/DOM/window.location">information</a> about the current page location, we suggest using variable names other than <code>location</code> to avoid namespace conflicts. <code>center</code> and <code>loc</code> are good alternatives.
+
+
+</p>
+<p><a name="Extent"></a>
+</p>
+<h2>MM.Extent</h2>
+<p>Extent objects represent rectangular geographic bounding boxes, and are identified by their <code>north</code>, <code>south</code>, <code>east</code> and <code>west</code> bounds. North and south bounds are expressed as degrees <a href="#Location.lat">latitude</a>; east and west bounds are degrees <a href="#Location.lon">longitude</a>. The constructor takes two forms:
+
+</p>
+<pre><code>new MM.Extent(north, west, south, east)</code></pre>
+<p>Create an extent bounded by <strong>north</strong>, <strong>west</strong>, <strong>south</strong> and <strong>east</strong> edges.
+
+</p>
+<pre><code>new MM.Extent(northWest, southEast)</code></pre>
+<p>Create an extent containing both <strong>northWest</strong> and <strong>southEast</strong> <a href="#Location">locations</a>.
+
+</p>
+<p><a name="Extent.north"></a>
+</p>
+<h3>north <code>extent.north</code></h3>
+<p>The northern edge of the extent. The <a href="#Extent">constructor</a> compares northern and southern values and selects the higher of the two as its <code>north</code>.
+<a name="Extent.south"></a>
+</p>
+<h3>south <code>extent.south</code></h3>
+<p>The southern edge of the extent. The <a href="#Extent">constructor</a> compares northern and southern values and selects the lower of the two as its <code>south</code>.
+<a name="Extent.east"></a>
+</p>
+<h3>east <code>extent.east</code></h3>
+<p>The eastern edge of the extent. The <a href="#Extent">constructor</a> compares eastern and western values and selects the higher of the two as its <code>east</code>.
+<a name="Extent.west"></a>
+</p>
+<h3>west <code>extent.west</code></h3>
+<p>The western edge of the extent. The <a href="#Extent">constructor</a> compares eastern and western bounds and selects the lower of the two values as its <code>west</code>.
+
+</p>
+<p><a name="Extent.northWest"></a>
+</p>
+<h3>northWest <code>extent.northWest()</code></h3>
+<p>Get the extent&#39;s northwest corner as a <a href="#Location">Location</a>.
+<a name="Extent.northEast"></a>
+</p>
+<h3>northEast <code>extent.northEast()</code></h3>
+<p>Get the extent&#39;s northeast corner as a <a href="#Location">Location</a>.
+<a name="Extent.southEast"></a>
+</p>
+<h3>southEast <code>extent.southEast()</code></h3>
+<p>Get the extent&#39;s southeast corner as a <a href="#Location">Location</a>.
+<a name="Extent.southWest"></a>
+</p>
+<h3>southWest <code>extent.southWest()</code></h3>
+<p>Get the extent&#39;s southwest corner as a <a href="#Location">Location</a>.
+<a name="Extent.center"></a>
+</p>
+<h3>center <code>extent.center()</code></h3>
+<p>Get the extent&#39;s center as a <a href="#Location">Location</a>.
+
+</p>
+<p><a name="Extent.containsLocation"></a>
+</p>
+<h3>containsLocation <code>extent.containsLocation(lcoation)</code></h3>
+<p>Returns <code>true</code> if the <strong>location</strong> falls within the <strong>extent</strong>, otherwise <code>false</code>.
+
+</p>
+<pre><code>var extent = new MM.Extent(37.8, -122.5, 37.6, -122.3);
+var sf = new MM.Location(37.764, -122.419);
+var oakland = new MM.Location(37.804, -122.271);
+extent.containsLocation(sf); // true
+extent.containsLocation(oakland); // false</code></pre>
+<p><a name="Extent.encloseLocation"></a>
+</p>
+<h3>encloseLocation <code>extent.encloseLocation(location)</code></h3>
+<p>Update the bounds of <strong>extent</strong> to include the provided <strong>location</strong>.
+
+</p>
+<pre><code>var extent = new MM.Extent(37.8, -122.5, 37.6, -122.3);
+var oakland = new MM.Location(37.804, -122.271);
+extent.encloseLocation(oakland);
+extent.containsLocation(oakland); // true</code></pre>
+<p><a name="Extent.encloseLocations"></a>
+</p>
+<h3>encloseLocations <code>extent.encloseLocations(locations)</code></h3>
+<p>Update the bounds of <strong>extent</strong> to include the provided <strong>locations</strong> (an array of <a href="#Location">Location</a> objects).
+
+</p>
+<p><a name="Extent.encloseExtent"></a>
+</p>
+<h3>encloseExtent <code>extent.encloseExtent(otherExtent)</code></h3>
+<p>Update the bounds of <strong>extent</strong> to include the bounds of the <strong>other extent</strong>.
+
+</p>
+<p><a name="Extent.setFromLocations"></a>
+</p>
+<h3>setFromLocations <code>extent.setFromLocations(locations)</code></h3>
+<p>Reset the bounds of the <strong>extent</strong> and enclose the provided <strong>locations</strong>.
+
+</p>
+<p><a name="Extent.copy"></a>
+</p>
+<h3>copy <code>extent.copy()</code></h3>
+<p>Copy the <strong>extent</strong> and its <code>north</code>, <code>south</code>, <code>east</code> and <code>west</code> values.
+
+</p>
+<p><a name="Extent.toArray"></a>
+</p>
+<h3>toArray <code>extent.toArray()</code></h3>
+<p>Returns a two-element array containing the <strong>extent</strong>&#39;s <a href="#Extent.northWest">northwest</a> and <a href="#Extent.southEast">southeast</a> locations.
+
+</p>
+<p><a name="Extent.fromString"></a>
+</p>
+<h3>Extent.fromString <code>MM.Extent.fromString(str)</code></h3>
+<p>Parse a string in the format <code>&quot;north,west,south,east&quot;</code> into a new Extent object.
+
+</p>
+<p><a name="Extent.fromArray"></a>
+</p>
+<h3>Extent.fromArray <code>MM.Extent.fromArray(locations)</code></h3>
+<p>Create a new Extent object from an array of <a href="#Location">Location</a> objects.
+
+
+</p>
+<p><a name="Point"></a>
+</p>
+<h2>MM.Point</h2>
+<p>Point objects represent <em>x</em> and <em>y</em> coordinates on the screen, such as a <a href="#Map.dimensions">map&#39;s dimensions</a> and the position of mouse or touch interactions.
+
+</p>
+<pre><code>new MM.Point(x, y)</code></pre>
+<p>Create a new Point object with <strong>x</strong> and <strong>y</strong> coordinates. <code>parseFloat()</code> is used to convert string values to numbers. The resulting object has <code>x</code> and <code>y</code> properties.
+
+</p>
+<p>Point objects can be used with <a href="#Map.pointLocation">pointLocation</a> to determine the <a href="#Location">geographic coordinates</a> of a point on the  screen inside a map. For instance:
+
+</p>
+<pre><code>// define the map&#39;s dimensions
+var size = new MM.Point(640, 480);
+// create a map without any layers or event handlers
+var map = new MM.Map(&quot;map&quot;, [], size, []);
+// zoom to San Francisco
+map.setCenterZoom(new MM.Location(37.764, -122.419), 8);
+// get the geographic coordinates of the bottom right corner
+var southEast = map.pointLocation(size);</code></pre>
+<p>And vice-versa, you can use <a href="#Map.locationPoint">locationPoint</a> to get the screen position of a geographic coordinate:
+
+</p>
+<pre><code>var oakland = new MM.Location(37.804, -122.271);
+var point = map.locationPoint(oakland);
+// do something with point.x and point.y</code></pre>
+<h3>Point.distance <code>MM.Point.distance(a, b)</code></h3>
+<p>Compute the <a href="http://en.wikipedia.org/wiki/Euclidean_distance">Euclidian distance</a> between two Point objects.
+
+</p>
+<h3>Point.interpolate <code>MM.Point.interpolate(a, b, t)</code></h3>
+<p>Compute the point on a straight line between points <strong>a</strong> and <strong>b</strong> at normal distance <strong>t</strong>, a number between <code>0</code> and <code>1</code>. (If <code>t == .5</code> the point will be halfway between <strong>a</strong> and <strong>b</strong>.)
+
+</p>
+<p><a name="Coordinate"></a>
+</p>
+<h2>MM.Coordinate</h2>
+<p>Coordinate objects are used internally by ModestMaps to model the surface of the Earth in  <a href="http://en.wikipedia.org/wiki/Google_Maps#Map_projection">Google&#39;s spherical Mercator projection</a>, which flattens the globe into a square, or <em>tile</em>. Coordinate objects represent points within that tile at different <code>zoom</code> levels, with <code>column</code> and <code>row</code> properties indicating their <em>x</em> and <em>y</em> positions, respectively. Each round number column and row within a zoom level represents a 256-pixel square image displayed in a ModestMaps <a href="#Layer">tile layer</a>.
+
+</p>
+<pre><code>new Coordinate(row, column, zoom)</code></pre>
+<p><a name="Coordinate.zoom"></a>
+</p>
+<h3>zoom <code>coordinate.zoom</code></h3>
+<p>Coordinates are always expressed relative to a specific <strong>zoom</strong> level. At zoom <code>0</code>, the Earth fits into a single square tile, <code>Coordinate(0, 0, 0)</code>. With each increase in zoom, every tile is divided into 4 parts, so at zoom level <code>1</code> the Earth becomes 4 tiles; at zoom level <code>2</code> it becomes 16. Coordinates can be converted to different zoom levels with <a href="#Coordinate.zoomTo">zoomTo</a>.
+
+</p>
+<p><a name="Coordinate.column"></a>
+</p>
+<h3>column <code>coordinate.column</code></h3>
+<p>A Coordinate&#39;s <code>column</code> represents a tile&#39;s relative <em>x</em> position at its zoom level. At zoom <code>0</code> there is one column. With each increase in zoom, the number of columns doubles, so at zoom <code>1</code> there are two (<code>0 &gt;= column &lt; 2</code>), at zoom <code>2</code> there are four (<code>0 &gt;= column &lt; 4</code>), and so on.
+
+</p>
+<p><a name="Coordinate.row"></a>
+</p>
+<h3>row <code>coordinate.row</code></h3>
+<p>A Coordinate&#39;s <code>row</code> represents a tile&#39;s relative <em>y</em> position at its zoom level. At zoom <code>0</code> there is only one tile. With each increase in zoom, the number of rows doubles, so at zoom <code>1</code> there are two (<code>0 &gt;= row &lt; 2</code>), at zoom <code>2</code> there are four (<code>0 &gt;= row &lt; 4</code>), and so on.
+
+</p>
+<p><a name="Coordinate.copy"></a>
+</p>
+<h3>copy <code>coordinate.copy()</code></h3>
+<p>Copy the <strong>coordinate</strong>&#39;s <code>zoom</code>, <code>row</code> and <code>column</code> properties into a new <strong>Coordinate</strong> object.
+
+</p>
+<p><a name="Coordinate.container"></a>
+</p>
+<h3>container <code>coordinate.container()</code></h3>
+<p>Create a Coordinate object that contains <strong>coordinate</strong> by flooring its <code>zoom</code>, <code>column</code> and <code>row</code> properties. This is the actual &quot;tile&quot; coordinate.
+
+</p>
+<p><a name="Coordinate.zoomTo"></a>
+</p>
+<h3>zoomTo <code>coordinate.zoomTo(zoom)</code></h3>
+<p>Copy <strong>coordinate</strong> and adjust its <code>row</code> and <code>column</code> properties to match the new <strong>zoom</strong> level.
+
+</p>
+<p><a name="Coordinate.zoomBy"></a>
+</p>
+<h3>zoomBy <code>coordinate.zoomBy(zoomOffset)</code></h3>
+<p>Zoom <strong>coordinate</strong> by the the specified <strong>zoom offset</strong> and return a new Coordinate object.
+
+</p>
+<p><a name="Coordinate.up"></a>
+</p>
+<h3>up <code>coordinate.up()</code></h3>
+<p>Get the Coordinate above <strong>coordinate</strong>.
+
+</p>
+<p><a name="Coordinate.right"></a>
+</p>
+<h3>right <code>coordinate.right()</code></h3>
+<p>Get the Coordinate to the right of <strong>coordinate</strong>.
+
+</p>
+<p><a name="Coordinate.down"></a>
+</p>
+<h3>down <code>coordinate.down()</code></h3>
+<p>Get the Coordinate below <strong>coordinate</strong>.
+
+</p>
+<p><a name="Coordinate.left"></a>
+</p>
+<h3>left <code>coordinate.left()</code></h3>
+<p>Get the Coordinate to the left of <strong>coordinate</strong>.
+
+</p>
+<p><a name="Coordinate.toKey"></a>
+</p>
+<h3>toKey <code>coordinate.toKey()</code></h3>
+<p>Generate a string key for the <strong>coordinate</strong>, e.g. <code>&quot;(1,1,5)&quot;</code> (<code>&quot;zoom,row,column&quot;</code>).
+
+</p>
+<p><a name="Coordinate.toString"></a>
+</p>
+<h3>toString <code>coordinate.toString()</code></h3>
+<p>Format the <strong>coordinate</strong> as a human-readable string, e.g. <code>&quot;(5,4 @ 1)&quot;</code> (<code>(&quot;row,column @ zoom&quot;)</code>)
+
+
+</p>
+<p><a name="Coordinate-pre-projecting"></a>
+</p>
+<h3>Pre-projecting</h3>
+<p>Coordinate are also useful for &quot;pre-projecting&quot; <a href="#Location">locations</a>. Because conversions between screen and geographic coordinates are more computationally expensive than conversions between screen and tile coordinates, you may wish to do the <a href="#Map.locationCoordinate">Location to Coordinate</a> conversion once then do <a href="#Map.coordinatePoint">Coordinate to Point</a> conversions subsequently. For example:
+
+</p>
+<pre><code>var map = new MM.Map(&quot;map&quot;, …);
+var sfLocation = new MM.Location(37.764, -122.419);
+var sfCoordinate = map.locationCoordinate(sfLocation);
+// assuming there is an &quot;sf&quot; element, with CSS positon: absolute
+var marker = map.parent.appendChild(document.getElementById(&quot;sf&quot;));
+map.addCallback(&quot;drawn&quot;, function() {
+    var point = map.coordinatePoint(sfCoordinate);
+    marker.style.left = point.x + &quot;px&quot;;
+    marker.style.top = point.y + &quot;px&quot;;
+});</code></pre>
+<p>In this example, <code>map.coordinatePoint(sfCoordinate)</code> will be much faster than calling <code>map.locationPoint(sfLocation)</code> each time the map is redrawn. You probably won&#39;t notice the performance gain with one marker, but you certainly will with hundreds.
+
+
+
+</p>
+<p><a name="TemplatedLayer"></a>
+</p>
+<h2>MM.TemplatedLayer</h2>
+<p>The <strong>TemplatedLayer</strong> class provides a simple interface for making layers with templated tile URLs.
+
+</p>
+<pre><code>new MM.TemplatedLayer(templateURL [, subdomains])</code></pre>
+<p>Create a layer in which each tile image&#39;s URL is a variation of the <strong>URL template</strong> and optional list of <strong>subdomains</strong>.
+
+</p>
+<p>You can learn more about templated tile URLs in the <a href="#Template">Template</a> reference. Here are some examples:
+
+</p>
+<pre><code>var toner = new MM.TemplatedLayer(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);
+var bing = new MM.TemplatedLayer(&quot;http://ecn.t0.tiles.virtualearth.net/tiles/r{Q}?&quot; +
+    &quot;g=689&amp;mkt=en-us&amp;lbl=l1&amp;stl=h&quot;);
+var osm = new MM.TemplatedLayer(&quot;http://tile.openstreetmap.org/{Z}/{X}/{Y}.png&quot;);</code></pre>
+<p><a name="Layer"></a>
+</p>
+<h2>MM.Layer</h2>
+<p>Map layers are where map imagery (including but not limited to tiles) gets rendered. The <strong>Layer</strong> class does all of the heavy lifting to determine which tiles are visible at any given moment, loads them if necessary, then adds them to the DOM and positions them on screen.
+
+</p>
+<pre><code>new MM.Layer(provider [, parent])</code></pre>
+<p>Create a new map layer that uses a <strong>provider</strong>, optionally specifying a custom <strong>parent</strong> element (or container). A layer&#39;s <strong>provider</strong> is an instance of the <a href="#MapProvider">MapProvider</a> class, which converts <a href="#Coordinate">tile coordinates</a> into image URLs. This example provides <a href="http://placehold.it/">Placehold.it</a> URLs that list the tile coordinates:
+
+</p>
+<pre><code>var provider = new MM.MapProvider(function(coord) {
+    return &quot;http://placehold.it/256x256&amp;text=&quot; +
+        [coord.zoom, coord.column, coord.row].join(&quot;/&quot;);
+});
+var layer = new MM.Layer(provider);
+map.addLayer(layer);</code></pre>
+<p>The <a href="#Template">Template</a> class simplifies generating image URLs for tile servers with popular template formats.
+
+</p>
+<p><a name="Layer.getProvider"></a>
+</p>
+<h3>getProvider <code>layer.getProvider()</code></h3>
+<p>Get the layer&#39;s current provider.
+
+</p>
+<p><a name="Layer.setProvider"></a>
+</p>
+<h3>setProvider <code>layer.setProvider()</code></h3>
+<p>Set the layer&#39;s current provider.
+
+</p>
+<p><a name="Layer.destroy"></a>
+</p>
+<h3>destroy <code>layer.destroy()</code></h3>
+<p>Destroy the layer, removing all of its tiles from memory and removing its <strong>parent</strong> element from the map.
+
+</p>
+<p><a name="Layer.draw"></a>
+</p>
+<h3>draw <code>layer.draw()</code></h3>
+<p>Redraw the layer by loading, unloading, adding, removing, and repositioning tile images as appropriate. Changing the provider triggers a <strong>draw</strong>.
+
+</p>
+<p><a name="Layer.requestRedraw"></a>
+</p>
+<h3>requestRedraw <code>layer.requestRedraw()</code></h3>
+<p>Request a layer redraw in 1 second. This works just like <a href="#Map.redraw">Map.redraw</a>.
+
+
+</p>
+<p><a name="MapProvider"></a>
+</p>
+<h2>MM.MapProvider</h2>
+<p>Map providers convert <a href="#Coordinate">tile coordinates</a> to image URLs. If your image tiles come in either <a href="#TemplateProvider-XYZ">XYZ</a> or <a href="#TemplateProvider-Quadkey">quadkey</a> formats, you should use the <a href="#TemplateProvider">TemplateProvider</a> class.
+
+</p>
+<pre><code>new MM.MapProvider(getTileUrl)</code></pre>
+<p><strong>MapProvider</strong> is an abstract class, meaning that it is meant to be <a href="#MM.extend">extended</a>. The constructor takes a function as its only argument, which is expected to return an image URL (or <code>null</code>) for a given <a href="#Coordinate">tile coordinate</a>. This example emulates the behavior of <a href="#Template">Template</a> using a static URL template:
+
+</p>
+<pre><code>var provider = new MM.MapProvider(function(coord) {
+    return &quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;
+        .replace(&quot;{Z}&quot;, coord.zoom)
+        .replace(&quot;{X}&quot;, coord.column)
+        .replace(&quot;{Y}&quot;, coord.row);
+});
+// Coordinate(row, col, zoom)
+provider.getTile(new MM.Coordinate(1, 2, 3));
+// returns: &quot;http://tile.stamen.com/toner/3/2/1.png&quot;</code></pre>
+<p>Map providers expose the following interface to <a href="#Layer">Layer</a> objects:
+
+</p>
+<p><a name="MapProvider.getTile"></a>
+</p>
+<h3>getTile <code>provider.getTile(tileCoord)</code></h3>
+<p>Generates a tile URL or DOM element for the given <strong>tile coordinate</strong>. If the returned value is a string, an <code>&lt;img&gt;</code> element is created. Otherwise, if truthy, the return value is assumed to be a DOM element.
+
+</p>
+<p>For instance, you could create a map provider that generates <code>&lt;canvas&gt;</code> elements for each tile by customizing <strong>getTile</strong> like so (note that in this case, your tiles will need to either reside on the same server or be served with the appropriate <a href="http://enable-cors.org/">CORS headers</a>):
+
+</p>
+<pre><code>var myProvider = new MM.MapProvider(function(coord) {
+    return &quot;path/to/tiles/&quot; +
+        [coord.zoom, coord.column, coord.row].join(&quot;/&quot;) +
+        &quot;.png&quot;;
+});
+myProvider.getTile = function(coord) {
+    var url = this.getTileUrl(coord);
+    if (url) {
+        var canvas = document.createElement(&quot;canvas&quot;);
+        canvas.width = canvas.height = 256;
+        var ctx = canvas.getContext(&quot;2d&quot;),
+            img = new Image();
+        img.onload = function() {
+            canvas.drawImage(img);
+        };
+        img.src = url;
+        return canvas;
+    }
+};</code></pre>
+<p>NOTE: Because layers cache elements returned by this function, there is no guarantee that <strong>getTile</strong> will be called subsequently after a call to <strong>releaseTile</strong> with the same tile coordinate. If your provider needs to be notified of &quot;re-added&quot; tiles (ones that are generated once, released, then added again from the cache), it should implement <a href="#MapProvider.reAddTile">reAddTile</a>.
+
+</p>
+<p><a name="MapProvider.getTileUrl"></a>
+</p>
+<h3>getTileUrl <code>provider.getTileUrl(tileCoord)</code></h3>
+<p>Get the URL of the tile with the provided <strong>coordinate</strong>. In the abstract <strong>MapProvider</strong> class, <strong>getTile</strong> and <strong>getTileUrl</strong>
+
+</p>
+<p><a name="MapProvider.releaseTile"></a>
+</p>
+<h3>releaseTile <code>provider.releaseTile(tileCoord)</code></h3>
+<p>Clean up any resources required to display the <strong>tile coordinate&#39;s</strong> corresponding tile image or element. This is probably only necessary if your provider maintains references (such as a list or numeric reference count) to tiles generated by <strong>getTile</strong>.
+
+</p>
+<p><a name="MapProvider.reAddTile"></a>
+</p>
+<h3>reAddTile <code>provider.reAddTile(tileCoord)</code></h3>
+<p>If a provider implements the <strong>reAddTile</strong> method, cached tiles will be passed to this function so that the provider can know about the re-addition of tiles revived from the layer cache.
+
+
+</p>
+<p><a name="Template"></a>
+</p>
+<h2>MM.Template</h2>
+<p>ModestMap&#39;s Template class extends <a href="#MapProvider">MapProvider</a>, and converts <a href="#Coordinate">tile coordinates</a> to image URLs using a standard template format. These are the same constructor arguments as in <a href="#TemplatedLayer">TemplatedLayer</a>:
+
+</p>
+<pre><code>new MM.Template(urlTemplate [, subdomains])</code></pre>
+<p>Create a new templated provider based on the specified <strong>URL template</strong>, and an optional array of <strong>subdomain</strong> replacements. URL templates may contain the following placeholders:
+
+</p>
+<p><a name="Template.XYZ"></a>
+</p>
+<h3>X, Y, Z <code>http://example.com/tiles/{Z}/{X}/{Y}.ext</code></h3>
+<p>In an <strong>XYZ</strong> template, the <code>{X}</code>, <code>{Y}</code> and <code>{Z}</code> placeholders are replaced with each <a href="#Coordinate">tile&#39;s</a> <code>column</code>, <code>row</code> and <code>zoom</code> properties, respectively.
+
+</p>
+<pre><code>var toner = new MM.Template(&quot;http://tile.stamen.com/toner/{Z}/{X}/{Y}.png&quot;);</code></pre>
+<p><a name="Template.quadkey"></a>
+</p>
+<h3>Quadkey <code>http://example.com/tiles/{Q}.ext</code></h3>
+<p>In a <strong>quadkey</strong> template, the <code>{Q}</code> placeholder is replaced with each <a href="#Coordinate">tile&#39;s</a> <a href="http://msdn.microsoft.com/en-us/library/bb259689.aspx">quadkey string</a>. These are found on Microsoft&#39;s <a href="http://www.bing.com/maps/">Bing Maps</a> (previously VirtualEarth) tile servers:
+
+</p>
+<pre><code>var bingBase = &quot;http://ecn.t0.tiles.virtualearth.net/tiles/r{Q}?&quot;;
+var bing = new MM.Template(bingBase + &quot;g=689&amp;mkt=en-us&amp;lbl=l1&amp;stl=h&quot;);</code></pre>
+<p><a name="Template.subdomains"></a>
+</p>
+<h3>Subdomains <code>http://{S}.example.com/...</code></h3>
+<p>If an array of <strong>subdomains</strong> is passed to the Template constructor, tile URLs will substitute a predictable selection from the array for any <code>{S}</code> placeholder (e.g., the first one gets <code>subdomains[0]</code>, the second gets <code>subdomains[1]</code>, etc.). Many tile servers support loading via multiple subdomains, e.g.:
+
+</p>
+<pre><code>var osm = new MM.Template(&quot;http://{S}.tile.openstreetmap.org/{Z}/{X}/{Y}.png&quot;,
+    [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]);
+var bing = new MM.Template(&quot;http://ecn.t{S}.tiles.virtualearth.net/tiles/r{Q}&quot; +
+    &quot;?g=689&amp;mkt=en-us&amp;lbl=l1&amp;stl=h&quot;,
+    [1, 2, 3, 4]);
+var terrain = new MM.Template(&quot;http://{S}.tile.stamen.com/terrain/{Z}/{X}/{Y}.png&quot;,
+    &quot;a b c d&quot;.split(&quot; &quot;));</code></pre>
+<p><strong>Multiple subdomains may drastically speed up your maps!</strong> Most browsers place limits on the number of URLs that can be loaded simultaneously from each domain. Using two subdomains in effect doubles the number of image tiles that can load at the same time.
+
+</p>
+<p>NOTE: <code>{S}</code> placeholders need not <em>necessarily</em> refer to subdomains. You could, for instance, vary the entire hostname of each tile, like so:
+
+</p>
+<pre><code>var template = new MM.TemplateProvider(&quot;http://{S}/tiles/{Z}/{X}/{Y}.png&quot;,
+    [&quot;example.com&quot;, &quot;example.org&quot;, &quot;example.net&quot;]);</code></pre>
+<h2>Package Utilities</h2>
+<p>These are provided as useful shortcuts, often used to provide cross-browser compatibility.
+
+</p>
+<h3>MM.extend <code>MM.extend(childClass, parentClass)</code></h3>
+<p>Extend the <code>prototype</code> of <strong>child class</strong> with previously unspecified methods from the <strong>parent class</strong>&#39;s <code>prototype</code>. This is how you extend classes in ModestMaps:
+
+</p>
+<pre><code>var MyLayer = function(provider) {
+    // do something MyLayer-specific
+    // then call the Layer constructor
+    MM.Layer.call(this, provider);
+};
+
+MyLayer.prototype = {
+    getTile: function(coord) {
+        // do something cool here
+    }
+};
+
+MM.extend(MyLayer, MM.Layer);</code></pre>
+<h3>MM.coerceLayer <code>MM.coerceLayer(layerish)</code></h3>
+<p>Coerce the provided <strong>layerish</strong> string or object into a <a href="#Layer">Layer</a>, according to the following rules:
+
+</p>
+<ol>
+<li>If <strong>layerish</strong> is a string, return a new <a href="#TemplatedLayer">TemplatedLayer</a> with <strong>layerish</strong> as the URL template.</li>
+<li>If <strong>layerish</strong> has a <code>draw</code> function, assume that it&#39;s a <a href="#Layer">Layer</a> instance and return it.</li>
+<li>Otherwise, assume that it&#39;s a <a href="#MapProvider">MapProvider</a> and return a new <a href="#Layer">Layer</a> with it as the constructor argument: <code>new MM.Layer(layerish)</code>.</li>
+</ol>
+<h3>MM.addEvent <code>MM.addEvent(element, eventType, listener)</code></h3>
+<p>Adds the <strong>listener</strong> to the provided <strong>DOM element</strong> for the given <strong>event type</strong>. In browsers that support <a href="http://www.w3.org/TR/DOM-Level-2-Events/">DOM Level 2 events</a>, this calls <code>element.addEventListener(eventType, listener, false)</code>. In older versions of Internet Explorer, this uses <code>element.attachEvent()</code>.
+
+</p>
+<pre><code>var link = document.getElementById(&quot;null-island&quot;),
+    nullIsland = new MM.Location(0, 0);
+MM.addEvent(link, &quot;click&quot;, function(e) {
+    map.setCenterZoom(nullIsland, 12);
+    return MM.cancelEvent(e);
+});</code></pre>
+<p>You can remove event listeners with <a href="#MM.removeEvent">MM.removeEvent</a>.
+
+</p>
+<h3>MM.removeEvent <code>MM.removeEvent(element, eventType, listener)</code></h3>
+<p>Removes the <strong>listener</strong> from <strong>element</strong> for the given <strong>event type</strong>.
+
+</p>
+<pre><code>MM.removeEvent(link, &quot;click&quot;, onClick);</code></pre>
+<h3>MM.cancelEvent <code>MM.cancelEvent(event)</code></h3>
+<p>Does whatever is necessary to cancel the provided DOM event and returns <code>false</code>. This is useful for preventing the default behavior or <code>click</code> events, e.g.:
+
+</p>
+<pre><code>var zoomIn = document.getElementById(&quot;zoom-in&quot;);
+MM.addEvent(zoomIn, &quot;click&quot;, function(e) {
+    map.zoomIn();
+    return MM.cancelEvent(e);
+});</code></pre>
+<h3>MM.getStyle <code>MM.getStyle(element, property)</code></h3>
+<p>Get the <strong>element</strong>&#39;s <a href="https://developer.mozilla.org/en/DOM/window.getComputedStyle">computed style</a> of the named <strong>CSS property</strong>.
+
+</p>
+<pre><code>var bgcolor = MM.getStyle(map.parent, &quot;background-color&quot;);</code></pre>
+<h3>MM.moveElement <code>MM.moveElement(element, point)</code></h3>
+<p>Updates the CSS properties of <strong>element</strong> so that it appears at the absolute position <strong>point</strong>. If available, this function uses <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a> (which are often hardware accelerated, and thus faster than traditional <code>top</code> and <code>left</code> properties).
+
+
+</p>
+<pre><code>var marker = document.getElementById(&quot;marker&quot;),
+    sf = new MM.Location(37.764, -122.419);
+map.addCallback(&quot;drawn&quot;, function() {
+    var point = map.locationPoint(sf);
+    MM.moveElement(marker, point);
+});</code></pre>
+<p>(See the section on <a href="#Coordinate-pre-projecting">pre-projecting</a> for a slightly better way of doing this.)
+
+</p>
+<h3>MM.getFrame <code>MM.getFrame(frameCallback)</code></h3>
+<p>This is a stand-in for <a href="https://developer.mozilla.org/en/DOM/window.requestAnimationFrame">requestAnimationFrame</a>, a feature of modern browsers that calls the <strong>frame callback</strong> function as often as possible without affecting page repainting.
+
+</p>
+<h3>MM.transformProperty <code>MM.transformProperty</code></h3>
+<p>The name of the property used by the running browser to provide <a href="http://www.w3.org/TR/css3-transforms/">CSS transforms</a>.
+
+</p>
+<h3>MM.matrixString <code>MM.matrixString(point)</code></h3>
+<p>Convert <strong>point</strong> into a CSS transform-compatible matrix string.
+
+</p>
+
+        </div>
+    </body>
+</html>
