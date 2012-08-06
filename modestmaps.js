@@ -749,9 +749,11 @@ var MM = com.modestmaps = {
         // return null if wrapped coordinate is outside of the tile limits
         sourceCoordinate: function(coord) {
             var TL = this.tileLimits[0].zoomTo(coord.zoom).container(),
-                BR = this.tileLimits[1].zoomTo(coord.zoom).container().right().down(),
+                BR = this.tileLimits[1].zoomTo(coord.zoom),
                 columnSize = Math.pow(2, coord.zoom),
                 wrappedColumn;
+
+            BR = new MM.Coordinate(Math.ceil(BR.row), Math.ceil(BR.column), Math.floor(BR.zoom));
 
             if (coord.column < 0) {
                 wrappedColumn = ((coord.column % columnSize) + columnSize) % columnSize;
