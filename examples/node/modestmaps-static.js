@@ -15,7 +15,7 @@ function renderStaticMap(provider, dimensions, zoom, location, callback) {
                                  Math.PI,  Math.PI, 1, 0,
                                 -Math.PI, -Math.PI, 0, 1)),
       tileSize = new MM.Point(256, 256);
-  
+
   var centerCoordinate = projection.locationCoordinate(location).zoomTo(zoom);
 
   function pointCoordinate(point) {
@@ -24,7 +24,7 @@ function renderStaticMap(provider, dimensions, zoom, location, callback) {
     coord.column += (point.x - dimensions.x/2) / tileSize.x;
     coord.row += (point.y - dimensions.y/2) / tileSize.y;
     return coord;
-  };
+  }
 
   function coordinatePoint(coord) {
     // Return an x, y point on the map image for a given coordinate.
@@ -38,7 +38,7 @@ function renderStaticMap(provider, dimensions, zoom, location, callback) {
   }
 
   var startCoord = pointCoordinate(new MM.Point(0,0)).container(),
-      endCoord = pointCoordinate(dimensions).container(); 
+      endCoord = pointCoordinate(dimensions).container();
 
   var numRequests = 0,
       completeRequests = 0;
@@ -50,7 +50,7 @@ function renderStaticMap(provider, dimensions, zoom, location, callback) {
   }
 
   function getTile(url, p) {
-    new get(url).asBuffer(function(error,data) { 
+    new get(url).asBuffer(function(error,data) {
       if (error) {
         callback(url + ' error: ' + error);
       }
@@ -75,34 +75,12 @@ function renderStaticMap(provider, dimensions, zoom, location, callback) {
       }
     }
   }
-  
 }
-
-/* 
-var provider = new MM.TemplatedMapProvider("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png");
-var dimensions = new MM.Point(800, 600);
-var zoom = 11;
-var location = new MM.Location(37.774929, -122.419415);
-
-renderStaticMap(provider, dimensions, 11, location, function(err, canvas) {
-  if (err) {
-    throw err;
-  }
-  var out = fs.createWriteStream(__dirname + '/map.png'),
-      stream = canvas.createPNGStream();
-  stream.on('data', function(chunk){
-    out.write(chunk);
-  });
-  stream.on('end', function(){
-    console.log('saved map.png');
-  });
-});
-*/
 
 // just one for now...
 var providers = {
-  osm: new MM.TemplatedLayer("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png")
-}
+  osm: new MM.Template("http://tile.openstreetmap.org/{Z}/{X}/{Y}.png")
+};
 
 var app = express.createServer();
 
@@ -111,12 +89,12 @@ app.get('/map', function(req,res) {
       width = req.param("width", 800),
       height = req.param("height", 600),
       dimensions = new MM.Point(width, height),
-      zoom = parseInt(req.param("zoom", 1)),
+      zoom = parseInt(req.param("zoom", 1), 10),
       lat = req.param("lat", 0.0),
       lon = req.param("lon", 0.0),
       location = new MM.Location(lat, lon);
   renderStaticMap(provider, dimensions, zoom, location, function(err,canvas) {
-    if (err) {    
+    if (err) {
       res.send(new Error(err));
     } else {
       res.header('Content-Type', 'image/png');
@@ -126,6 +104,3 @@ app.get('/map', function(req,res) {
 });
 
 app.listen(3000);
-
-
-
