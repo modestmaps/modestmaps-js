@@ -2217,6 +2217,7 @@ var MM = com.modestmaps = {
 
         setCenterZoom: function(location, zoom) {
             this.coordinate = this.projection.locationCoordinate(location).zoomTo(parseFloat(zoom) || 0);
+            this.coordinate = this.enforceLimits(this.coordinate);
             MM.getFrame(this.getRedraw());
             this.dispatchCallback('centered', [location, zoom]);
             return this;
@@ -2282,8 +2283,8 @@ var MM = com.modestmaps = {
 
         setExtent: function(locations, precise) {
             this.coordinate = this.extentCoordinate(locations, precise);
-            this.draw(); // draw calls enforceLimits
-            // (if you switch to getFrame, call enforceLimits first)
+            this.coordinate = this.enforceLimits(this.coordinate);
+            MM.getFrame(this.getRedraw());
 
             this.dispatchCallback('extentset', locations);
             return this;

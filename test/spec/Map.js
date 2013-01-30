@@ -56,6 +56,13 @@ describe('Map', function() {
       expect(typeof map.coordinate.zoom).toEqual('number');
   });
 
+  it('enforces limits when setting an extent', function() {
+      map.dimensions = { x: 800, y: 800 };
+      map.zoom(2).center({ lat: 54.5259614, lon:15.2551187 });
+      expect(map.locationPoint({ lat: 40.7143528, lon: -74.0059731 }).y)
+        .toBeCloseTo(384.9985102776103);
+  });
+
   describe('Navigation', function() {
       it('binds and calls drawn', function() {
           spyOn(sink, 'receive');
