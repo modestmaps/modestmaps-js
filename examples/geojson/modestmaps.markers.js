@@ -187,7 +187,7 @@ if (!com.modestmaps) {
                 // offset by the layer parent position if x or y is non-zero
                 if (this.position.x || this.position.y) {
                     pos.x -= this.position.x;
-                    pox.y -= this.position.y;
+                    pos.y -= this.position.y;
                 }
                 marker.style.left = ~~(pos.x + .5) + "px";
                 marker.style.top = ~~(pos.y + .5) + "px";
