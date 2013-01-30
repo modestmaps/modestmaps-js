@@ -8,8 +8,12 @@ Following the semantic versioning recommendation best we can:
     minor version, and backwards incompatible API changes increment
     the major version." -- http://semver.org/
 
-v3.3.6 (unreleased)
+v3.3.6
 - .enable() and .disable() return the layer object as expected
+- `setCenter()` now correctly calls enforceLimits so that `locationPoint`
+  is immediately accurate.
+- Examples fixes
+- Now builds with uglifyjs instead of YUICompressor
 
 v3.3.5
 - Fixes rounding bug in MapProvider's `sourceCoordinate`

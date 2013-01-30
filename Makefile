@@ -22,7 +22,7 @@ JS_FILES = \
 
 VERSION = `cat VERSION`
 
-all: modestmaps.js modestmaps.min.js update-version
+all: update-version modestmaps.js modestmaps.min.js
 
 modestmaps.min.js: modestmaps.js
 	rm -f modestmaps.min.js
