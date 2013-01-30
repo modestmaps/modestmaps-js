@@ -1972,6 +1972,7 @@ var MM = com.modestmaps = {
             this.enabled = true;
             this.parent.style.display = '';
             this.draw();
+            return this;
         },
 
         // Disable a layer, don't display in DOM, clear all requests
@@ -1979,6 +1980,7 @@ var MM = com.modestmaps = {
             this.enabled = false;
             this.requestManager.clear();
             this.parent.style.display = 'none';
+            return this;
         },
 
         // Remove this layer from the DOM, cancel all of its requests

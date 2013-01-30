@@ -1,3 +1,6 @@
+NODE_PATH ?= ./node_modules
+JS_COMPILER = $(NODE_PATH)/uglify-js/bin/uglifyjs
+
 JS_FILES = \
 	src/start.js \
 	src/utils.js \
@@ -23,7 +26,7 @@ all: modestmaps.js modestmaps.min.js update-version
 
 modestmaps.min.js: modestmaps.js
 	rm -f modestmaps.min.js
-	java -jar tools/yuicompressor-2.4.2.jar modestmaps.js > modestmaps.min.js
+	$(JS_COMPILER) modestmaps.js > modestmaps.min.js
 
 modestmaps.js: $(JS_FILES) Makefile
 	rm -f modestmaps.js
