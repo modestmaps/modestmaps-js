@@ -1,18 +1,27 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-  <title>Jasmine Spec Runner</title>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  <script src="../node_modules/expect.js/expect.js"></script>
+  <script src="../node_modules/mocha/mocha.js"></script>
+  <script src="../node_modules/happen/src/happen.js"></script>
 
-  <link rel="shortcut icon" type="image/png" href="lib/jasmine-1.2.0.rc3/jasmine_favicon.png">
-  <link rel="stylesheet" type="text/css" href="lib/jasmine-1.2.0.rc3/jasmine.css">
-  <script type="text/javascript" src="lib/jasmine-1.2.0.rc3/jasmine.js"></script>
-  <script type="text/javascript" src="lib/jasmine-1.2.0.rc3/jasmine-html.js"></script>
+  <!--[if IE]>
+  <script src="lib/sinon-ie-1.5.2.js"></script>
+  <![endif]-->
 
-  <script type="text/javascript" src="lib/happen.js"></script>
-
-  <!-- include spec files here... -->
   <script type="text/javascript" src="../modestmaps.js"></script>
+
+  <script>
+    mocha.setup('bdd');
+    // Firefox has a bug where it leaks getInterface on the
+    // metaKey test
+    mocha.globals('getInterface', 'resize');
+  </script>
 
   <script type="text/javascript" src="spec/Coordinate.js"></script>
   <script type="text/javascript" src="spec/Point.js"></script>
@@ -27,39 +36,9 @@
   <script type="text/javascript" src="spec/Transformation.js"></script>
   <script type="text/javascript" src="spec/Provider.js"></script>
   <script type="text/javascript" src="spec/Util.js"></script>
-  <script type="text/javascript" src="spec/Globals.js"></script>
 
-  <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 1000;
-
-      var htmlReporter = new jasmine.HtmlReporter();
-
-      jasmineEnv.addReporter(htmlReporter);
-
-      jasmineEnv.specFilter = function(spec) {
-        return htmlReporter.specFilter(spec);
-      };
-
-      var currentWindowOnload = window.onload;
-
-      window.onload = function() {
-        if (currentWindowOnload) {
-          currentWindowOnload();
-        }
-        execJasmine();
-      };
-
-      function execJasmine() {
-        jasmineEnv.execute();
-      }
-
-    })();
+  <script>
+    mocha.run();
   </script>
-
-</head>
-
-<body>
 </body>
 </html>

@@ -2,7 +2,7 @@ describe('MouseWheelHandler', function() {
     var map;
 
     beforeEach(function() {
-        div = document.createElement('div');
+        var div = document.createElement('div');
         div.id = +new Date();
         div.style.width = 500;
         div.style.height = 500;
@@ -17,22 +17,19 @@ describe('MouseWheelHandler', function() {
         map.setCenterZoom(new MM.Location(0, 0), 0);
     });
 
-    it('zooms in the map', function() {
-        runs(function() {
-            happen.once(map.parent, {
-                type: 'mousewheel',
-                detail: -100
-            });
+    it('zooms in the map', function(done) {
+        happen.once(map.parent, {
+            type: 'mousewheel',
+            clicks: -100
         });
 
-        waits(300);
-
-        runs(function() {
+        window.setTimeout(function() {
             happen.once(map.parent, {
                 type: 'mousewheel',
-                detail: -200
+                clicks: -200
             });
-            expect(map.getZoom()).toEqual(1);
-        });
+            expect(map.getZoom()).to.eql(1);
+            done();
+        }, 300);
     });
 });
