@@ -29,6 +29,9 @@
                 this._tileComplete = function(manager, tile) {
                     theLayer.tiles[tile.id] = tile;
                     theLayer.positionTile(tile);
+                    // Support style transition if available.
+                    tile.style.visibility = 'inherit';
+                    tile.className = 'map-tile-loaded';
                 };
             }
             return this._tileComplete;
@@ -38,9 +41,10 @@
             if (!this._tileError) {
                 var theLayer = this;
                 this._tileError = function(manager, tile) {
-                    tile.element.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    tile.onload = tile.onerror = null;
                     theLayer.tiles[tile.element.id] = tile.element;
                     theLayer.positionTile(tile.element);
+                    tile.element.style.visibility = 'hidden';
                 };
             }
             return this._tileError;
@@ -328,8 +332,6 @@
             var theLevel = this.levels[tile.coord.zoom];
             theLevel.appendChild(tile);
 
-            // Support style transition if available.
-            tile.className = 'map-tile-loaded';
 
             // ensure the level is visible if it's still the current level
             if (Math.round(this.map.coordinate.zoom) == tile.coord.zoom) {
