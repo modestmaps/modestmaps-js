@@ -2,7 +2,7 @@ describe('DoubleClickHandler', function() {
     var map;
 
     beforeEach(function() {
-        div = document.createElement('div');
+        var div = document.createElement('div');
         div.id = +new Date();
         div.style.width = 500;
         div.style.height = 500;
@@ -18,20 +18,20 @@ describe('DoubleClickHandler', function() {
     });
 
     it('does not zoom in on single click', function() {
-        expect(map.getZoom()).toEqual(0);
+        expect(map.getZoom()).to.eql(0);
         happen.click(map.parent);
-        expect(map.getZoom()).toEqual(0);
+        expect(map.getZoom()).to.eql(0);
     });
 
     it('zooms in on double click', function() {
-        expect(map.getZoom()).toEqual(0);
+        expect(map.getZoom()).to.eql(0);
         happen.dblclick(map.parent);
-        expect(map.getZoom()).toEqual(1);
+        expect(map.getZoom()).to.eql(1);
     });
 
     it('zooms out on double click with shift', function() {
         map.setZoom(1);
-        happen.dblclick(map.parent, { shift: true });
-        expect(map.getZoom()).toEqual(0);
+        happen.dblclick(map.parent, { shiftKey: true });
+        expect(map.getZoom()).to.eql(0);
     });
 });

@@ -20,6 +20,9 @@
     "url"  : "git://github.com/modestmaps/modestmaps-js.git"
   }],
   "devDependencies": {
+    "mocha": "~1.8",
+    "expect.js": "~0.2.0",
+    "happen": "~0.1.2",
     "docco": "~0.3.0",
     "uglify-js": "~1.0.0"
   },

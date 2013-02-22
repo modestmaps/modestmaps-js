@@ -2026,7 +2026,7 @@ var MM = com.modestmaps = {
         // we're no longer adding width and height to parent.style but we still
         // need to enforce padding, overflow and position otherwise everything screws up
         // TODO: maybe console.warn if the current values are bad?
-        this.parent.style.padding = '0';
+        this.parent.style.padding = 0;
         this.parent.style.overflow = 'hidden';
 
         var position = MM.getStyle(this.parent, 'position');
@@ -2067,17 +2067,21 @@ var MM = com.modestmaps = {
 
         // if you don't specify dimensions we assume you want to fill the parent
         // unless the parent has no w/h, in which case we'll still use a default
-        if (!dimensions) {
+        if (dimensions &&
+            dimensions.hasOwnProperty('x') &&
+            dimensions.hasOwnProperty('y') &&
+            !isNaN(Math.round(dimensions.x)) &&
+            !isNaN(Math.round(dimensions.y))) {
+            this.autoSize = false;
+            // don't call setSize here because it calls draw()
+            this.parent.style.width = Math.round(dimensions.x);
+            this.parent.style.height = Math.round(dimensions.y);
+        } else {
             dimensions = new MM.Point(this.parent.offsetWidth,
                                       this.parent.offsetHeight);
             this.autoSize = true;
             // use destroy to get rid of this handler from the DOM
             MM.addEvent(window, 'resize', this.windowResize());
-        } else {
-            this.autoSize = false;
-            // don't call setSize here because it calls draw()
-            this.parent.style.width = Math.round(dimensions.x) + 'px';
-            this.parent.style.height = Math.round(dimensions.y) + 'px';
         }
         this.dimensions = dimensions;
 
