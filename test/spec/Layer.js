@@ -10,6 +10,23 @@ describe('Layer', function() {
         expect(l.map).toEqual(null);
     });
 
+    it('should not request more tiles than needed', function () {
+        var p, requested = {};
+        runs(function() {
+            p = new MM.TemplatedLayer('http://tile.openstreetmap.org/{Z}/{X}/{Y}.png');
+            p.requestManager.requestTile = function (key) {
+                requested[key] = true;
+            };
+            var m = new MM.Map(document.createElement('div'), p, { x: 1, y: 1 });
+            var coord = new MM.Coordinate(0.5, 0.5, 1);
+            m.setCenter(m.coordinateLocation(coord)).setZoom(1);
+        });
+        waits(500);
+        runs(function() {
+            expect(requested).toEqual({'1,0,0': true});
+        });
+    });
+
     // Currently not testing subdomain-based templatedmapprovider, since
     // the implementation should be kind of undefined.
     it('causes the map to throw requesterror when things are not accessible', function() {

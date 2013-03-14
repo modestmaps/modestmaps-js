@@ -96,9 +96,9 @@
             var tileCoord = startCoord.copy();
 
             for (tileCoord.column = startCoord.column;
-                 tileCoord.column <= endCoord.column; tileCoord.column++) {
+                 tileCoord.column < endCoord.column; tileCoord.column++) {
                 for (tileCoord.row = startCoord.row;
-                     tileCoord.row <= endCoord.row; tileCoord.row++) {
+                     tileCoord.row < endCoord.row; tileCoord.row++) {
                     var validKeys = this.inventoryVisibleTile(levelElement, tileCoord);
 
                     while (validKeys.length) {
