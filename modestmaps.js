@@ -92,10 +92,96 @@ var MM = com.modestmaps = {
     };
 
     MM._browser = (function(window) {
+        /*
+         * Copy code from Leaflet's L.Browser, handles different browser and feature detections for internal Leaflet use.
+         */
+
+        var ie = !!window.ActiveXObject,
+            ie6 = ie && !window.XMLHttpRequest,
+            ie7 = ie && !document.querySelector,
+
+            // terrible browser detection to work around Safari / iOS / Android browser bugs
+            ua = navigator.userAgent.toLowerCase(),
+            webkit = ('WebKitCSSMatrix' in window), //ua.indexOf('webkit') !== -1,
+            chrome = ua.indexOf('chrome') !== -1,
+            android = ua.indexOf('android') !== -1,
+            android23 = ua.search('android [23]') !== -1,
+
+            mobile = typeof orientation !== undefined + '',
+            msTouch = window.navigator && window.navigator.msPointerEnabled &&
+                      window.navigator.msMaxTouchPoints,
+            retina = ('devicePixelRatio' in window && window.devicePixelRatio > 1) ||
+                     ('matchMedia' in window && window.matchMedia('(min-resolution:144dpi)') &&
+                      window.matchMedia('(min-resolution:144dpi)').matches),
+
+            doc = document.documentElement,
+            ie3d = ie && ('transition' in doc.style),
+            webkit3d = ('WebKitCSSMatrix' in window) && ('m11' in new window.WebKitCSSMatrix()),
+            gecko3d = 'MozPerspective' in doc.style,
+            opera3d = 'OTransition' in doc.style,
+            any3d = (ie3d || webkit3d || gecko3d || opera3d);
+
+        var touch = (function () {
+
+            var startName = 'ontouchstart';
+
+            // IE10+ (We simulate these into touch* events in L.DomEvent and L.DomEvent.MsTouch) or WebKit, etc.
+            if (msTouch || (startName in doc)) {
+                return true;
+            }
+
+            // Firefox/Gecko
+            var div = document.createElement('div'),
+                supported = false;
+
+            if (!div.setAttribute) {
+                return false;
+            }
+            div.setAttribute(startName, 'return;');
+
+            if (typeof div[startName] === 'function') {
+                supported = true;
+            }
+
+            div.removeAttribute(startName);
+            div = null;
+
+            return supported;
+        }());
+
+
         return {
-            webkit: ('WebKitCSSMatrix' in window),
-            webkit3d: ('WebKitCSSMatrix' in window) && ('m11' in new WebKitCSSMatrix())
+            ie: ie,
+            ie6: ie6,
+            ie7: ie7,
+            webkit: webkit,
+
+            android: android,
+            android23: android23,
+
+            chrome: chrome,
+
+            ie3d: ie3d,
+            webkit3d: webkit3d,
+            gecko3d: gecko3d,
+            opera3d: opera3d,
+            any3d: any3d,
+
+            mobile: mobile,
+            mobileWebkit: mobile && webkit,
+            mobileWebkit3d: mobile && webkit3d,
+            mobileOpera: mobile && window.opera,
+
+            touch: touch,
+            msTouch: msTouch,
+
+            retina: retina
         };
+
+        //return {
+        //    webkit: ('WebKitCSSMatrix' in window),
+        //    webkit3d: ('WebKitCSSMatrix' in window) && ('m11' in new WebKitCSSMatrix())
+        //};
     })(this); // use this for node.js global
 
     MM.moveElement = function(el, point) {
@@ -1043,14 +1129,26 @@ var MM = com.modestmaps = {
             maxDoubleTapDelay = 350,
             locations = {},
             taps = [],
-            snapToZoom = true,
+            snapToZoom = false,
             wasPinching = false,
             lastPinchCenter = null;
 
+        function setCss () {
+            var s = document.createElement('style');
+            s.setAttribute("type", "text/css");
+            document.getElementsByTagName('head').item(0).appendChild(s);
+            var ss = s.sheet;
+
+            ss.insertRule("div, img {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
+        }
+
         function isTouchable () {
-             var el = document.createElement('div');
-             el.setAttribute('ongesturestart', 'return;');
-             return (typeof el.ongesturestart === 'function');
+            if (MM._browser.touch) {
+                setCss();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         function updateTouches(e) {
@@ -1060,11 +1158,9 @@ var MM = com.modestmaps = {
                     var l = locations[t.identifier];
                     l.x = t.clientX;
                     l.y = t.clientY;
-                    l.scale = e.scale;
                 }
                 else {
                     locations[t.identifier] = {
-                        scale: e.scale,
                         startPos: { x: t.clientX, y: t.clientY },
                         x: t.clientX,
                         y: t.clientY,
@@ -1082,7 +1178,10 @@ var MM = com.modestmaps = {
         }
 
         function touchStart(e) {
+            locations = {};
             updateTouches(e);
+            //MM.addEvent(window, 'touchmove', touchMove);
+            //MM.addEvent(window, 'touchend', touchEnd);
         }
 
         function touchMove(e) {
@@ -1100,6 +1199,9 @@ var MM = com.modestmaps = {
 
         function touchEnd(e) {
             var now = new Date().getTime();
+
+            //MM.removeEvent(window, 'touchmove', touchMove);
+            //MM.removeEvent(window, 'touchend', touchEnd);
             // round zoom if we're done pinching
             if (e.touches.length === 0 && wasPinching) {
                 onPinched(lastPinchCenter);
@@ -1197,16 +1299,19 @@ var MM = com.modestmaps = {
                 l0 = locations[t0.identifier],
                 l1 = locations[t1.identifier];
 
+            if (!l0 || !l1) return;
             // mark these touches so they aren't used as taps/holds
             l0.wasPinch = true;
             l1.wasPinch = true;
 
             // scale about the center of these touches
-            var center = MM.Point.interpolate(p0, p1, 0.5);
+            var center     = MM.Point.interpolate(p0, p1, 0.5);
+            var scale      = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
+            var prevScale  = Math.sqrt(Math.pow(l0.x - l1.x, 2) + Math.pow(l0.y - l1.y, 2));
 
             map.zoomByAbout(
-                Math.log(e.scale) / Math.LN2 -
-                Math.log(l0.scale) / Math.LN2,
+                Math.log(scale) / Math.LN2 -
+                Math.log(prevScale) / Math.LN2,
                 center );
 
             // pan from the previous center of these touches
@@ -1227,6 +1332,7 @@ var MM = com.modestmaps = {
                 map.zoomByAbout(tz - z, p);
             }
             wasPinching = false;
+            locations = {};
         }
 
         handler.init = function(x) {
