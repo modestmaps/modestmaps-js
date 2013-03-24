@@ -10,11 +10,22 @@
             wasPinching = false,
             lastPinchCenter = null;
 
+        function setCss () {
+            var s = document.createElement('style');
+            s.setAttribute("type", "text/css");
+            document.getElementsByTagName('head').item(0).appendChild(s);
+            var ss = s.sheet;
+
+            ss.insertRule("div, img {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
+        }
+
         function isTouchable () {
-            return MM._browser.touch;
-            //var el = document.createElement('div');
-            //el.setAttribute('ongesturestart', 'return;');
-            //return (typeof el.ongesturestart === 'function');
+            if (MM._browser.touch) {
+                setCss();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         function updateTouches(e) {
