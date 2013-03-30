@@ -59,8 +59,6 @@
         function touchStart(e) {
             locations = {};
             updateTouches(e);
-            //MM.addEvent(window, 'touchmove', touchMove);
-            //MM.addEvent(window, 'touchend', touchEnd);
         }
 
         function touchMove(e) {
