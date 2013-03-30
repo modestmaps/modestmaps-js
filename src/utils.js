@@ -148,10 +148,6 @@
             retina: retina
         };
 
-        //return {
-        //    webkit: ('WebKitCSSMatrix' in window),
-        //    webkit3d: ('WebKitCSSMatrix' in window) && ('m11' in new WebKitCSSMatrix())
-        //};
     })(this); // use this for node.js global
 
     MM.moveElement = function(el, point) {

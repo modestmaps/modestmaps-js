@@ -15,8 +15,10 @@
             s.setAttribute("type", "text/css");
             document.getElementsByTagName('head').item(0).appendChild(s);
             var ss = s.sheet;
+            var mapid = map.parent.id;
 
-            ss.insertRule("div, img {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
+            ss.insertRule("#" + mapid + " div {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
+            ss.insertRule("#" + mapid + " {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
         }
 
         function isTouchable () {
@@ -77,8 +79,6 @@
         function touchEnd(e) {
             var now = new Date().getTime();
 
-            //MM.removeEvent(window, 'touchmove', touchMove);
-            //MM.removeEvent(window, 'touchend', touchEnd);
             // round zoom if we're done pinching
             if (e.touches.length === 0 && wasPinching) {
                 onPinched(lastPinchCenter);
@@ -183,8 +183,8 @@
 
             // scale about the center of these touches
             var center     = MM.Point.interpolate(p0, p1, 0.5);
-            var scale      = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
-            var prevScale  = Math.sqrt(Math.pow(l0.x - l1.x, 2) + Math.pow(l0.y - l1.y, 2));
+            var scale      = MM.Point.distance(p0, p1);
+            var prevScale  = MM.Point.distance(l0, l1);
 
             map.zoomByAbout(
                 Math.log(scale) / Math.LN2 -
