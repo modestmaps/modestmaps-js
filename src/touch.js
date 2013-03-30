@@ -6,14 +6,28 @@
             maxDoubleTapDelay = 350,
             locations = {},
             taps = [],
-            snapToZoom = true,
+            snapToZoom = false,
             wasPinching = false,
             lastPinchCenter = null;
 
+        function setCss () {
+            var s = document.createElement('style');
+            s.setAttribute("type", "text/css");
+            document.getElementsByTagName('head').item(0).appendChild(s);
+            var ss = s.sheet;
+            var mapid = map.parent.id;
+
+            ss.insertRule("#" + mapid + " div {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
+            ss.insertRule("#" + mapid + " {-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}", 0);
+        }
+
         function isTouchable () {
-             var el = document.createElement('div');
-             el.setAttribute('ongesturestart', 'return;');
-             return (typeof el.ongesturestart === 'function');
+            if (MM._browser.touch) {
+                setCss();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         function updateTouches(e) {
@@ -23,11 +37,9 @@
                     var l = locations[t.identifier];
                     l.x = t.clientX;
                     l.y = t.clientY;
-                    l.scale = e.scale;
                 }
                 else {
                     locations[t.identifier] = {
-                        scale: e.scale,
                         startPos: { x: t.clientX, y: t.clientY },
                         x: t.clientX,
                         y: t.clientY,
@@ -45,6 +57,7 @@
         }
 
         function touchStart(e) {
+            locations = {};
             updateTouches(e);
         }
 
@@ -63,6 +76,7 @@
 
         function touchEnd(e) {
             var now = new Date().getTime();
+
             // round zoom if we're done pinching
             if (e.touches.length === 0 && wasPinching) {
                 onPinched(lastPinchCenter);
@@ -160,16 +174,19 @@
                 l0 = locations[t0.identifier],
                 l1 = locations[t1.identifier];
 
+            if (!l0 || !l1) return;
             // mark these touches so they aren't used as taps/holds
             l0.wasPinch = true;
             l1.wasPinch = true;
 
             // scale about the center of these touches
-            var center = MM.Point.interpolate(p0, p1, 0.5);
+            var center     = MM.Point.interpolate(p0, p1, 0.5);
+            var scale      = MM.Point.distance(p0, p1);
+            var prevScale  = MM.Point.distance(l0, l1);
 
             map.zoomByAbout(
-                Math.log(e.scale) / Math.LN2 -
-                Math.log(l0.scale) / Math.LN2,
+                Math.log(scale) / Math.LN2 -
+                Math.log(prevScale) / Math.LN2,
                 center );
 
             // pan from the previous center of these touches
@@ -190,6 +207,7 @@
                 map.zoomByAbout(tz - z, p);
             }
             wasPinching = false;
+            locations = {};
         }
 
         handler.init = function(x) {
