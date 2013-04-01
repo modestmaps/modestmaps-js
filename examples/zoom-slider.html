@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;' />
+  <meta name='apple-mobile-web-app-status-bar-style' content='black' />
+  <meta name='apple-mobile-web-app-capable' content='yes' />
+  <title>Examples | Modest Maps</title>
+  <link rel='shortcut icon' href='/examples/images/favicon.ico' type='image/x-icon' />
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700' rel='stylesheet' type='text/css'>
+  <link href='/examples/site.css' rel='stylesheet' type='text/css' media='all' />
+  <script src='/examples/site.js'></script>
+</head>
+<body>
+  <div id='header'>
+    <div class='limiter clearfix'>
+      <h1>
+        <a class='inner title' href='/examples/'>Modest Maps
+          <span class='thin'>examples</span>
+        </a>
+      </h1>
+    </div>
+  </div>
+  <div class='limiter clearfix relative'>
+  <div class='content'>
+    <div class='content-main'>
+      <div class='content-header clearfix'>
+        <a href='/examples//zoom-slider.html' class='result'>
+          <h4 class='code title'>Zoom Slider</h4>
+          <em class='description'>Use a range slider to animate zooming in your map.</em>
+          <small class='tags'>
+            
+              Zooming,
+            
+              UI
+            
+          </small>
+        </a>
+        <div class='details'>
+          <div>
+            <h6 class='label'>Tools Required</h6>
+            
+              Modest Maps,
+            
+              HTML5
+            
+          </div>
+          <div>
+            <h6 class='label'>Modest Maps Version</h6>
+            v1.0.0-beta1
+          </div>
+        </div>
+      </div>
+
+      <!--Gist preview-->
+      <iframe class='preview' src='http://bl.ocks.org/d/2689676/' frameborder='0'></iframe>
+      <div id='markdown'></div>
+      <div id='html'></div>
+      <div id='code-examples'></div>
+
+<script type='text/template' id='markdown-snippets'>
+<%= content %>
+</script>
+
+      <script type='text/template' id='html-snippets'>
+        <div class='snippet'>
+          <div class='heading'>
+            <h5 id='<%= id %>' class='filename'><%= filename %></h5>
+          </div>
+          <pre class='prettyprint'><%- content %></pre>
+        </div>
+      </script>
+      <script type='text/template' id='snippets'>
+        <div class='snippet'>
+          <div class='heading'>
+            <h5 id='<%= id %>' class='filename'><%= filename %></h5>
+          </div>
+          <pre class='prettyprint'><%- content %></pre>
+        </div>
+      </script>
+    </div>
+  </div>
+  <div class='sidebar'>
+    <div class='sidebar-inner'>
+      <div class='block'>
+        <h6>Files used</h6>
+        <script type='text/template' id='markdown-listing'>
+          <li><a href='#' class='top'><%= filename %></a></li>
+        </script>
+        <script type='text/template' id='html-listing'>
+          <li><a href='#<%= id %>'><%= filename %></a></li>
+        </script>
+        <script type='text/template' id='rest-listing'>
+          <li><a href='#<%= id %>'><%= filename %></a></li>
+        </script>
+        <div id='toc'>
+          <ul id='markdown-toc'></ul>
+          <ul id='html-toc'></ul>
+          <ul id='rest-toc'></ul>
+        </div>
+      </div>
+      <div class='use'>
+        To use this example we encourage you to fork the code from <a href='https://gist.github.com'>gist.github.com</a> and customize it for your own needs.
+        <a target='_blank' class='button color' href='https://gist.github.com/gists/2689676'>Fork this example<span class='icon octocat'>&nbsp;</span></a>
+      </div>
+      <a class='button' href='https://gist.github.com/gists/2689676/download'>Download source code</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    var gist = 2689676;
+    var e = new Docs();
+    $(e.getGist(gist));
+    $(e.fixedSidebar());
+  });
+</script>
+
+
+  <div id='footer'>
+    <div class='limiter'>
+      <small>The authorship of code examples are listed in the main <a href='https://github.com/modestmaps/modestmaps-js/tree/master/examples'>ModestMaps repository</a>.</small>
+    </div>
+  </div>
+</body>
+</html>

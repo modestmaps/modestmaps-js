@@ -1,16 +1,114 @@
----
----
 [
-{% for item in site.categories.modest-maps %}
+
   {
-    "category":"{{item.category}}",
-    "title":"{{item.title|replace:'"','\"'}}",
-    "url":"{{item.url}}",
-    "description":"{{item.description}}",
+    "category":"modest-maps",
+    "title":"Hash",
+    "url":"/hash.html",
+    "description":"Capture the current coordinates on the map in a url hash.",
     "tags": [
-      {% for tag in item.tags %}" {{tag}}"{% unless forloop.last %},{% endunless %}{% endfor %}
+      " Url"
     ]
   },
-{% endfor %}
+
+  {
+    "category":"modest-maps",
+    "title":"Great Circle",
+    "url":"/great-circle.html",
+    "description":"Create an arc using canvas.",
+    "tags": [
+      " Canvas"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Zoom Slider",
+    "url":"/zoom-slider.html",
+    "description":"Use a range slider to animate zooming in your map.",
+    "tags": [
+      " Zooming"," UI"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Spotlight",
+    "url":"/spotlight.html",
+    "description":"Create highlighted regions using canvas.",
+    "tags": [
+      " Highlight"," Canvas"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Two Maps",
+    "url":"/two-maps.html",
+    "description":"Load two maps and synch their panning.",
+    "tags": [
+      " Synching"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Enforce Limits",
+    "url":"/enforce-limits.html",
+    "description":"Set boundries to limit how far a map can be panned.",
+    "tags": [
+      " Panning"," Limits"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Chaining",
+    "url":"/chaining.html",
+    "description":"Simplfy your code by method chaining.",
+    "tags": [
+      " Architecture"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Cab spotting",
+    "url":"/cabspotting.html",
+    "description":"Tracking points on a map based on XML data.",
+    "tags": [
+      " Tracking"," XML"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Overlay Popup",
+    "url":"/bubble.html",
+    "description":"Add popups to your map using canvas.",
+    "tags": [
+      " Popup"," Canvas"," Overlay"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Basic Controls",
+    "url":"/basic-controls.html",
+    "description":"Add basic navigation to your map like pan and zoom.",
+    "tags": [
+      " Zooming"," Panning"," UI"
+    ]
+  },
+
+  {
+    "category":"modest-maps",
+    "title":"Any Zoom Level",
+    "url":"/anyscale.html",
+    "description":"Simple zooming without zoom levels.",
+    "tags": [
+      " Zooming"
+    ]
+  },
+
 false
 ]

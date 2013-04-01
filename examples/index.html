@@ -1,7 +1,27 @@
----
-layout: default
----
-<div class='browse'>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;' />
+  <meta name='apple-mobile-web-app-status-bar-style' content='black' />
+  <meta name='apple-mobile-web-app-capable' content='yes' />
+  <title>Examples | Modest Maps</title>
+  <link rel='shortcut icon' href='/examples/images/favicon.ico' type='image/x-icon' />
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700' rel='stylesheet' type='text/css'>
+  <link href='/examples/site.css' rel='stylesheet' type='text/css' media='all' />
+  <script src='/examples/site.js'></script>
+</head>
+<body>
+  <div id='header'>
+    <div class='limiter clearfix'>
+      <h1>
+        <a class='inner title' href='/examples/'>Modest Maps
+          <span class='thin'>examples</span>
+        </a>
+      </h1>
+    </div>
+  </div>
+  <div class='browse'>
   <div class='limiter clearfix'>
     <form id='search'>
       <input type='text' placeholder='Filter topics'>
@@ -19,7 +39,7 @@ layout: default
 
   <script type='text/template' id='examples'>
     <li>
-    <a href='{{site.baseurl}}<%= url %>' class='post'>
+    <a href='/examples<%= url %>' class='post'>
         <h4 class='code title'><%= title %></h4>
         <em class='description'><%= description %></em>
         <small class='tags'><%= tags %></small>
@@ -35,3 +55,12 @@ layout: default
     $(front.queryExamples);
   });
 </script>
+
+
+  <div id='footer'>
+    <div class='limiter'>
+      <small>The authorship of code examples are listed in the main <a href='https://github.com/modestmaps/modestmaps-js/tree/master/examples'>ModestMaps repository</a>.</small>
+    </div>
+  </div>
+</body>
+</html>
