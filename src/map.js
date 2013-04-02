@@ -164,8 +164,9 @@
             if (!rel) {
                 return handler;
             }
+
             var l = rel.length;
-            while(l--) {
+            while (l--) {
                 if (typeof rel[l].id === 'string' && rel[l].id === id) {
                     handler = rel[l];
                     break;
@@ -182,16 +183,42 @@
 
         disableHandler : function (id) {
             var handler = this.getHandler(id);
-            // (handler && typeof handler.remove === 'function') &&
-            handler.remove();
+            (handler && typeof handler.remove === 'function') && handler.remove();
             return this;
         },
 
         enableHandler : function (id) {
             var handler = this.getHandler(id);
-            // (handler && typeof handler.remove === 'function') &&
-            handler.init(this);
+            (handler && typeof handler.remove === 'function') && handler.init(this);
             return this;
+        },
+
+        removeHandler : function(id) {
+            var handler = this.getHandler(id),
+                index = this.eventHandlers.indexOf(handler);
+
+            /** When no handler was found, try to find it in MouseHandler's handlers */
+
+            if (index === -1) {
+                var mouseHandler = this.getHandler('MouseHandler');
+                index = mouseHandler.handlers.indexOf(handler);
+                if (index > -1) {
+                    handler.remove();
+                    mouseHandler.handlers.splice(index,1);
+                }
+                return;
+            }
+
+            handler.remove();
+            this.eventHandlers.splice(index,1);
+        },
+
+        addHandler : function (handler) {
+            handler.init(this);
+            if (typeof handler.id !== 'string') {
+                throw new Error('Handler lacks the required id attribute');
+            }
+            this.eventHandlers.push(handler);
         },
 
         windowResize: function() {

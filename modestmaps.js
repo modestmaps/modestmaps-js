@@ -187,7 +187,7 @@ var MM = com.modestmaps = {
         var aArgs = Array.prototype.slice.call(arguments, 1), 
             fToBind = this,
             fNOP = function () {};
-            
+
         var fBound = function () {
             return fToBind.apply(this instanceof fNOP && oThis ? this : oThis,
                 aArgs.concat(Array.prototype.slice.call(arguments)));
@@ -197,7 +197,9 @@ var MM = com.modestmaps = {
         fBound.prototype = new fNOP();
         return fBound;
       };
-    }    // Point
+    }
+
+    // Point
     MM.Point = function(x, y) {
         this.x = parseFloat(x);
         this.y = parseFloat(y);
@@ -901,11 +903,11 @@ var MM = com.modestmaps = {
         handler.init = function(x) {
             this.id = 'MouseWheelHandler';
             map = x;
-            mouseWheel = this.mouseWheel.bind(this);
             _zoomDiv = document.body.appendChild(document.createElement('div'));
             _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
             var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
             innerDiv.style.height = '2000px';
+            mouseWheel = this.mouseWheel.bind(this);
             MM.addEvent(map.parent, 'mousewheel', mouseWheel);
             return handler;
         };
@@ -1837,7 +1839,7 @@ var MM = com.modestmaps = {
 
             var tileWidth = this.map.tileSize.x * scale;
             var tileHeight = this.map.tileSize.y * scale;
-            var center = new MM.Point(this.map.dimensions.x/2, this.map.dimensions.y/2);
+            var center = new MM.Point(this.map.dimensions.x* 0.5, this.map.dimensions.y* 0.5);
             var tiles = this.tileElementsInLevel(level);
 
             while (tiles.length) {
@@ -1906,9 +1908,9 @@ var MM = com.modestmaps = {
             var scale = Math.pow(2, this.map.coordinate.zoom - tile.coord.zoom);
 
             MM.moveElement(tile, {
-                x: Math.round((this.map.dimensions.x/2) +
+                x: Math.round((this.map.dimensions.x* 0.5) +
                     (tile.coord.column - theCoord.column) * this.map.tileSize.x),
-                y: Math.round((this.map.dimensions.y/2) +
+                y: Math.round((this.map.dimensions.y* 0.5) +
                     (tile.coord.row - theCoord.row) * this.map.tileSize.y),
                 scale: scale,
                 // TODO: pass only scale or only w/h
@@ -2188,8 +2190,9 @@ var MM = com.modestmaps = {
             if (!rel) {
                 return handler;
             }
+
             var l = rel.length;
-            while(l--) {
+            while (l--) {
                 if (typeof rel[l].id === 'string' && rel[l].id === id) {
                     handler = rel[l];
                     break;
@@ -2206,16 +2209,42 @@ var MM = com.modestmaps = {
 
         disableHandler : function (id) {
             var handler = this.getHandler(id);
-            // (handler && typeof handler.remove === 'function') &&
-            handler.remove();
+            (handler && typeof handler.remove === 'function') && handler.remove();
             return this;
         },
 
         enableHandler : function (id) {
             var handler = this.getHandler(id);
-            // (handler && typeof handler.remove === 'function') &&
-            handler.init(this);
+            (handler && typeof handler.remove === 'function') && handler.init(this);
             return this;
+        },
+
+        removeHandler : function(id) {
+            var handler = this.getHandler(id),
+                index = this.eventHandlers.indexOf(handler);
+
+            /** When no handler was found, try to find it in MouseHandler's handlers */
+
+            if (index === -1) {
+                var mouseHandler = this.getHandler('MouseHandler');
+                index = mouseHandler.handlers.indexOf(handler);
+                if (index > -1) {
+                    handler.remove();
+                    mouseHandler.handlers.splice(index,1);
+                }
+                return;
+            }
+
+            handler.remove();
+            this.eventHandlers.splice(index,1);
+        },
+
+        addHandler : function (handler) {
+            handler.init(this);
+            if (typeof handler.id !== 'string') {
+                throw new Error('Handler lacks the required id attribute');
+            }
+            this.eventHandlers.push(handler);
         },
 
         windowResize: function() {

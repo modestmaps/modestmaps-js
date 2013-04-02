@@ -36,7 +36,6 @@ describe('MouseWheelHandler', function() {
         });
     });
 
-
     it('can be disabled and enabled', function () {
         runs(function () {
             expect(map.getZoom()).toEqual(0);
@@ -49,7 +48,6 @@ describe('MouseWheelHandler', function() {
         });
 
         waits(300);
-
 
         runs(function() {
             map.enableHandler('MouseWheelHandler');
@@ -68,7 +66,36 @@ describe('MouseWheelHandler', function() {
             });
             expect(map.getZoom()).toEqual(1);
         });
+    });
 
+    it('can be removed and added back', function () {
+        runs(function () {
+            map.removeHandler('MouseWheelHandler');
+            expect(map.getZoom()).toEqual(0);
+            happen.once(map.parent, {
+                type: 'mousewheel',
+                detail: -100
+            });           
+        });
 
-    });    
+        waits(300);
+
+        runs(function() {
+            map.addHandler(new MM.MouseWheelHandler(map));
+            happen.once(map.parent, {
+                type: 'mousewheel',
+                detail: -100
+            });
+        });
+
+        waits(300);
+
+        runs(function() {          
+            happen.once(map.parent, {
+                type: 'mousewheel',
+                detail: -200
+            });            
+            expect(map.getZoom()).toEqual(1);
+        });        
+    });
 });

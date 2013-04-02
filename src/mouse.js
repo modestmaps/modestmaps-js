@@ -30,11 +30,11 @@
         handler.init = function(x) {
             this.id = 'MouseWheelHandler';
             map = x;
-            mouseWheel = this.mouseWheel.bind(this);
             _zoomDiv = document.body.appendChild(document.createElement('div'));
             _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
             var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
             innerDiv.style.height = '2000px';
+            mouseWheel = this.mouseWheel.bind(this);
             MM.addEvent(map.parent, 'mousewheel', mouseWheel);
             return handler;
         };

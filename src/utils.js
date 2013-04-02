@@ -157,7 +157,7 @@
         var aArgs = Array.prototype.slice.call(arguments, 1), 
             fToBind = this,
             fNOP = function () {};
-            
+
         var fBound = function () {
             return fToBind.apply(this instanceof fNOP && oThis ? this : oThis,
                 aArgs.concat(Array.prototype.slice.call(arguments)));
@@ -168,3 +168,4 @@
         return fBound;
       };
     }
+

@@ -249,7 +249,7 @@
 
             var tileWidth = this.map.tileSize.x * scale;
             var tileHeight = this.map.tileSize.y * scale;
-            var center = new MM.Point(this.map.dimensions.x/2, this.map.dimensions.y/2);
+            var center = new MM.Point(this.map.dimensions.x* 0.5, this.map.dimensions.y* 0.5);
             var tiles = this.tileElementsInLevel(level);
 
             while (tiles.length) {
@@ -318,9 +318,9 @@
             var scale = Math.pow(2, this.map.coordinate.zoom - tile.coord.zoom);
 
             MM.moveElement(tile, {
-                x: Math.round((this.map.dimensions.x/2) +
+                x: Math.round((this.map.dimensions.x* 0.5) +
                     (tile.coord.column - theCoord.column) * this.map.tileSize.x),
-                y: Math.round((this.map.dimensions.y/2) +
+                y: Math.round((this.map.dimensions.y* 0.5) +
                     (tile.coord.row - theCoord.row) * this.map.tileSize.y),
                 scale: scale,
                 // TODO: pass only scale or only w/h
