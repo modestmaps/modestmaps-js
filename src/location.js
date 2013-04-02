@@ -62,9 +62,9 @@
 
         var d = 2 * Math.asin(
             Math.sqrt(
-              Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
+              Math.pow(Math.sin((lat1 - lat2) * 0.5), 2) +
               Math.cos(lat1) * Math.cos(lat2) *
-              Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
+              Math.pow(Math.sin((lon1 - lon2) * 0.5), 2)));
 
         var A = Math.sin((1-f)*d)/Math.sin(d);
         var B = Math.sin(f*d)/Math.sin(d);

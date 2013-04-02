@@ -60,8 +60,8 @@
         // getter for the center location
         center: function() {
             return new MM.Location(
-                this.south + (this.north - this.south) / 2,
-                this.east + (this.west - this.east) / 2
+                this.south + (this.north - this.south) * 0.5,
+                this.east + (this.west - this.east) * 0.5
             );
         },
 

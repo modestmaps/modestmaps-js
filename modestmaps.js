@@ -181,7 +181,23 @@ var MM = com.modestmaps = {
         else if (window.getComputedStyle)
             return document.defaultView.getComputedStyle(el,null).getPropertyValue(styleProp);
     };
-    // Point
+
+    if (!Function.prototype.bind) {
+      Function.prototype.bind = function (oThis) {    
+        var aArgs = Array.prototype.slice.call(arguments, 1), 
+            fToBind = this,
+            fNOP = function () {};
+            
+        var fBound = function () {
+            return fToBind.apply(this instanceof fNOP && oThis ? this : oThis,
+                aArgs.concat(Array.prototype.slice.call(arguments)));
+        };
+     
+        fNOP.prototype = this.prototype;
+        fBound.prototype = new fNOP();
+        return fBound;
+      };
+    }    // Point
     MM.Point = function(x, y) {
         this.x = parseFloat(x);
         this.y = parseFloat(y);
@@ -355,9 +371,9 @@ var MM = com.modestmaps = {
 
         var d = 2 * Math.asin(
             Math.sqrt(
-              Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
+              Math.pow(Math.sin((lat1 - lat2) * 0.5), 2) +
               Math.cos(lat1) * Math.cos(lat2) *
-              Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
+              Math.pow(Math.sin((lon1 - lon2) * 0.5), 2)));
 
         var A = Math.sin((1-f)*d)/Math.sin(d);
         var B = Math.sin(f*d)/Math.sin(d);
@@ -456,8 +472,8 @@ var MM = com.modestmaps = {
         // getter for the center location
         center: function() {
             return new MM.Location(
-                this.south + (this.north - this.south) / 2,
-                this.east + (this.west - this.east) / 2
+                this.south + (this.north - this.south) * 0.5,
+                this.east + (this.west - this.east) * 0.5
             );
         },
 
@@ -877,11 +893,30 @@ var MM = com.modestmaps = {
     MM.MouseWheelHandler = function() {
         var handler = {},
             map,
+            mouseWheel,
             _zoomDiv,
             prevTime,
-            precise = false;
+            precise = false;      
 
-        function mouseWheel(e) {
+        handler.init = function(x) {
+            this.id = 'MouseWheelHandler';
+            map = x;
+            mouseWheel = this.mouseWheel.bind(this);
+            _zoomDiv = document.body.appendChild(document.createElement('div'));
+            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
+            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
+            innerDiv.style.height = '2000px';
+            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
+            return handler;
+        };
+
+        handler.precise = function(x) {
+            if (!arguments.length) return precise;
+            precise = x;
+            return handler;
+        };
+
+        handler.mouseWheel = function (e) {
             var delta = 0;
             prevTime = prevTime || new Date().getTime();
 
@@ -906,22 +941,6 @@ var MM = com.modestmaps = {
 
             // Cancel the event so that the page doesn't scroll
             return MM.cancelEvent(e);
-        }
-
-        handler.init = function(x) {
-            map = x;
-            _zoomDiv = document.body.appendChild(document.createElement('div'));
-            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
-            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
-            innerDiv.style.height = '2000px';
-            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
-            return handler;
-        };
-
-        handler.precise = function(x) {
-            if (!arguments.length) return precise;
-            precise = x;
-            return handler;
         };
 
         handler.remove = function() {
@@ -946,6 +965,7 @@ var MM = com.modestmaps = {
         }
 
         handler.init = function(x) {
+            this.id = 'DoubleClickHandler';
             map = x;
             MM.addEvent(map.parent, 'dblclick', doubleClick);
             return handler;
@@ -999,6 +1019,7 @@ var MM = com.modestmaps = {
         }
 
         handler.init = function(x) {
+            this.id = 'DragHandler';
             map = x;
             MM.addEvent(map.parent, 'mousedown', mouseDown);
             return handler;
@@ -1013,12 +1034,12 @@ var MM = com.modestmaps = {
 
     MM.MouseHandler = function() {
         var handler = {},
-            map,
-            handlers;
+            map;
 
         handler.init = function(x) {
+            this.id = 'MouseHandler';
             map = x;
-            handlers = [
+            this.handlers = [
                 MM.DragHandler().init(map),
                 MM.DoubleClickHandler().init(map),
                 MM.MouseWheelHandler().init(map)
@@ -1027,8 +1048,8 @@ var MM = com.modestmaps = {
         };
 
         handler.remove = function() {
-            for (var i = 0; i < handlers.length; i++) {
-                handlers[i].remove();
+            for (var i = 0; i < this.handlers.length; i++) {
+                this.handlers[i].remove();
             }
             return handler;
         };
@@ -1230,6 +1251,7 @@ var MM = com.modestmaps = {
         }
 
         handler.init = function(x) {
+            this.id = 'TouchHandler';
             map = x;
 
             // Fail early if this isn't a touch device.
@@ -2149,6 +2171,53 @@ var MM = com.modestmaps = {
             return this;
         },
 
+        // event handlers
+
+        getHandler : function (id, mHandler) {
+            var handler = null,
+                rel = this.eventHandlers;
+
+            if (mHandler === true) {
+                rel = this.getHandler('MouseHandler', false);
+                if (!rel) {
+                    return handler;
+                }
+                rel = rel.handlers;
+            }
+
+            if (!rel) {
+                return handler;
+            }
+            var l = rel.length;
+            while(l--) {
+                if (typeof rel[l].id === 'string' && rel[l].id === id) {
+                    handler = rel[l];
+                    break;
+                }
+            }
+
+            /** When no handler was found, attempt to find it in MouseHandler's handlers */
+
+            if (!handler && typeof mHandler !== 'boolean') {
+                return this.getHandler(id, true);
+            }
+            return handler;
+        },
+
+        disableHandler : function (id) {
+            var handler = this.getHandler(id);
+            // (handler && typeof handler.remove === 'function') &&
+            handler.remove();
+            return this;
+        },
+
+        enableHandler : function (id) {
+            var handler = this.getHandler(id);
+            // (handler && typeof handler.remove === 'function') &&
+            handler.init(this);
+            return this;
+        },
+
         windowResize: function() {
             if (!this._windowResize) {
                 var theMap = this;
@@ -2277,8 +2346,8 @@ var MM = com.modestmaps = {
             initZoom = Math.max(initZoom, this.coordLimits[0].zoom);
 
             // coordinate of extent center
-            var centerRow = (TL.row + BR.row) / 2;
-            var centerColumn = (TL.column + BR.column) / 2;
+            var centerRow = (TL.row + BR.row) * 0.5;
+            var centerColumn = (TL.column + BR.column) * 0.5;
             var centerZoom = TL.zoom;
             return new MM.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom);
         },
@@ -2318,7 +2387,7 @@ var MM = com.modestmaps = {
             }
 
             // distance from the center of the map
-            var point = new MM.Point(this.dimensions.x / 2, this.dimensions.y / 2);
+            var point = new MM.Point(this.dimensions.x * 0.5, this.dimensions.y * 0.5);
             point.x += this.tileSize.x * (coord.column - this.coordinate.column);
             point.y += this.tileSize.y * (coord.row - this.coordinate.row);
 
@@ -2330,8 +2399,8 @@ var MM = com.modestmaps = {
         pointCoordinate: function(point) {
             // new point coordinate reflecting distance from map center, in tile widths
             var coord = this.coordinate.copy();
-            coord.column += (point.x - this.dimensions.x / 2) / this.tileSize.x;
-            coord.row += (point.y - this.dimensions.y / 2) / this.tileSize.y;
+            coord.column += (point.x - this.dimensions.x * 0.5) / this.tileSize.x;
+            coord.row += (point.y - this.dimensions.y * 0.5) / this.tileSize.y;
 
             return coord;
         },
@@ -2601,7 +2670,7 @@ var MM = com.modestmaps = {
                 if (bottomRightLimit.row - topLeftLimit.row <
                     currentBottomRight.row - currentTopLeft.row) {
                     // if the limit is smaller than the current view center it
-                    coord.row = (bottomRightLimit.row + topLeftLimit.row) / 2;
+                    coord.row = (bottomRightLimit.row + topLeftLimit.row) * 0.5;
                 } else {
                     if (currentTopLeft.row < topLeftLimit.row) {
                         coord.row += topLeftLimit.row - currentTopLeft.row;
@@ -2612,7 +2681,7 @@ var MM = com.modestmaps = {
                 if (bottomRightLimit.column - topLeftLimit.column <
                     currentBottomRight.column - currentTopLeft.column) {
                     // if the limit is smaller than the current view, center it
-                    coord.column = (bottomRightLimit.column + topLeftLimit.column) / 2;
+                    coord.column = (bottomRightLimit.column + topLeftLimit.column) * 0.5;
                 } else {
                     if (currentTopLeft.column < topLeftLimit.column) {
                         coord.column += topLeftLimit.column - currentTopLeft.column;
