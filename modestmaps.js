@@ -180,26 +180,7 @@ var MM = com.modestmaps = {
             return el.currentStyle[styleProp];
         else if (window.getComputedStyle)
             return document.defaultView.getComputedStyle(el,null).getPropertyValue(styleProp);
-    };
-
-    if (!Function.prototype.bind) {
-      Function.prototype.bind = function (oThis) {    
-        var aArgs = Array.prototype.slice.call(arguments, 1), 
-            fToBind = this,
-            fNOP = function () {};
-
-        var fBound = function () {
-            return fToBind.apply(this instanceof fNOP && oThis ? this : oThis,
-                aArgs.concat(Array.prototype.slice.call(arguments)));
-        };
-     
-        fNOP.prototype = this.prototype;
-        fBound.prototype = new fNOP();
-        return fBound;
-      };
-    }
-
-    // Point
+    };    // Point
     MM.Point = function(x, y) {
         this.x = parseFloat(x);
         this.y = parseFloat(y);
@@ -895,30 +876,13 @@ var MM = com.modestmaps = {
     MM.MouseWheelHandler = function() {
         var handler = {},
             map,
-            mouseWheel,
             _zoomDiv,
             prevTime,
-            precise = false;      
+            precise = false;
 
-        handler.init = function(x) {
-            this.id = 'MouseWheelHandler';
-            map = x;
-            _zoomDiv = document.body.appendChild(document.createElement('div'));
-            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
-            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
-            innerDiv.style.height = '2000px';
-            mouseWheel = this.mouseWheel.bind(this);
-            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
-            return handler;
-        };
+        handler.id = 'MouseWheelHandler';
 
-        handler.precise = function(x) {
-            if (!arguments.length) return precise;
-            precise = x;
-            return handler;
-        };
-
-        handler.mouseWheel = function (e) {
+        function mouseWheel(e) {
             var delta = 0;
             prevTime = prevTime || new Date().getTime();
 
@@ -943,6 +907,22 @@ var MM = com.modestmaps = {
 
             // Cancel the event so that the page doesn't scroll
             return MM.cancelEvent(e);
+        }
+
+        handler.init = function(x) {
+            map = x;
+            _zoomDiv = document.body.appendChild(document.createElement('div'));
+            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
+            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
+            innerDiv.style.height = '2000px';
+            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
+            return handler;
+        };
+
+        handler.precise = function(x) {
+            if (!arguments.length) return precise;
+            precise = x;
+            return handler;
         };
 
         handler.remove = function() {
@@ -957,6 +937,8 @@ var MM = com.modestmaps = {
         var handler = {},
             map;
 
+        handler.id = 'DoubleClickHandler';
+
         function doubleClick(e) {
             // Ensure that this handler is attached once.
             // Get the point on the map that was double-clicked
@@ -967,7 +949,6 @@ var MM = com.modestmaps = {
         }
 
         handler.init = function(x) {
-            this.id = 'DoubleClickHandler';
             map = x;
             MM.addEvent(map.parent, 'dblclick', doubleClick);
             return handler;
@@ -985,6 +966,8 @@ var MM = com.modestmaps = {
         var handler = {},
             prevMouse,
             map;
+
+        handler.id = 'DragHandler';
 
         function mouseDown(e) {
             if (e.shiftKey || e.button == 2) return;
@@ -1021,7 +1004,6 @@ var MM = com.modestmaps = {
         }
 
         handler.init = function(x) {
-            this.id = 'DragHandler';
             map = x;
             MM.addEvent(map.parent, 'mousedown', mouseDown);
             return handler;
@@ -1038,8 +1020,10 @@ var MM = com.modestmaps = {
         var handler = {},
             map;
 
+        handler.id = 'MouseHandler';
+        handler.handlers = [];
+
         handler.init = function(x) {
-            this.id = 'MouseHandler';
             map = x;
             this.handlers = [
                 MM.DragHandler().init(map),
@@ -1053,12 +1037,12 @@ var MM = com.modestmaps = {
             for (var i = 0; i < this.handlers.length; i++) {
                 this.handlers[i].remove();
             }
+            this.handlers = [];
             return handler;
         };
 
         return handler;
-    };
-    MM.TouchHandler = function() {
+    };    MM.TouchHandler = function() {
         var handler = {},
             map,
             maxTapTime = 250,
@@ -2175,7 +2159,7 @@ var MM = com.modestmaps = {
 
         // event handlers
 
-        getHandler : function (id, mHandler) {
+        getHandler: function (id, mHandler) {
             var handler = null,
                 rel = this.eventHandlers;
 
@@ -2207,19 +2191,19 @@ var MM = com.modestmaps = {
             return handler;
         },
 
-        disableHandler : function (id) {
+        disableHandler: function (id) {
             var handler = this.getHandler(id);
             (handler && typeof handler.remove === 'function') && handler.remove();
             return this;
         },
 
-        enableHandler : function (id) {
+        enableHandler: function (id) {
             var handler = this.getHandler(id);
             (handler && typeof handler.remove === 'function') && handler.init(this);
             return this;
         },
 
-        removeHandler : function(id) {
+        removeHandler: function(id) {
             var handler = this.getHandler(id),
                 index = this.eventHandlers.indexOf(handler);
 
@@ -2239,7 +2223,7 @@ var MM = com.modestmaps = {
             this.eventHandlers.splice(index,1);
         },
 
-        addHandler : function (handler) {
+        addHandler: function (handler) {
             handler.init(this);
             if (typeof handler.id !== 'string') {
                 throw new Error('Handler lacks the required id attribute');

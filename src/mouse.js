@@ -22,30 +22,13 @@
     MM.MouseWheelHandler = function() {
         var handler = {},
             map,
-            mouseWheel,
             _zoomDiv,
             prevTime,
-            precise = false;      
+            precise = false;
 
-        handler.init = function(x) {
-            this.id = 'MouseWheelHandler';
-            map = x;
-            _zoomDiv = document.body.appendChild(document.createElement('div'));
-            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
-            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
-            innerDiv.style.height = '2000px';
-            mouseWheel = this.mouseWheel.bind(this);
-            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
-            return handler;
-        };
+        handler.id = 'MouseWheelHandler';
 
-        handler.precise = function(x) {
-            if (!arguments.length) return precise;
-            precise = x;
-            return handler;
-        };
-
-        handler.mouseWheel = function (e) {
+        function mouseWheel(e) {
             var delta = 0;
             prevTime = prevTime || new Date().getTime();
 
@@ -70,6 +53,22 @@
 
             // Cancel the event so that the page doesn't scroll
             return MM.cancelEvent(e);
+        }
+
+        handler.init = function(x) {
+            map = x;
+            _zoomDiv = document.body.appendChild(document.createElement('div'));
+            _zoomDiv.style.cssText = 'visibility:hidden;top:0;height:0;width:0;overflow-y:scroll';
+            var innerDiv = _zoomDiv.appendChild(document.createElement('div'));
+            innerDiv.style.height = '2000px';
+            MM.addEvent(map.parent, 'mousewheel', mouseWheel);
+            return handler;
+        };
+
+        handler.precise = function(x) {
+            if (!arguments.length) return precise;
+            precise = x;
+            return handler;
         };
 
         handler.remove = function() {
@@ -84,6 +83,8 @@
         var handler = {},
             map;
 
+        handler.id = 'DoubleClickHandler';
+
         function doubleClick(e) {
             // Ensure that this handler is attached once.
             // Get the point on the map that was double-clicked
@@ -94,7 +95,6 @@
         }
 
         handler.init = function(x) {
-            this.id = 'DoubleClickHandler';
             map = x;
             MM.addEvent(map.parent, 'dblclick', doubleClick);
             return handler;
@@ -112,6 +112,8 @@
         var handler = {},
             prevMouse,
             map;
+
+        handler.id = 'DragHandler';
 
         function mouseDown(e) {
             if (e.shiftKey || e.button == 2) return;
@@ -148,7 +150,6 @@
         }
 
         handler.init = function(x) {
-            this.id = 'DragHandler';
             map = x;
             MM.addEvent(map.parent, 'mousedown', mouseDown);
             return handler;
@@ -165,8 +166,10 @@
         var handler = {},
             map;
 
+        handler.id = 'MouseHandler';
+        handler.handlers = [];
+
         handler.init = function(x) {
-            this.id = 'MouseHandler';
             map = x;
             this.handlers = [
                 MM.DragHandler().init(map),
@@ -180,6 +183,7 @@
             for (var i = 0; i < this.handlers.length; i++) {
                 this.handlers[i].remove();
             }
+            this.handlers = [];
             return handler;
         };
 

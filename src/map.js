@@ -149,7 +149,7 @@
 
         // event handlers
 
-        getHandler : function (id, mHandler) {
+        getHandler: function (id, mHandler) {
             var handler = null,
                 rel = this.eventHandlers;
 
@@ -181,19 +181,19 @@
             return handler;
         },
 
-        disableHandler : function (id) {
+        disableHandler: function (id) {
             var handler = this.getHandler(id);
             (handler && typeof handler.remove === 'function') && handler.remove();
             return this;
         },
 
-        enableHandler : function (id) {
+        enableHandler: function (id) {
             var handler = this.getHandler(id);
             (handler && typeof handler.remove === 'function') && handler.init(this);
             return this;
         },
 
-        removeHandler : function(id) {
+        removeHandler: function(id) {
             var handler = this.getHandler(id),
                 index = this.eventHandlers.indexOf(handler);
 
@@ -213,7 +213,7 @@
             this.eventHandlers.splice(index,1);
         },
 
-        addHandler : function (handler) {
+        addHandler: function (handler) {
             handler.init(this);
             if (typeof handler.id !== 'string') {
                 throw new Error('Handler lacks the required id attribute');
