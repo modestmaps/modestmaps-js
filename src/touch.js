@@ -193,6 +193,7 @@
         }
 
         handler.init = function(x) {
+            this.id = 'TouchHandler';
             map = x;
 
             // Fail early if this isn't a touch device.

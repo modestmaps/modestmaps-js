@@ -26,6 +26,8 @@
             prevTime,
             precise = false;
 
+        handler.id = 'MouseWheelHandler';
+
         function mouseWheel(e) {
             var delta = 0;
             prevTime = prevTime || new Date().getTime();
@@ -81,6 +83,8 @@
         var handler = {},
             map;
 
+        handler.id = 'DoubleClickHandler';
+
         function doubleClick(e) {
             // Ensure that this handler is attached once.
             // Get the point on the map that was double-clicked
@@ -108,6 +112,8 @@
         var handler = {},
             prevMouse,
             map;
+
+        handler.id = 'DragHandler';
 
         function mouseDown(e) {
             if (e.shiftKey || e.button == 2) return;
@@ -158,12 +164,14 @@
 
     MM.MouseHandler = function() {
         var handler = {},
-            map,
-            handlers;
+            map;
+
+        handler.id = 'MouseHandler';
+        handler.handlers = [];
 
         handler.init = function(x) {
             map = x;
-            handlers = [
+            this.handlers = [
                 MM.DragHandler().init(map),
                 MM.DoubleClickHandler().init(map),
                 MM.MouseWheelHandler().init(map)
@@ -172,9 +180,10 @@
         };
 
         handler.remove = function() {
-            for (var i = 0; i < handlers.length; i++) {
-                handlers[i].remove();
+            for (var i = 0; i < this.handlers.length; i++) {
+                this.handlers[i].remove();
             }
+            this.handlers = [];
             return handler;
         };
 
