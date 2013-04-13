@@ -1,5 +1,5 @@
     MM.TouchHandler = function() {
-        var handler = {},
+        var handler = { id: 'TouchHandler' },
             map,
             maxTapTime = 250,
             maxTapDistance = 30,
@@ -193,7 +193,6 @@
         }
 
         handler.init = function(x) {
-            this.id = 'TouchHandler';
             map = x;
 
             // Fail early if this isn't a touch device.

@@ -131,7 +131,6 @@
         },
 
         // callbacks...
-
         addCallback: function(event, callback) {
             this.callbackManager.addCallback(event, callback);
             return this;
@@ -148,48 +147,42 @@
         },
 
         // event handlers
-
         getHandler: function (id, mHandler) {
             var handler = null,
                 rel = this.eventHandlers;
 
             if (mHandler === true) {
                 rel = this.getHandler('MouseHandler', false);
-                if (!rel) {
-                    return handler;
-                }
+                if (!rel) return handler;
                 rel = rel.handlers;
             }
 
-            if (!rel) {
-                return handler;
-            }
+            if (!rel) return handler;
 
-            var l = rel.length;
-            while (l--) {
+            for (var l = 0; l < rel.length; l++) {
                 if (typeof rel[l].id === 'string' && rel[l].id === id) {
                     handler = rel[l];
                     break;
                 }
             }
 
-            /** When no handler was found, attempt to find it in MouseHandler's handlers */
-
+            // When no handler was found, attempt to find it in MouseHandler's handlers
             if (!handler && typeof mHandler !== 'boolean') {
                 return this.getHandler(id, true);
             }
+
             return handler;
         },
 
         disableHandler: function (id) {
             var handler = this.getHandler(id);
-            (handler && typeof handler.remove === 'function') && handler.remove();
+            if (handler && typeof handler.remove === 'function') handler.remove();
             return this;
         },
 
         enableHandler: function (id) {
             var handler = this.getHandler(id);
-            (handler && typeof handler.remove === 'function') && handler.init(this);
+            if (handler && typeof handler.remove === 'function') handler.init(this);
             return this;
         },
 
@@ -197,12 +190,11 @@
             var handler = this.getHandler(id),
                 index = this.eventHandlers.indexOf(handler);
 
-            /** When no handler was found, try to find it in MouseHandler's handlers */
-
+            // When no handler was found, try to find it in MouseHandler's handlers
             if (index === -1) {
                 var mouseHandler = this.getHandler('MouseHandler');
                 index = mouseHandler.handlers.indexOf(handler);
-                if (index > -1) {
+                if (index !== -1) {
                     handler.remove();
                     mouseHandler.handlers.splice(index,1);
                 }
@@ -211,6 +203,7 @@
 
             handler.remove();
             this.eventHandlers.splice(index,1);
+            return handler;
         },
 
         addHandler: function (handler) {
@@ -219,6 +212,7 @@
                 throw new Error('Handler lacks the required id attribute');
             }
             this.eventHandlers.push(handler);
+            return this;
         },
 
         windowResize: function() {
@@ -349,8 +343,8 @@
             initZoom = Math.max(initZoom, this.coordLimits[0].zoom);
 
             // coordinate of extent center
-            var centerRow = (TL.row + BR.row) * 0.5;
-            var centerColumn = (TL.column + BR.column) * 0.5;
+            var centerRow = (TL.row + BR.row) / 2;
+            var centerColumn = (TL.column + BR.column) / 2;
             var centerZoom = TL.zoom;
             return new MM.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom);
         },
@@ -390,7 +384,7 @@
             }
 
             // distance from the center of the map
-            var point = new MM.Point(this.dimensions.x * 0.5, this.dimensions.y * 0.5);
+            var point = new MM.Point(this.dimensions.x / 2, this.dimensions.y / 2);
             point.x += this.tileSize.x * (coord.column - this.coordinate.column);
             point.y += this.tileSize.y * (coord.row - this.coordinate.row);
 
@@ -402,8 +396,8 @@
         pointCoordinate: function(point) {
             // new point coordinate reflecting distance from map center, in tile widths
             var coord = this.coordinate.copy();
-            coord.column += (point.x - this.dimensions.x * 0.5) / this.tileSize.x;
-            coord.row += (point.y - this.dimensions.y * 0.5) / this.tileSize.y;
+            coord.column += (point.x - this.dimensions.x / 2) / this.tileSize.x;
+            coord.row += (point.y - this.dimensions.y / 2) / this.tileSize.y;
 
             return coord;
         },
@@ -673,7 +667,7 @@
                 if (bottomRightLimit.row - topLeftLimit.row <
                     currentBottomRight.row - currentTopLeft.row) {
                     // if the limit is smaller than the current view center it
-                    coord.row = (bottomRightLimit.row + topLeftLimit.row) * 0.5;
+                    coord.row = (bottomRightLimit.row + topLeftLimit.row) / 2;
                 } else {
                     if (currentTopLeft.row < topLeftLimit.row) {
                         coord.row += topLeftLimit.row - currentTopLeft.row;
@@ -684,7 +678,7 @@
                 if (bottomRightLimit.column - topLeftLimit.column <
                     currentBottomRight.column - currentTopLeft.column) {
                     // if the limit is smaller than the current view, center it
-                    coord.column = (bottomRightLimit.column + topLeftLimit.column) * 0.5;
+                    coord.column = (bottomRightLimit.column + topLeftLimit.column) / 2;
                 } else {
                     if (currentTopLeft.column < topLeftLimit.column) {
                         coord.column += topLeftLimit.column - currentTopLeft.column;

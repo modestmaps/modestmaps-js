@@ -20,13 +20,12 @@
     };
 
     MM.MouseWheelHandler = function() {
-        var handler = {},
+        var handler = { id: 'MouseWheelHandler' },
             map,
             _zoomDiv,
             prevTime,
             precise = false;
 
-        handler.id = 'MouseWheelHandler';
 
         function mouseWheel(e) {
             var delta = 0;
@@ -80,10 +79,8 @@
     };
 
     MM.DoubleClickHandler = function() {
-        var handler = {},
+        var handler = { id: 'DoubleClickHandler' },
             map;
-
-        handler.id = 'DoubleClickHandler';
 
         function doubleClick(e) {
             // Ensure that this handler is attached once.
@@ -109,11 +106,9 @@
 
     // Handle the use of mouse dragging to pan the map.
     MM.DragHandler = function() {
-        var handler = {},
+        var handler = { id: 'DragHandler' },
             prevMouse,
             map;
-
-        handler.id = 'DragHandler';
 
         function mouseDown(e) {
             if (e.shiftKey || e.button == 2) return;
@@ -163,15 +158,12 @@
     };
 
     MM.MouseHandler = function() {
-        var handler = {},
+        var handler = { id: 'MouseHandler', handlers: [] },
             map;
-
-        handler.id = 'MouseHandler';
-        handler.handlers = [];
 
         handler.init = function(x) {
             map = x;
-            this.handlers = [
+            handler.handlers = [
                 MM.DragHandler().init(map),
                 MM.DoubleClickHandler().init(map),
                 MM.MouseWheelHandler().init(map)
@@ -180,10 +172,10 @@
         };
 
         handler.remove = function() {
-            for (var i = 0; i < this.handlers.length; i++) {
-                this.handlers[i].remove();
+            for (var i = 0; i < handler.handlers.length; i++) {
+                handler.handlers[i].remove();
             }
-            this.handlers = [];
+            handler.handlers = [];
             return handler;
         };
 
