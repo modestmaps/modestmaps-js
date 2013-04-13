@@ -131,7 +131,6 @@
         },
 
         // callbacks...
-
         addCallback: function(event, callback) {
             this.callbackManager.addCallback(event, callback);
             return this;
@@ -144,6 +143,75 @@
 
         dispatchCallback: function(event, message) {
             this.callbackManager.dispatchCallback(event, message);
+            return this;
+        },
+
+        // event handlers
+        getHandler: function (id, mHandler) {
+            var handler = null,
+                rel = this.eventHandlers;
+
+            if (mHandler === true) {
+                rel = this.getHandler('MouseHandler', false);
+                if (!rel) return handler;
+                rel = rel.handlers;
+            }
+
+            if (!rel) return handler;
+
+            for (var l = 0; l < rel.length; l++) {
+                if (typeof rel[l].id === 'string' && rel[l].id === id) {
+                    handler = rel[l];
+                    break;
+                }
+            }
+
+            // When no handler was found, attempt to find it in MouseHandler's handlers
+            if (!handler && typeof mHandler !== 'boolean') {
+                return this.getHandler(id, true);
+            }
+
+            return handler;
+        },
+
+        disableHandler: function (id) {
+            var handler = this.getHandler(id);
+            if (handler && typeof handler.remove === 'function') handler.remove();
+            return this;
+        },
+
+        enableHandler: function (id) {
+            var handler = this.getHandler(id);
+            if (handler && typeof handler.remove === 'function') handler.init(this);
+            return this;
+        },
+
+        removeHandler: function(id) {
+            var handler = this.getHandler(id),
+                index = this.eventHandlers.indexOf(handler);
+
+            // When no handler was found, try to find it in MouseHandler's handlers
+            if (index === -1) {
+                var mouseHandler = this.getHandler('MouseHandler');
+                index = mouseHandler.handlers.indexOf(handler);
+                if (index !== -1) {
+                    handler.remove();
+                    mouseHandler.handlers.splice(index,1);
+                }
+                return;
+            }
+
+            handler.remove();
+            this.eventHandlers.splice(index,1);
+            return handler;
+        },
+
+        addHandler: function (handler) {
+            handler.init(this);
+            if (typeof handler.id !== 'string') {
+                throw new Error('Handler lacks the required id attribute');
+            }
+            this.eventHandlers.push(handler);
             return this;
         },
 

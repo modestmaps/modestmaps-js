@@ -1,5 +1,5 @@
     MM.TouchHandler = function() {
-        var handler = {},
+        var handler = { id: 'TouchHandler' },
             map,
             maxTapTime = 250,
             maxTapDistance = 30,

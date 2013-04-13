@@ -31,4 +31,20 @@ describe('DragHandler', function() {
         expect(~~map.getCenter().lat).toEqual(27);
         expect(~~map.getCenter().lon).toEqual(-28);
     });
+
+    it('can be disabled and enabled', function () {
+        runs(function () {
+            map.disableHandler('DragHandler');
+            happen.mousedown(map.parent, { clientX: 10, clientY: 10 });
+            expect(map.parent.style.cursor).toNotEqual('move');
+        });
+
+        waits(300);
+
+        runs(function () {
+            map.enableHandler('DragHandler');
+            happen.mousedown(map.parent, { clientX: 10, clientY: 10 });
+            expect(map.parent.style.cursor).toEqual('move');
+        });
+    });    
 });

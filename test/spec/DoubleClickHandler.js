@@ -34,4 +34,22 @@ describe('DoubleClickHandler', function() {
         happen.dblclick(map.parent, { shift: true });
         expect(map.getZoom()).toEqual(0);
     });
+
+    it('can be disabled and enabled', function () {
+        runs(function () {
+            map.disableHandler('DoubleClickHandler');
+            expect(map.getZoom()).toEqual(0);
+            happen.dblclick(map.parent);
+            expect(map.getZoom()).toEqual(0);
+        });
+
+        waits(300);
+
+        runs(function () {
+            map.enableHandler('DoubleClickHandler');
+            expect(map.getZoom()).toEqual(0);
+            happen.dblclick(map.parent);
+            expect(map.getZoom()).toEqual(1);
+        });
+    });    
 });

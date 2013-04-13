@@ -355,9 +355,9 @@ var MM = com.modestmaps = {
 
         var d = 2 * Math.asin(
             Math.sqrt(
-              Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
+              Math.pow(Math.sin((lat1 - lat2) * 0.5), 2) +
               Math.cos(lat1) * Math.cos(lat2) *
-              Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
+              Math.pow(Math.sin((lon1 - lon2) * 0.5), 2)));
 
         var A = Math.sin((1-f)*d)/Math.sin(d);
         var B = Math.sin(f*d)/Math.sin(d);
@@ -456,8 +456,8 @@ var MM = com.modestmaps = {
         // getter for the center location
         center: function() {
             return new MM.Location(
-                this.south + (this.north - this.south) / 2,
-                this.east + (this.west - this.east) / 2
+                this.south + (this.north - this.south) * 0.5,
+                this.east + (this.west - this.east) * 0.5
             );
         },
 
@@ -875,11 +875,12 @@ var MM = com.modestmaps = {
     };
 
     MM.MouseWheelHandler = function() {
-        var handler = {},
+        var handler = { id: 'MouseWheelHandler' },
             map,
             _zoomDiv,
             prevTime,
             precise = false;
+
 
         function mouseWheel(e) {
             var delta = 0;
@@ -933,7 +934,7 @@ var MM = com.modestmaps = {
     };
 
     MM.DoubleClickHandler = function() {
-        var handler = {},
+        var handler = { id: 'DoubleClickHandler' },
             map;
 
         function doubleClick(e) {
@@ -960,7 +961,7 @@ var MM = com.modestmaps = {
 
     // Handle the use of mouse dragging to pan the map.
     MM.DragHandler = function() {
-        var handler = {},
+        var handler = { id: 'DragHandler' },
             prevMouse,
             map;
 
@@ -1012,13 +1013,12 @@ var MM = com.modestmaps = {
     };
 
     MM.MouseHandler = function() {
-        var handler = {},
-            map,
-            handlers;
+        var handler = { id: 'MouseHandler', handlers: [] },
+            map;
 
         handler.init = function(x) {
             map = x;
-            handlers = [
+            handler.handlers = [
                 MM.DragHandler().init(map),
                 MM.DoubleClickHandler().init(map),
                 MM.MouseWheelHandler().init(map)
@@ -1027,16 +1027,17 @@ var MM = com.modestmaps = {
         };
 
         handler.remove = function() {
-            for (var i = 0; i < handlers.length; i++) {
-                handlers[i].remove();
+            for (var i = 0; i < handler.handlers.length; i++) {
+                handler.handlers[i].remove();
             }
+            handler.handlers = [];
             return handler;
         };
 
         return handler;
     };
     MM.TouchHandler = function() {
-        var handler = {},
+        var handler = { id: 'TouchHandler' },
             map,
             maxTapTime = 250,
             maxTapDistance = 30,
@@ -1815,7 +1816,7 @@ var MM = com.modestmaps = {
 
             var tileWidth = this.map.tileSize.x * scale;
             var tileHeight = this.map.tileSize.y * scale;
-            var center = new MM.Point(this.map.dimensions.x/2, this.map.dimensions.y/2);
+            var center = new MM.Point(this.map.dimensions.x* 0.5, this.map.dimensions.y* 0.5);
             var tiles = this.tileElementsInLevel(level);
 
             while (tiles.length) {
@@ -1884,9 +1885,9 @@ var MM = com.modestmaps = {
             var scale = Math.pow(2, this.map.coordinate.zoom - tile.coord.zoom);
 
             MM.moveElement(tile, {
-                x: Math.round((this.map.dimensions.x/2) +
+                x: Math.round((this.map.dimensions.x* 0.5) +
                     (tile.coord.column - theCoord.column) * this.map.tileSize.x),
-                y: Math.round((this.map.dimensions.y/2) +
+                y: Math.round((this.map.dimensions.y* 0.5) +
                     (tile.coord.row - theCoord.row) * this.map.tileSize.y),
                 scale: scale,
                 // TODO: pass only scale or only w/h
@@ -2146,6 +2147,76 @@ var MM = com.modestmaps = {
 
         dispatchCallback: function(event, message) {
             this.callbackManager.dispatchCallback(event, message);
+            return this;
+        },
+
+        // event handlers
+
+        getHandler: function (id, mHandler) {
+            var handler = null,
+                rel = this.eventHandlers;
+
+            if (mHandler === true) {
+                rel = this.getHandler('MouseHandler', false);
+                if (!rel) return handler;
+                rel = rel.handlers;
+            }
+
+            if (!rel) return handler;
+
+            for (var l = 0; l < rel.length; l++) {
+                if (typeof rel[l].id === 'string' && rel[l].id === id) {
+                    handler = rel[l];
+                    break;
+                }
+            }
+
+            // When no handler was found, attempt to find it in MouseHandler's handlers
+            if (!handler && typeof mHandler !== 'boolean') {
+                return this.getHandler(id, true);
+            }
+
+            return handler;
+        },
+
+        disableHandler: function (id) {
+            var handler = this.getHandler(id);
+            if (handler && typeof handler.remove === 'function') handler.remove();
+            return this;
+        },
+
+        enableHandler: function (id) {
+            var handler = this.getHandler(id);
+            if (handler && typeof handler.remove === 'function') handler.init(this);
+            return this;
+        },
+
+        removeHandler: function(id) {
+            var handler = this.getHandler(id),
+                index = this.eventHandlers.indexOf(handler);
+
+            // When no handler was found, try to find it in MouseHandler's handlers
+            if (index === -1) {
+                var mouseHandler = this.getHandler('MouseHandler');
+                index = mouseHandler.handlers.indexOf(handler);
+                if (index !== -1) {
+                    handler.remove();
+                    mouseHandler.handlers.splice(index,1);
+                }
+                return;
+            }
+
+            handler.remove();
+            this.eventHandlers.splice(index,1);
+            return handler;
+        },
+
+        addHandler: function (handler) {
+            handler.init(this);
+            if (typeof handler.id !== 'string') {
+                throw new Error('Handler lacks the required id attribute');
+            }
+            this.eventHandlers.push(handler);
             return this;
         },
 
