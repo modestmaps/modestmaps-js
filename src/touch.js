@@ -1,3 +1,5 @@
+    MM.MSGestureInitialized = false;
+
     MM.TouchHandler = function() {
         var handler = { id: 'TouchHandler' },
             map,
@@ -8,31 +10,36 @@
             taps = [],
             snapToZoom = true,
             wasPinching = false,
-            lastPinchCenter = null;
+            lastPinchCenter = null,
+            msTapOldTime = new Date(),
+            shiftKey = false;
 
         function isTouchable () {
              var el = document.createElement('div');
              el.setAttribute('ongesturestart', 'return;');
-             return (typeof el.ongesturestart === 'function');
+             return (typeof el.ongesturestart === 'function' || MM.supportGesture());
         }
 
         function updateTouches(e) {
-            for (var i = 0; i < e.touches.length; i += 1) {
-                var t = e.touches[i];
-                if (t.identifier in locations) {
-                    var l = locations[t.identifier];
-                    l.x = t.clientX;
-                    l.y = t.clientY;
-                    l.scale = e.scale;
-                }
-                else {
-                    locations[t.identifier] = {
-                        scale: e.scale,
-                        startPos: { x: t.clientX, y: t.clientY },
-                        x: t.clientX,
-                        y: t.clientY,
-                        time: new Date().getTime()
-                    };
+            //Check MSGesture supoort
+            if(!MM.supportGesture()){
+                for (var i = 0; i < e.touches.length; i += 1) {
+                    var t = e.touches[i];
+                    if (t.identifier in locations) {
+                        var l = locations[t.identifier];
+                        l.x = t.clientX;
+                        l.y = t.clientY;
+                        l.scale = e.scale;
+                    }
+                    else {
+                        locations[t.identifier] = {
+                            scale: e.scale,
+                            startPos: { x: t.clientX, y: t.clientY },
+                            x: t.clientX,
+                            y: t.clientY,
+                            time: new Date().getTime()
+                        };
+                    }
                 }
             }
         }
@@ -45,17 +52,33 @@
         }
 
         function touchStart(e) {
+            //Check MSGesture supoort
+            if(MM.supportGesture()){
+                e.currentTarget._gesture.addPointer(e.pointerId);
+                e.touches = new Array(1);
+                e.touches[0] = e.currentTarget;
+                shiftKey = e.shiftKey;
+            }
             updateTouches(e);
         }
 
         function touchMove(e) {
-            switch (e.touches.length) {
-                case 1:
-                    onPanning(e.touches[0]);
-                    break;
-                case 2:
-                    onPinching(e);
-                    break;
+            //Check MSGesture supoort
+            if(!MM.supportGesture()){
+                switch (e.touches.length) {
+                    case 1:
+                        onPanning(e.touches[0]);
+                        break;
+                    case 2:
+                        onPinching(e);
+                        break;
+                }
+            }else{
+                onPanning(e);
+                onPinching(e);
+                e.touches = new Array(1);
+                e.touches[0] = e.currentTarget;
+                map.parent.style.cursor = 'move';
             }
             updateTouches(e);
             return MM.cancelEvent(e);
@@ -117,6 +140,11 @@
             return MM.cancelEvent(e);
         }
 
+        // Handle the end of gesture event.
+        function onMSGestureEnd(){
+            map.parent.style.cursor = '';
+        }
+
         function onHold (hold) {
             // TODO
         }
@@ -130,6 +158,16 @@
                 return;
             }
             taps = [tap];
+        }
+
+        // Handle a tap event for MSGesture
+        function onMSTap(e){
+            var now = new Date();
+
+            if(now - msTapOldTime < maxDoubleTapDelay){
+                map.zoomByAbout(shiftKey ? -1 : 1, new MM.Point(e.offsetX, e.offsetY));
+            }
+            msTapOldTime = now;
         }
 
         // Handle a double tap by zooming in a single zoom level to a
@@ -146,37 +184,50 @@
 
         // Re-transform the actual map parent's CSS transformation
         function onPanning (touch) {
-            var pos = { x: touch.clientX, y: touch.clientY },
+            var pos,
+                prev;
+            if(MM.supportGesture()){
+               map.panBy(touch.translationX, touch.translationY);
+            }else{
+                pos = { x: touch.clientX, y: touch.clientY };
                 prev = locations[touch.identifier];
-            map.panBy(pos.x - prev.x, pos.y - prev.y);
+                map.panBy(pos.x - prev.x, pos.y - prev.y);
+            }
         }
 
         function onPinching(e) {
-            // use the first two touches and their previous positions
-            var t0 = e.touches[0],
-                t1 = e.touches[1],
-                p0 = new MM.Point(t0.clientX, t0.clientY),
-                p1 = new MM.Point(t1.clientX, t1.clientY),
-                l0 = locations[t0.identifier],
-                l1 = locations[t1.identifier];
+            if(!MM.supportGesture()){
+                // use the first two touches and their previous positions
+                var t0 = e.touches[0],
+                    t1 = e.touches[1],
+                    p0 = new MM.Point(t0.clientX, t0.clientY),
+                    p1 = new MM.Point(t1.clientX, t1.clientY),
+                    l0 = locations[t0.identifier],
+                    l1 = locations[t1.identifier];
 
-            // mark these touches so they aren't used as taps/holds
-            l0.wasPinch = true;
-            l1.wasPinch = true;
+                // mark these touches so they aren't used as taps/holds
+                l0.wasPinch = true;
+                l1.wasPinch = true;
 
-            // scale about the center of these touches
-            var center = MM.Point.interpolate(p0, p1, 0.5);
+                // scale about the center of these touches
+                var center = MM.Point.interpolate(p0, p1, 0.5);
 
-            map.zoomByAbout(
-                Math.log(e.scale) / Math.LN2 -
-                Math.log(l0.scale) / Math.LN2,
-                center );
+                map.zoomByAbout(
+                    Math.log(e.scale) / Math.LN2 -
+                    Math.log(l0.scale) / Math.LN2,
+                    center );
 
-            // pan from the previous center of these touches
-            var prevCenter = MM.Point.interpolate(l0, l1, 0.5);
+                // pan from the previous center of these touches
+                var prevCenter = MM.Point.interpolate(l0, l1, 0.5);
 
-            map.panBy(center.x - prevCenter.x,
-                           center.y - prevCenter.y);
+                map.panBy(center.x - prevCenter.x,
+                    center.y - prevCenter.y);
+            }else{
+                map.zoomByAbout(
+                    e.scale - 1,
+                    new MM.Point(e.offsetX, e.offsetY) );
+            }
+
             wasPinching = true;
             lastPinchCenter = center;
         }
@@ -198,19 +249,34 @@
             // Fail early if this isn't a touch device.
             if (!isTouchable()) return handler;
 
-            MM.addEvent(map.parent, 'touchstart', touchStart);
-            MM.addEvent(map.parent, 'touchmove', touchMove);
-            MM.addEvent(map.parent, 'touchend', touchEnd);
+            if(!MM.supportGesture()){
+                MM.addEvent(map.parent, 'touchstart', touchStart);
+                MM.addEvent(map.parent, 'touchmove', touchMove);
+                MM.addEvent(map.parent, 'touchend', touchEnd);
+            }else{
+                map.parent.style.msTouchAction = "none";
+                MM.MSGestureInitialized = true;
+                map.parent._gesture = new MSGesture();
+                map.parent._gesture.target = map.parent;
+                MM.addEvent(map.parent, 'MSPointerDown', touchStart);
+                MM.addEvent(window, 'MSGestureChange', touchMove);
+                MM.addEvent(window, 'MSGestureTap', onMSTap);
+                MM.addEvent(window, 'MSGestureEnd', onMSGestureEnd);
+            }
             return handler;
         };
 
         handler.remove = function() {
             // Fail early if this isn't a touch device.
             if (!isTouchable()) return handler;
-
-            MM.removeEvent(map.parent, 'touchstart', touchStart);
-            MM.removeEvent(map.parent, 'touchmove', touchMove);
-            MM.removeEvent(map.parent, 'touchend', touchEnd);
+            if(!MM.supportGesture()){
+                MM.removeEvent(map.parent, 'touchstart', touchStart);
+                MM.removeEvent(map.parent, 'touchmove', touchMove);
+                MM.removeEvent(map.parent, 'touchend', touchEnd);
+            }else{
+                MM.removeEvent(map.parent, 'MSPointerDown', touchStart);
+                MM.removeEvent(map.parent, 'MSGestureChange', touchMove);
+            }
             return handler;
         };
 

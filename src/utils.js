@@ -1,3 +1,8 @@
+    // Check support for MSGesture.
+    MM.supportGesture = function () {
+        return navigator.msPointerEnabled && window.MSGesture;
+    };
+
     // Make inheritance bearable: clone one level of properties
     MM.extend = function(child, parent) {
         for (var property in parent.prototype) {
