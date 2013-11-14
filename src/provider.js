@@ -92,7 +92,7 @@
         var isQuadKey = template.match(/{(Q|quadkey)}/);
         // replace Microsoft style substitution strings
         if (isQuadKey) template = template
-            .replace('{subdomains}', '{S}')
+            .replace('{subdomain}', '{S}')
             .replace('{zoom}', '{Z}')
             .replace('{quadkey}', '{Q}');
 
