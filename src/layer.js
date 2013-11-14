@@ -1,4 +1,3 @@
-
     // Layer
     MM.Layer = function(provider, parent, name) {
         this.parent = parent || document.createElement('div');
@@ -319,9 +318,9 @@
 
             MM.moveElement(tile, {
                 x: Math.round((this.map.dimensions.x* 0.5) +
-                    (tile.coord.column - theCoord.column) * this.map.tileSize.x),
+                    (tile.coord.column - theCoord.column) * this.map.tileSize.x * scale),
                 y: Math.round((this.map.dimensions.y* 0.5) +
-                    (tile.coord.row - theCoord.row) * this.map.tileSize.y),
+                    (tile.coord.row - theCoord.row) * this.map.tileSize.y * scale),
                 scale: scale,
                 // TODO: pass only scale or only w/h
                 width: this.map.tileSize.x,
