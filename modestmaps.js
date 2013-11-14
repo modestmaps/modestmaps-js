@@ -798,7 +798,7 @@ var MM = com.modestmaps = {
         var isQuadKey = template.match(/{(Q|quadkey)}/);
         // replace Microsoft style substitution strings
         if (isQuadKey) template = template
-            .replace('{subdomains}', '{S}')
+            .replace('{subdomain}', '{S}')
             .replace('{zoom}', '{Z}')
             .replace('{quadkey}', '{Q}');
 
@@ -1565,7 +1565,6 @@ var MM = com.modestmaps = {
         }
 
     };
-
     // Layer
     MM.Layer = function(provider, parent, name) {
         this.parent = parent || document.createElement('div');
@@ -1663,9 +1662,9 @@ var MM = com.modestmaps = {
             var tileCoord = startCoord.copy();
 
             for (tileCoord.column = startCoord.column;
-                 tileCoord.column <= endCoord.column; tileCoord.column++) {
+                 tileCoord.column < endCoord.column; tileCoord.column++) {
                 for (tileCoord.row = startCoord.row;
-                     tileCoord.row <= endCoord.row; tileCoord.row++) {
+                     tileCoord.row < endCoord.row; tileCoord.row++) {
                     var validKeys = this.inventoryVisibleTile(levelElement, tileCoord);
 
                     while (validKeys.length) {
@@ -1886,9 +1885,9 @@ var MM = com.modestmaps = {
 
             MM.moveElement(tile, {
                 x: Math.round((this.map.dimensions.x* 0.5) +
-                    (tile.coord.column - theCoord.column) * this.map.tileSize.x),
+                    (tile.coord.column - theCoord.column) * this.map.tileSize.x * scale),
                 y: Math.round((this.map.dimensions.y* 0.5) +
-                    (tile.coord.row - theCoord.row) * this.map.tileSize.y),
+                    (tile.coord.row - theCoord.row) * this.map.tileSize.y * scale),
                 scale: scale,
                 // TODO: pass only scale or only w/h
                 width: this.map.tileSize.x,
@@ -2134,7 +2133,6 @@ var MM = com.modestmaps = {
         },
 
         // callbacks...
-
         addCallback: function(event, callback) {
             this.callbackManager.addCallback(event, callback);
             return this;
@@ -2151,7 +2149,6 @@ var MM = com.modestmaps = {
         },
 
         // event handlers
-
         getHandler: function (id, mHandler) {
             var handler = null,
                 rel = this.eventHandlers;

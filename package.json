@@ -21,7 +21,7 @@
   }],
   "devDependencies": {
     "docco": "~0.3.0",
-    "uglify-js": "~1.0.0"
+    "uglify-js": "2.4.3"
   },
   "directories": { }
 }
