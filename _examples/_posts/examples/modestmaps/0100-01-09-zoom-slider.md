@@ -10,5 +10,6 @@
     - 'Modest Maps'
     - 'HTML5'
   version: 'v1.0.0-beta1'
+  author: tristen
   gist: 2689676
 ---

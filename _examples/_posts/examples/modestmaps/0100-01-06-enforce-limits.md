@@ -9,5 +9,6 @@
   tools:
     - 'Modest Maps'
   version: 'v1.0.0-beta1'
+  author: tristen
   gist: 2627435
 ---
