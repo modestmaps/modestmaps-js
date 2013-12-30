@@ -878,13 +878,12 @@ var MM = com.modestmaps = {
         var handler = { id: 'MouseWheelHandler' },
             map,
             _zoomDiv,
-            prevTime,
+            prevTime = new Date().getTime(),
             precise = false;
 
 
         function mouseWheel(e) {
             var delta = 0;
-            prevTime = prevTime || new Date().getTime();
 
             try {
                 _zoomDiv.scrollTop = 1000;
