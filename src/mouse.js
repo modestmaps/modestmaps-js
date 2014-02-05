@@ -87,7 +87,9 @@
             // Get the point on the map that was double-clicked
             var point = MM.getMousePoint(e, map);
             // use shift-double-click to zoom out
-            map.zoomByAbout(e.shiftKey ? -1 : 1, point);
+            if(!MM.MSGestureInitialized){ //If MSGesture is initialized, ignore this to not duplicate function.
+                map.zoomByAbout(e.shiftKey ? -1 : 1, point);
+            }
             return MM.cancelEvent(e);
         }
 
@@ -132,7 +134,7 @@
         }
 
         function mouseMove(e) {
-            if (prevMouse) {
+            if (prevMouse && !MM.MSGestureInitialized) { //If MSGesture is initialized, ignore this to not duplicate function.
                 map.panBy(
                     e.clientX - prevMouse.x,
                     e.clientY - prevMouse.y);
