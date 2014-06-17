@@ -1550,7 +1550,7 @@ var MM = com.modestmaps = {
                             element: img,
                             url: ('' + img.src)
                         });
-                        img.src = null;
+                        img.src = '';
                     }
 
                     // keep going in the same order
