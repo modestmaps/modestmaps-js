@@ -1410,7 +1410,8 @@ var MM = com.modestmaps = {
                     this.loadingBay.removeChild(img);
                     this.openRequestCount--;
                     /* console.log(this.openRequestCount + " open requests"); */
-                    img.src = img.coord = img.onload = img.onerror = null;
+                    img.src = '';
+                    img.coord = img.onload = img.onerror = null;
                 }
             }
 
