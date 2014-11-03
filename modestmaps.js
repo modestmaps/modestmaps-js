@@ -878,13 +878,12 @@ var MM = com.modestmaps = {
         var handler = { id: 'MouseWheelHandler' },
             map,
             _zoomDiv,
-            prevTime,
+            prevTime = new Date().getTime(),
             precise = false;
 
 
         function mouseWheel(e) {
             var delta = 0;
-            prevTime = prevTime || new Date().getTime();
 
             try {
                 _zoomDiv.scrollTop = 1000;
@@ -1410,7 +1409,8 @@ var MM = com.modestmaps = {
                     this.loadingBay.removeChild(img);
                     this.openRequestCount--;
                     /* console.log(this.openRequestCount + " open requests"); */
-                    img.src = img.coord = img.onload = img.onerror = null;
+                    img.src = '';
+                    img.coord = img.onload = img.onerror = null;
                 }
             }
 
@@ -1549,7 +1549,7 @@ var MM = com.modestmaps = {
                             element: img,
                             url: ('' + img.src)
                         });
-                        img.src = null;
+                        img.src = '';
                     }
 
                     // keep going in the same order
